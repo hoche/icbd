@@ -1,0 +1,33 @@
+This is for icbd developers only. It can be ignored if you're just
+building the system.
+
+Docs for the autoconf system can be found at any gnu mirror. The main
+one is at www.gnu.org. Specifically, you can look at
+http://www.gnu.org/manual/autoconf-2.13/html_chapter/autoconf_toc.html
+
+If you add a check to the configure.in file, you'll need to run
+autoreconf to have the configure script pick up the changes.
+
+The configure script, when run, does three things:
+1) It performs a variety of checks. Some of those checks will result
+in internal variables being defined, and some will result in ifdef's.
+
+2) ifdefs will get written out to a file called "config.h" in this
+directory. All sources should #include this file.
+
+3) The top level Makefile.in will get copied over to Makefile, and the
+internal variables defined in step 1) will get substituted for @VARIABLE@.
+e.g. if configure has determine that RANLIB is "ranlib" (see the 
+AC_CHECK_PROG directive in configure.in), all instances of @RANLIB@ in
+Makefile.in will get replaced with the string "ranlib". The same goes for
+murgil/Makefile.in and server/Makefile.in.
+
+
+If you need to run the configure process over again, be sure to remove
+config.cache.
+
+
+
+Michel Hoche-Mong
+12 May 2000
+hoche@grok.com

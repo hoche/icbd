@@ -1,0 +1,80 @@
+#!/usr/local/bin/perl
+
+###
+## @(#) deldb.pl		jon@luini.com		2/1/98
+##
+## delete nick entries from an icbd database
+###
+
+use Getopt::Std;
+
+@suffi = (
+    'addr',
+    'email',
+    'home',
+    'nick',
+    'nummsg',
+    'password',
+    'phone',
+    'realname',
+    'secure',
+    'signoff',
+    'signon',
+    'text',
+    'www',
+);
+
+do getopts ('q');
+
+dbmopen( %DB, "./icbdb", 0666);
+
+foreach $nick (@ARGV)
+{
+    local($k, $num);
+
+    $k = "${nick}.nick";
+    if ( $DB{$k} eq "" )
+    {
+	$nick =~ tr/A-Z/a-z/;
+	$k = "${nick}.nick";
+	print "Trying with lower-cased nick $nick.\n";
+    }
+
+    if ( $DB{$k} !~ /^\Q${nick}\E/i )
+    {
+	print "Warning: Database key $k value ($DB{$k}) != nick value $nick.\n";
+#	next;
+    }
+
+    $k = "${nick}.nummsg";
+    $num = $DB{$k};
+
+    foreach $s (@suffi)
+    {
+	local($k2) = "${nick}.${s}";
+	delete $DB{$k2};
+    }
+
+    if ( $num > 0 )
+    {
+	local($i);
+
+	for ( $i = 1; $i <= $num; $i++ )
+	{
+	    local($h, $f, $m);
+
+	    $h = "${nick}.header${i}";
+	    $f = "${nick}.from${i}";
+	    $m = "${nick}.message${i}";
+
+	    delete $DB{$h};
+	    delete $DB{$f};
+	    delete $DB{$m};
+	}
+    }
+
+    if ( !defined ($opt_q) )
+	{ print "$nick deleted.\n"; }
+}
+
+dbmclose( DB);

@@ -1,0 +1,15 @@
+#!/usr/local/bin/perl
+
+###
+## @(#) setdb		falcon@icb.net
+##
+## assign a specific database value. useful for resetting passwords for users
+## who forget them.
+### 
+
+dbmopen( %DB, "./icbdb", 0666);
+
+($var, $val) = (@ARGV);
+print "VAR[$var] VAL[$val]\n";
+$DB{$var} = $val;
+dbmclose( DB);

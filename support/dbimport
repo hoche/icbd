@@ -1,0 +1,21 @@
+#!/usr/local/bin/perl
+
+###
+## @(#) dbimport		falcon@icb.net
+##
+## this builds a database by importing data created by dbexport
+## it's not hammered on since it's only been used once
+###
+
+dbmopen (DB, "./icbdb", 0666);
+
+while ( $line = <STDIN> )
+{
+	if ( $line =~ /([^|]+)\|(.*)/ )
+	{
+		print "$1 = $2\n";
+		$DB{$1} = $2;
+	}
+}
+
+dbmclose( DB);

@@ -1,0 +1,104 @@
+#	Copyright (c) 1989 Carrick Sean Casey. All rights reserved.
+#
+#	Master makefile for the "internation CB" Internet chat system.
+#	The file COPYING details the usage license.
+
+#	WAIT!! YOU SHOULD NOT NEED TO EDIT THIS FILE.
+
+#	INSTRUCTIONS: Type "./configure", and follow the directions.
+
+#	"make"         - compile the sources
+#	"make install" - compile sources, install binaries and man pages
+#	"make clean"   - delete everything that "make" generates
+#	"make depend"  - regenerate dependency lists
+
+
+#	Just in case... you wouldn't believe....
+SHELL		= /bin/sh
+
+#	Directories to do a make in.
+DIRS 		= murgil server 
+MANDIRS		= 
+
+#	Files to be removed from top level with "make clean".
+TOPCLEAN	= lmurgil.a core
+
+#	Files that configure creates
+CONFIG_CLEAN	= Makefile murgil/Makefile server/Makefile config.h config.log config.cache config.status
+
+#	Files to be tarred up with "make dist".
+DISTFILES	= COPYING \
+		  README \
+		  README.CHANGEHIST \
+		  README.INSTALL \
+		  README.ToDo \
+		  README.autoconf \
+		  README.fn \
+		  version.h \
+		  Protocol.html \
+		  Makefile.in \
+		  config.h.in \
+		  configure.in \
+		  configure \
+		  murgil \
+		  server \
+		  prod \
+		  support
+
+PREREQS		= config.h
+
+#	Default
+
+all:		$(PREREQS)
+	@for dir in ${DIRS}; do \
+		(echo Making in $${dir}; \
+		 cd $${dir}; ${MAKE} ${MFLAGS} -${MAKEFLAGS}); done
+
+install:	$(PREREQS)
+	@for dir in ${DIRS} ${MANDIRS}; do \
+		(echo Making install in $${dir}; \
+		cd $${dir}; ${MAKE} ${MFLAGS} -${MAKEFLAGS} install); done
+
+depend:		$(PREREQS)
+	@for dir in ${DIRS}; do \
+		(echo Making depend in $${dir}; \
+		cd $${dir}; ${MAKE} ${MFLAGS} -${MAKEFLAGS} depend); done
+
+lint:		$(PREREQS)
+	@for dir in ${DIRS}; do \
+		(echo Making lint in $${dir}; \
+		cd $${dir}; ${MAKE} ${MFLAGS} -${MAKEFLAGS} lint); done
+
+rebuild:
+	-rm -f $(TOPCLEAN)
+	@for dir in ${DIRS}; do \
+		(echo Making clean in $${dir}; \
+		cd $${dir}; ${MAKE} -f Make clean); done
+	$(MAKE) all
+
+clean:
+	@for dir in ${DIRS}; do \
+		(echo Making clean in $${dir}; \
+		cd $${dir}; ${MAKE} clean); done
+	-rm -f $(TOPCLEAN)
+
+distclean:
+	@for dir in ${DIRS}; do \
+		(echo Making clean in $${dir}; \
+		cd $${dir}; ${MAKE} clean); done
+	-rm -f $(TOPCLEAN)
+	-rm -f $(CONFIG_CLEAN)
+
+dist:	depend clean
+	rm -rf dist
+	mkdir dist dist/icbd
+	cp -r $(DISTFILES) dist/icbd
+	(cd dist; find . -name "CVS" | xargs rm -rf )
+	(cd dist; rm -f icb.tar; @TAR@ -cf icbd.tar icbd)
+	mv dist/icbd.tar .
+	@COMPRESS@ -v icbd.tar
+	rm -rf dist
+
+
+config:
+# DO NOT DELETE THIS LINE -- makedepend depends on it.

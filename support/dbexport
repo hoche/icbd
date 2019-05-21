@@ -1,0 +1,19 @@
+#!/usr/local/bin/perl
+
+###
+## @(#) dbexport		falcon@icb.net
+##
+## this exports the database in a format that can be used by
+## dbimport. it's not hammered on since it's only been used once.
+## primary use is when migrating from one machine to another which
+## has a different binary format for its dbm files so you can't just
+## copy them over.
+###
+
+dbmopen (DB, "./icbdb", 0666);
+
+while (($key,$val) = each %DB) {
+    print $key, '|', $val, "\n";
+}
+
+dbmclose( DB);

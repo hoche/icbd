@@ -1,0 +1,33 @@
+95/09/22:
+Increased maximum number of groups to 75. Added -q (quiet) options to
+notify, hush, invite and cancel.
+
+95/09/15:
+Reworked /invite and /cancel. /invite now has -r, -s and -n options. -n
+works like the old invite, inviting a single nickname. -s allows people
+matching the given site pattern to enter the group. -r only allows that
+invitation to work if the person trying to enter the group is registered.
+/cancel now has -s and -n options, so that you can remove the -s and -n
+invitations. Note the combinations of options much be strung together,
+so it would be /invite -rn Bubba, not /invite -r -n Bubba.
+
+95/09/06:
+If the moderator exits ICB and is currently registered, the moderatorship
+does not pass to a new person for 5 minutes.
+
+There is a new command, /shuttime, which shows how much time until the
+server is scheduled to shutdown.
+
+95/09/01:
+/commands can now be sent as /m server command.
+
+95/08/07:
+Added /m server secure and /m server nosecure. nosecure was the default,
+where if a nickname's username/hostname pair matched your current
+information, you were automatically registered. secure means this will
+not happen, and you must provide a password manually.
+
+95/06/13:
+Added /s_help for help on server commands. Added /drop to remove
+rogue nickname connections. Added /exclude to send open messages 
+but not to a single nickname.

@@ -1,0 +1,24 @@
+jon's TODO List:
+
+    * Poke keithr until he gets me his server-side notify code modifications
+    * write tests for perl test harness
+
+hoche's TODO List:
+
+    configuration
+    ---------------
+    * go through all the "configure" ifdefs in config.h.in and add the
+	appropriate thing to the code
+    * fix the dist target
+    * add an install-sh
+    * get rid of unused/obsolete #ifdefs, via ifnames
+
+    socket server (murgil) rewrite and SSL support
+    ----------------------------------------------
+    * make cbufs be allocated as socket requests come in (use mempool?)
+    * add queued writing
+    * add timed event queue for interrupting select()
+    * fix SSL support
+    * add configfile reader
+    * add mempool for message buffers
+    * fix fd dump of sockets

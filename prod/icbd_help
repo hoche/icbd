@@ -1,0 +1,90 @@
+Command       Arguments              Effect
+-------       ----------             ------
+away                                 Lists your away message if set
+              text                   Sets away message to "text"
+noaway                               Unsets away message
+beep          nickname               Sends a beep to "nickname"
+boot          nickname               If you're mod, removes "nickname"
+                                     from group
+cancel        -q                     quiet mode
+              -n nickname            Removes nickname from invite list
+              -s site                Removes site pattern from invite list
+drop          nickname password      Disconnects "nickname" if registered 
+                                     with password "password"
+echoback      off                    Server doesn't send you the messages
+                                     you send
+              on                     Server sends you the public messages 
+                                     you send
+              verbose                Server sends you the public and personal
+                                     messages you send
+nobeep        off                    other users can send you beeps (default)
+              on                     other users cannot send you beeps
+              verbose                other users cannot send you beeps, plus 
+                                     you get a message when they try (and fail)
+exclude       nickname               Send open message to everyone 
+                                     except "nickname"
+g             group                  Changes you to group "group"
+              @nickname              Changes you to group "nickname" is in
+invite        -q                     quiet mode
+              -r                     Invite only works if person is registerd
+              -n nickname            Invite nickname to group
+              -s site                Invite site pattern to group
+m             nickname               Send a personal message to "nickname"
+motd                                 Lists the message of the day
+name          newnick                Changes your nickname to "newnick"
+news                                 List all news
+              message number         List just news item "message number"
+notify        -q                     quiet mode
+              -n nickname            Notify when nickname signs on/off
+              -s site                Notify when matching site sign on/off
+pass          nickname               If you're mod, makes "nickname" mod
+                                     (just do "/pass" to set no moderator)
+s_help                               Send this list
+shuttime                             Shows time until server shutdown
+stats                                Lists various server statistics
+status                               Lists status of current group
+              v                      If mod, changes group to visible
+              s                      If mod, changes group to secret
+              i                      If mod, changes group to invisible
+              p                      If mod, changes group to public
+              m                      If mod, changes group to moderated
+              r                      If mod, changes group to restricted
+              c                      If mod, changes group to controlled
+              l                      If mod, changes group to loud
+              n                      If mod, changes group to normal
+              q                      If mod, changes group to quiet
+              # N                    If mod, limits group to N users
+              b N                    If mod, set idle-boot in group to N min.
+              idlebootmsg MESSAGE    If mod, sets idle-boot message to MESSAGE
+                                        (%s is used to substitute username)
+              im N                   If mod, set idle-mod in group to N min.
+              name newname           If mod, changes name of group to newname
+topic                                Lists current topic
+              new topic              Sets topic to "new topic"
+v                                    Send server version
+w                                    List everyone on server
+              -s                     Short list of everyone on server
+              -g                     List the groups on the server
+              .                      List just the group you're in
+              @nickname              List just the group "nickname" is in
+whereis       nickname               Lists current login info for "nickname"
+                                     If "nickname" is blank, reports info
+                                       for the last private message or Probe
+{s}hush       -q                     quiet mode
+              -n nickname            Server doesn't send you messages from
+                                     "nickname"
+              -s site                Server doesn't send you messages from
+                                     people logged in from site "site"
+              -o                     Hush open messages only
+              -p                     Hush personal messages only
+  Note that {s}hush is a toggle. If you have {s}hushed someone, issued
+  the same command you used to {s}hush them to un{s}hush them.
+
+talk          nickname               sets list who can talk to *only* nickname
+              -a nickname            add nickname to list who can talk
+              -q                     quiet mode
+              -r                     talk only works if person is registered
+              -d nickname            delete nickname from talk list
+  Note: talk operates on controlled (see /status ? for more info) groups only. 
+
+See also /m server help

@@ -1,0 +1,105 @@
+Invisible/Restricted groups shouldn't be /w'able
+   Bug: Can see invisible groups you can't go to
+
+Better checking in add_item
+
+change fopens to opens
+
+Unglobalize mbuf
+
+Fix commands that take options to take multiple options
+    correctly (Done: invite, cancel, hush, notify; ToDo: status, w)
+
+More extensive tracking for /whereis
+
+Add /bar: -n nick; -s site; -u unregistered only
+
+hushing messages from hushed people?
+
+Enhance command parser
+
+Message slowdowns for dumps.
+
+Monitor life of server by parent connection to 7326.
+
+identd
+
+Send "Register" message if person is known but not		Done
+   authenticated
+
+Added timezone info in access.c					Done
+
+Problems with groups > 8 chars? 				Done
+   GroupName in print_group_header not large enough
+
+Removed setting of visibility of group in loginmsg...done	Done
+   in s_change.c
+
+Expanded size of rname in murgil/getrname.c...24 is too short!	Done
+
+Explicitly set the fd limit 					Done
+
+Put timeout in getremotename and only call getremotename once	Done
+
+notify should tell if someone's already on			Done
+
+-q option on /notify, /hush, /invite, /cancel			Done
+
+Gets confused when people cause other people to be dumped?	Done
+   (Reworked using S_kill as array)
+
+reworking of /invite: -n nick; -s site; -r registered only	Done
+
+Alerting of Moderatorship					Done
+
+Timeout for Moderatorship					Done
+
+/stat r if no mod causes coredump				Fixed
+
+/shuttime							Done
+
+Blows up if you do a whois of something large			Fixed
+
+/[no]secure							Done
+
+problem when fdset  = 32? Redefined FD_ISSET			Fixed
+
+BUG! s_status_group wrong for k=2. 				Fixed
+
+/excludes							Done
+
+help								Done
+
+/bump								In /drop
+
+icb -w should show number of messages				No
+
+HUSH (site/nickname;personal/public)				Done
+
+/news								Done
+
+/cp updates .address						Done
+
+/boot /cancel's invites						Done
+
+-g @user doesn't work						Done
+
+User count at end of /w						Done
+
+Alphabetical lists (of groups and inside groups)		Done
+
+Alert of invites						Done
+
+.. and . groups							Done
+
+Nickname registration						Done
+
+notify								Done
+
+whereis								Done
+
+Idle Timeout Warnings						Done
+
+Shutdown Warnings						Done
+
+Add support for 5th and 6th parameters to loginmsg		No

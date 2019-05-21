@@ -1,0 +1,621 @@
+This file documents all (known) changes made. The majority of the
+changes logged herein are by me, simply because it wasn't under
+CVS control during that time.  Some very old change information is
+listed below that under the title "Ancient history".  Changes since
+Jun 2000 are more general in nature since specifics are available
+in the CVS tree.
+
+--jon r. luini (jon@luini.com)
+
+______________________________________________________________________________
+Version 1.2c (still unreleased)
+______________________________________________________________________________
+
+* Tom Spindler spent some time reviewing the code and submitted a variety
+    of patches. He noticed that functions like filtertext were modifying
+    the passed-in argument in-place, and sometimes that argument was
+    a const string. To fix this, he patched them to copy the strings into
+    internal buffers before modifying them. He also went through and
+    converted a lot of char*'s to const char*'s and stuff like that.
+
+* Michel fixed the signal handlers to use RETSIGTYPE (as defined by
+    config.h). He also made some minor updates to the configure script.
+
+* Um. Jon made some bug fixes. Need to do some cvs diffs to remember what they
+    were and list any relevent ones here.
+
+* Michel did a buncha stuff he needs to summarize.
+
+* Added new BOOT_GROUP variable to define what group people get moved to
+    when they are booted. Also made it under the same restrictions as
+    IDLE_GROUP. Changed the default behaviour from booting into "icb"
+    (Server's restricted group) to ~PURGATORY~
+    (jon: jun 2001)
+
+* Added new /stats server command to display varied statistics of interest
+    (jon: 20 jun 2001)
+
+* Added idle time to /whereis output (s_info())
+    (jon: 20 jun 2001)
+
+______________________________________________________________________________
+Version 1.2b (Aug 23 2000)
+______________________________________________________________________________
+
+* A few more bug fixes and feature enhancements by Michel Hoche-Mong:
+    Since the ndbm support in gdbm enforces exclusive writing
+    and will block if the same process opens it twice, a fair
+    chunk of access.c was rewritten to allow an already-opened
+    database to be passed around. There were also some minor
+    twiddles to make it so the admin user can't be booted and
+    can boot people without having to assume mod of a group.
+    Finally, server-side-/aways were implemented. The
+    implementation provides for a limited anti-away-spam by
+    tracking the last person to whom a user has sent an away
+    and not resending the away if the next message from that
+    person is within AWAY_NOSEND_TIME seconds.
+
+* Jon also fixed some other minor bugs and the ICB protocol document was
+    added into the CVS tree (though remains to be exhaustively updated).
+    After changing the main server to have MAX_IDLE disabled, some new
+    features were added to provide more control over idle-behaviour:
+    idle-mod settings per group and server-defined maximums.
+
+* Michel rewrote the serverserve() select() loop and Jon fixed some bugs
+    in readpacket()/sendpacket() and FD_ISSET() to properly detect lost
+    connections. The sum is that icbd is much better about cpu use and
+    also makes more sense.
+
+* Some other extensions to the autoconf configure.in and config.h.in were
+    made to make configuration yet easier.
+
+* The server name is now simply "ICB Server 1.2b" for a couple of reasons,
+    primarily that there aren't any other actively developed servers so
+    this becomes the prime one (other offshoots can add a distinction) and
+    all of Michel's work isn't properly defined under the "Chime" name.
+
+______________________________________________________________________________
+Version 1.2a (Jun 27 2000)
+______________________________________________________________________________
+
+Version 1.2a marked a large overhaul effort by Michel Hoche-Mong which started
+purely as wanting to make it managed under autoconf and ultimately resulted in
+that as well as some code organization changes, removal of the JRL ifdefs,
+and a fair bit of conversion to ANSI C from K&R. Since the structure of the
+code changed considerably, it was worth a full increment in the version
+from 1.1e to 1.2a. The README.INSTALL document also first appears in this
+version.
+
+
+______________________________________________________________________________
+Begin logged JRL change history (covering from around 1995 - 2000)
+______________________________________________________________________________
+
+** TOP LEVEL DIRECTORY **
+
+config.h.in
+  96-10-14
+    - added PERM_FILE definition
+  98-10-19
+    - added IDLE_GROUP definition
+    - added MAX_IDLE_BOOT definition
+  00-07-20 (hoche)
+    - cranked down USER_BUF_SIZE to 257, which is all that's really needed
+  00-07-21 (hoche)
+    - added MAX_AWAY_LEN definition
+
+version.h
+  98-02-03
+    - updated version to "Evolve Server (jrl) v1.1a"
+  98-07-04
+    - updated version to "Evolve Server (jrl) v1.1b"
+  99-03-15
+    - updated version to "Evolve Server (jrl) v1.1c"
+  99-12-02
+    - updated version to "Evolve Server (jrl) v1.1d"
+  00-06-07
+    - set version to "Chime ICB Server v1.2a"
+  00-07-21 (hoche)
+    - updated version to "Chime ICB Server v1.2b"
+
+
+** SERVER DIRECTORY **
+
+server.h:
+  96-01-17
+    - added n_talk and nr_talk variables to GROUP_ITEM structure
+    - added CONTROLLED in the comment for 'control' variable for consistency
+  96-05-13
+    - added nobeep variable to USER_ITEM structure
+  96-10-14
+    - added perms variable to USER_ITEM structure
+    - added PERM_ defines
+  98-09-28
+    - added "size" variable to the GROUP_ITEM for max # users in a group
+  98-10-20
+    - added "idleboot" variable to the GROUP_ITEM for max idletime in a group
+    - added "idleboot_msg" variable to the GROUP_ITEM for idleboot msg
+  99-03-30
+    - added new defines LOGIN_FALSE, LOGIN_PENDING, and LOGIN_COMPLETE
+	for use with u_tab[n].login value. used to differentiate a login
+	which hasn't been assigned into a group yet.
+  00-07-21 (hoche)
+    - added "awaymsg" variable to the USER_ITEM.
+
+send.c:
+  96-05-13
+    - added check to nobeep value to sendbeep() 
+  98-10-19
+    - added who parameter to sendping() to include who is requesting the ping
+  00-05-07
+    - modified sendperson() to set lpriv_id
+
+s_info.c:
+  00-05-07
+    - modified s_info() to report info on lpriv_id if no arg given
+
+groups.c:
+  96-01-17
+    - added nlclear of n_talk and nr_talk variables to clear_group_item()
+    - added malloc entries for n_talk and nr_talk to init_groups()
+  98-09-28
+    - added setting of size to clear_group_item()
+  98-10-20
+    - added setting of idleboot and idleboot_msg to clear_group_item()
+
+msgs.c:
+  96-01-17
+    - added code to loginmsg() to notify users of groups they have talk
+      permissions in upon login
+    - added case for CMD_TALK to cmdmsg()
+    - openmsg() updated to not allow open messages in "controlled" control
+      groups by people who aren't in the talk list, or are the moderator
+  96-01-21
+    - removed updating of receive for client structure in pong()
+    - also fixed bug: mdb("tbuf") should be mdb(tbuf)
+    - added CMD_PING to cmdmsg()
+  96-05-13
+    - added CMD_NOBEEP to cmdmsg()
+    - updated fill_user_entry to include nobeep setting to false for loginmsg()
+  96-06-26
+    - fixed loginmsg() to not allow auto-login to secret/inivisible groups 
+      via icb -g @user
+  96-10-14
+    - updated fill_user_entry to include perms setting to NULL for loginmsg()
+  96-10-14
+    - updated loginmsg() to call get_perms(), a new function for setting
+      permission settings
+    - added code to openmsg() to auto-boot people who send more than
+      1 message per second (pasting most likely)
+  96-12-02
+    - added new function ok2read() which is used to tell sdoinput() when
+      to pause/restart on reading input from connections.
+  98-08-06
+    - fixed loginmsg() to correctly auto-authenticate users who specify
+      a password. (uses new verifyOnly flag to nickwrite())
+  98-11-30
+    - fixed loginmsg() to use a passed group name for -w -g <group>
+      for a new "wg" login type (since changing "w" has some backwards
+      compatability issues)
+    - added error checking for unrecognized login types (not "login", "w",
+	or "wg")
+  99-03-30
+    - updated all references to u_tab[n].login to use new LOGIN_* defines
+    - added logging of [WHO] to "w" loginmsg() requests
+  00-07-21 (hoche)
+    - added CMD_AWAY and CMD_NOAWAY to cmdmsg()
+
+users.c:
+  96-05-13
+    - updated fill_user_entry to include nobeep argument and setting
+    - updated clear_user_item to clear nobeep also
+  96-10-14
+    - updated fill_user_entry to include perms argument and setting
+    - updated clear_user_item to clear perms also
+  98-10-19
+    - updated clear_user_item to init ping_req/pong_time
+  99-03-30
+    - updated all references to u_tab[n].login to use new LOGIN_* defines
+  00-05-07
+    - updated clear_user_item to init lpriv_id[]
+
+lookup.h:
+  96-01-17
+    - added CMD_TALK define
+    - added SET_CONTROL define
+    - added AUTO_WWW define
+  96-01-21
+    - added CMD_PING define
+  96-05-13
+    - added CMD_NOBEEP define
+  98-09-28
+    - added SET_SIZE define
+  98-10-20
+    - added SET_IDLEBOOT define
+  00-07-21 (hoche)
+    - added CMD_AWAY
+    - added CMD_NOAWAY
+
+groups.h
+  96-01-17
+    - added CONTROLLED define
+
+s_admin.c
+  98-10-20
+    - modified s_restart() to use restart_arg[cv] for restart
+  99-03-30
+    - updated all references to u_tab[n].login to use new LOGIN_* defines
+
+s_group.c:
+  96-01-17
+    - added s_talk(), talk_delete(), and talk_report() function
+    - modified s_status() to include talk info in /status command
+    - added cases for CONTROLLED and SET_CONTROL in s_status()
+    - added "c - controlled" to dump_table() output
+  96-03-06
+    - modified pass() so the admin can force the passing of moderatorship
+  96-10-14
+    - updated is_booting to not be static since we need it for booting
+      folks who spam in group 1
+  98-09-28
+    - added case for SET_SIZE in s_status() to set the max size of a group
+    - included Size: in status output
+    - modified s_change() to check the size if it's not public or restricted
+  98-10-19
+    - added code in s_change() for the creation of group IDLE_GROUP to be
+	public, visible, and quiet
+    - added code for is_group_idle (like is_group_1) to check for IDLE_GROUP
+	so people can't change the status
+  98-09-20
+    - added case for SET_IDLEBOOT in s_status() to set the idleboot of a group
+    - included Idle-Boot: in status output
+    - added case for SET_IDLEBOOT_MSG in s_status() to set the idleboot msg 
+    - included Idle-Boot message: in status output
+  98-11-03
+    - added new function filterfmt() which the SET_IDLEBOOT_MSG now uses
+	for checking it's %s string.
+    - added code to allow optional string to /boot user [string] to set a
+	custom message. Default is: "%s was booted."
+  99-02-01
+    - fixed bug which allowed /exclude to send open messages in Quiet groups
+  99-03-30
+    - updated all references to u_tab[n].login to use new LOGIN_* defines
+  99-12-02
+    - made idleboot status change messages include who made them so that
+	annoying people in public groups are held accountable
+  00-02-02
+    - changed the behaviour of s_pass so that relinquishing mod doesn't
+	change group to public automatically. also, s_status is updated
+	such that group members in a group w/out a mod now are restricted
+	from using SET_MODERATE, SET_CONTROL, SET_RESTRICT, SET_IDLEBOOT,
+	and SET_QUIET
+  00-05-07
+    - updated s_change() to not send Probe messages to moderator on restricted
+	or full groups if it's from a user that the moderator has on their
+	private hush list. also modified to update lpriv_id.
+  00-07-21 (hoche)
+    - made it so you can't boot admin.
+
+
+signals.c:
+  96-01-17
+    - updated icbdump() and icbload() to include n_talk and nr_talk data
+  96-05-13
+    - updated icbdump() and icbload() to include the nobeep variable value
+  96-10-14
+    - updated icbdump() and icbload() to include the perms variable value
+  98-09-28
+    - updated icbdump() and icbload() to include the group size value
+  98-10-19
+    - updated icbdump()/icbload() to grab the right size of fd_set
+    - updated icbdump() and icbload() to include the group idleboot and
+	idleboot_msg value
+  98-10-20
+    - updated icbload() to have a bigger line buffer length (was 80)
+  99-03-30
+    - updated all references to u_tab[n].login to use new LOGIN_* defines
+
+globals.c:
+  96-01-17
+    - updated *command_table[] to include "talk" command
+    - added "c" (controlled) to status_table
+    - added "www" to *auto_table[]
+  96-01-21
+    - updated *command_table[] to include "ping" command
+  96-05-13
+    - updated *command_table[] to include "nobeep" command
+  98-09-28
+    - updated *status_table[] to include "#" to limit number of users per group 
+  98-10-19
+    - added variables pong_req/ping_time (see externs.h)
+  98-10-20
+    - updated *status_table[] to include "b" to set idleboot per group
+    - updated *status_table[] to include "idlebootmsg" to set idleboot msg
+    - added restart_args for saving off arguments for /restart
+  99-12-04
+    - changed pong_req/ping_time/S_kill to MAX_USERS size instead of
+	MAX_REAL_USERS size to fix buffer overrun bug in
+	clear_users()->clear_user_item() loop
+  00-05-07
+    - added lpriv_id[] declaration
+
+dispatch.c
+  99-03-16
+    - added case for ICB_M_NOOP command (as defined in protocol.h)
+  99-03-30
+    - updated all references to u_tab[n].login to use new LOGIN_* defines
+
+s_user.c:
+  96-01-17
+    - s_name to call talk_report() when name is changed
+  96-05-13
+    - added s_nobeep() function
+  98-10-19
+    - added s_ping() function (to be used by CMD_PING)
+  00-07-21 (hoche)
+    - added s_away() (to be used by CMD_AWAY)
+    - added s_noaway() (to be used by CMD_NOAWAY)
+
+access.c:
+  96-01-17
+    - nickwrite() to call talk_report() when name is registered changed
+    - added home page db entry (nick.www) to nicklookup()
+  96-07-17
+    - modified nickdelete() to take an arg for password verification
+  96-07-18
+    - modified valuser() to truncate password at MAX_PASSWDLEN
+    - modified nickdelete() to truncate password at MAX_PASSWDLEN
+    - modified nickwrite() to truncate password at MAX_PASSWDLEN
+    - modified nickchpass() to truncate newpw and oldpw at MAX_PASSWDLEN
+  96-11-06
+    - modified nickdelete() to correctly call dbmclose() before returning
+  98-02-02
+    - modified nickdelete() to correctly delete the .www field
+  98-08-06
+    - modified nickwrite() to return a valid return code
+    - modified nickwrite() to take new argument, verifyOnly which, if set,
+      will make the function return with an error code if the nickname doesn't
+      already have an entry the database. this can be used to auto-auth
+      users w/out automatically creating new db entries if they typo their
+      nickname.
+  00-05-02
+    - modified nickwritetime() to check and make sure that when writing
+	the signoff time, the nick is valid. this fixes a bug where
+	people delete a nick and then when quitting it was adding an
+	orphaned .signoff db entry
+  00-07-21 (hoche)
+    - added extra DBM* parameter to most of the functions to fix a problem
+         where one function would open a dbm in exclusive write mode and then
+         would call call another which would also try to open the dbm in
+         exclusive write mode, but would then bomb out.
+    - also fixed a bug in valuser where the  database wouldn't be closed if 
+         the requested nick wasn't found.
+
+s_who.c:
+  96-01-17
+    - print_group_header() updated to have "c" in ctl[] array
+  99-03-30
+    - updated all references to u_tab[n].login to use new LOGIN_* defines
+
+protocol.h
+  99-03-16
+    - added new ICB_M_NOOP command ('n') which does nothing, basically.
+      it's so clients which need to keep data flowing on an open socket
+      to avoid being shut down by a firewall can do so w/out affecting
+      their idle-time, etc.
+
+auto.c:
+  96-01-17
+    - added AUTO_WWW case to autoCommand() and in the help message
+  96-07-17
+    - modified nickdelete to take a password for authentication
+    - modified AUTO_DELETE case in autoCommand() to pass password as an arg
+  98-08-06
+    - modified autoCommand()'s AUTO_REGISTER to set the new arg to
+      nickwrite() for verifyOnly to 0. [see access.c]
+
+main.c
+  ???
+    - added support for virtual separate host binding for multi-ipd servers
+      which included adding the -b flag
+    - cleaned up some of the usage flags
+    - added extern char *getlocalname() declaration
+  96-03-22
+    - added thishost to the initial logging startup message
+    - added restart to reset thishost using getremotesockname
+  96-05-13
+    - updated fill_user_entry to include nobeep setting to true for server
+  96-10-14
+    - updated fill_user_entry to include perms setting to NULL for server
+  98-10-19
+    - added initialization of pong_req[]/ping_time[]
+  98-10-20
+    - added saving of argv[] into restart_args
+  99-03-30
+    - updated all references to u_tab[n].login to use new LOGIN_* defines
+  00-05-07
+    - added initialization of lpriv_id[]
+
+funcs.h
+  96-05-13
+    - added s_nobeep() declaration
+  00-07-21 (hoche)
+    - added s_away() declaration
+    - added s_noaway() declaration
+
+ipcf.c
+  98-08-18
+    - modified s_didpoll to have idle-out code #ifdefd on MAX_IDLE being set
+      so that if unset in config.h, the result is no idle out enabled
+  98-10-19
+    - added code for idle-booting users to IDLE_GROUP
+  98-10-20
+    - added code to check the per-group idleboot time instead 
+    - changed message to use idleboot_msg, if set
+  99-03-30
+    - updated all references to u_tab[n].login to use new LOGIN_* defines
+
+extern.h
+  98-10-19
+    - added pong_req/ping_time array for use in ping/pong (didn't want to make
+	it part of the user struct)
+  98-10-20
+    - added restart_args for saving off arguments for /restart
+  99-12-04
+    - changed pong_req/ping_time/S_kill to MAX_USERS size instead of
+	MAX_REAL_USERS size to fix buffer overrun bug in
+	clear_users()->clear_user_item() loop
+  00-05-07
+    - added lpriv_id[] array (didn't want to make it part of the user struct)
+
+strutil.c
+  98-11-03
+    - added ~ to OKGROUPCHARS
+
+** MURGIL DIRECTORY **
+
+serverserve.c
+  96-12-02
+    - modified sdoinput() to only read the data if ok2read() returns 1
+    - added new held_fdset which is used to move descriptors which are
+      held to since otherwise, select will keep returning immediately
+      and chew up CPU time.
+  99-09-26 (hoche)
+    - modified serverserve() timer loop to prevent calling sigpause() after
+	the alarm has already gone off (which results in a hang).
+
+
+getrname.c
+  95-03-22
+    - added getlocalname which does the same thing as getremotename
+       except using getsockname() instead of getpeername()
+  98-02-04
+    - added some typecasting of (char *) and (int) to network sys calls
+
+setdelay.c
+  98-07-14
+    - added setpolltimeout to properly set value of tv_usec 
+
+readpacket.c
+  00-07-21 (hoche)
+    - fixed bug where incoming packets weren't getting null terminated but were
+      being used as C-strings by the main server code.
+
+______________________________________________________________________________
+Ancient history
+______________________________________________________________________________
+
+Planned for near releases ------------------------------------------
+	/status to be completely rewritten
+		/status {arguments}
+		if {arguments} are omitted, report about this group
+			-vol q (quiet), n (normal), l (loud)
+			-vis i (invisible), s (secret), v (visible)
+			-ctl r (restricted), m (moderated), p (public)
+			-mod <beneficiary of moderatorship will>
+		? gives usage list.
+	attention to other, known bugs.
+		If a user signs on with -g . or -g .. there is no
+		group name so Bad Things Happen.  Maybe.
+
+		make it so that nickserve interprets R:, N:, E:, A:,
+		P: and #: for people
+
+Future releases may have -------------------------------------------
+	votable moderators
+		if a groups wants to have a moderator, it can vote one in?
+		some percent of a quorum??
+		or can someone just ask for it.
+	how about the idea of registering group characteristics,
+		having groups that have "history" like NetChat, but
+		with the addition of database-like searches,
+		set of moderators and initial status options.
+	use of distributed servers.
+	accounts for connect and timeout times,
+		positive votes buy you time???
+	        using time gets you time as long as you are good?
+	implement the time part of shutdown in the polling loop.
+
+HISTORY -------------------------------------------------------------
+     ICB release 1  (Sat. April 6, 1991)
+             Survived for 35 hours, much is crippled, though.
+     ICB release 2  (Sun. April 7, 1991)
+             Things begin to look usable.
+     ICB release 3  (Mon. April 8, 1991)
+             Lots of stuff works
+     ICB release 3b (Mon. April 9, 1991)
+             Doesn't crash much anymore.
+             Most of who information available, but in a bad format.
+     ICB release 4  (Wed. April 10, 1991)
+        /w      gives user only listing, has local time and is formatted.
+        /w g    gives group info
+        /w *    gives both group and user listings
+     ICB release 4b (Thur. April 11, 1991)
+        fn -w   NOT AVAILABLE due to timing difficulties.  There is no easy
+                way to synchronize the client's last message with being
+                asked to exit -- causes server to crash.  Apparently
+        / fn -g name
+        | fn -g .name
+        \ fn -g ..name
+                allows entering a group with the visibility status
+                option set to visible, secret and invisible, respectively.
+                Seem to work, and you actually get all 8 characters of a
+                group name in all three variations.  The dots are
+                stripped.
+        join versus signon announced.
+        on sign-on syntax of group names gives status option settings.
+        who format closer to original ForumNet(tm) client.
+        /w g    and
+        /w *    both give a count of total visible users.
+        /w g    formatting corrected.
+     ICB release 5 (Fri. April 12, 1991)
+        admin functions work.
+        server termination cleaner.
+     ICB release 6 (4/13/91)
+	/w  completely rewritten
+		/w {flag} {where}
+		flag can be omitted (short), -l (long), -g (group info only)
+		where can be omitted (all groups), . (here), or name of group
+		? gives usage.
+	idle time works properly when first signed on.
+	signing onto secret and invisible groups doesn't mess up status.
+	info command implemented (in = nickname, out = loginid@nodeid).
+     ICB release 6b (4/14/91)
+        /w bugs fixed (?)
+        /m reports _who_ isn't signed on properly
+     ICB release 6c (4/15/91)
+        added close after sendexit for drop.
+        added "quiet" group code
+                (signoffs still show up)
+     ICB release 6d (4/15/91)
+	made -l the default for /w and changed the format slightly.
+		-s still works for the short format.
+	fixed signoffs for quiet groups.
+ICB release 6e (4/16/91)
+	added timeout code
+	running under dbx to try to find where it is crashing.
+ICB release 6f (4/16/91)
+	changed timeout code
+ICB release 7 (4/17/91)
+	added the automagical resident user
+	fixed goexit
+ICB release 7b (4/17/91)
+	fixed t_recv of the automagical resident user
+	took out snailmail and phone info from TheList
+ICB release 7c (4/17/91)
+	fixed timeout drop
+	added "help" and "nickserve" to TheList
+ICB release 8 (4/18/91)
+	added names to TheList
+	added command processing for the automagical resident user
+	added nickname recognition for login and name changes
+	added a blank line before group headers in /w
+ICB release 8b (4/18/91)
+	put in a little bit of nickname protection.
+ICB release 9 (4/20/91)
+	changed the group header on /w
+	implemented group name change as part of /status
+ICB release 9b (4/21/91)
+	fix a problem that /status name <group> causes
+ICB release 9c (4/25/91)
+	fix a problem with moderators "not going away"

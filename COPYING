@@ -1,0 +1,39 @@
+Note: This is the default COPYING file from the fn days and it's unclear
+how much of those original sources even still remain. Nonetheless, the
+restrictions listed are fairly reasonable and should be followed in lieu
+of more recent rules.
+
+Any questions regarding other uses of this code can be directed to
+falcon@icb.net.
+
+______________________________________________________________________________
+
+Copyright (c) 1990 by Carrick Sean Casey.
+
+Except for the following restrictions, this software, its documentation,
+and derivative works may be redistributed freely.
+
+- Redistribution for a fee other than connect-time charges is prohibited.
+- Redistribution with the COPYING notice omitted is prohibited.
+- Redistribution as part of a package containing a compilation copyright
+  is prohibited.
+- Redistributing functionally altered versions is permitted only if they
+  are plainly marked as such, and are not misrepresented as being the
+  original software.
+
+All other rights reserved.
+
+Some second party code modules have been incorporated into fn, and the
+above copyright notice does not apply to these modules; they include
+their own copyright notices (or have none).
+
+DISCLAIMER OF WARRANTY
+----------------------
+The author (Carrick Sean Casey) disclaims all warranties with regard to
+this software to the extent permitted by applicable law, including all
+implied warranties of merchantability and fitness. In no event shall
+the author be liable for any special, indirect or consequential damages
+or any damages whatsoever resulting from loss of use, data or profits,
+whether in an action of contract, negligence or other tortious action,
+arising out of or in connection with the use or performance of this
+software.

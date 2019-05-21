@@ -1,0 +1,80 @@
+#!/usr/local/bin/perl
+
+###
+## @(#) findb.pl		jon@luini.com		2/1/98
+##
+## find all related database fields for a nickname
+###
+
+@suffi = (
+    'addr',
+    'email',
+    'home',
+    'nick',
+    'nummsg',
+    'password',
+    'phone',
+    'realname',
+    'secure',
+    'signoff',
+    'signon',
+    'text',
+    'www',
+);
+
+dbmopen( %DB, "./icbdb", 0666);
+
+#foreach $i (@ARGV) {
+#    print "$i = \"$DB{$i}\"\n";
+#}
+
+foreach $nick (@ARGV)
+{
+    local($k);
+
+    $k = "${nick}.nick";
+    if ( !defined ($DB{$k}) )
+    {
+	print "$nick not registered.\n";
+        next;
+    }
+
+    if ( $DB{$k} !~ /^$nick$/i )
+    {
+	printf "Warning: Nick $nick doesn't match \$DB{$k} ($DB{$k}).\n";
+	next;
+    }
+
+    printf "  %10s %s\n", "NICKNAME:", $nick;
+    foreach $s (@suffi)
+    {
+	local($k2) = "${nick}.${s}";
+	printf "  %10s %s\n",
+	    "$s:", $DB{$k2};
+    }
+
+    $k = "${nick}.nummsg";
+    if ( $DB{$k} > 0 )
+    {
+	local($i, $num);
+
+	$num = $DB{$k};
+	for ( $i = 1; $i <= $num; $i++ )
+	{
+	    local($h, $f, $m);
+
+	    $h = "${nick}.header${i}";
+	    $f = "${nick}.from${i}";
+	    $m = "${nick}.message${i}";
+
+	    printf "  %10s %s\n", "message:", $i; 
+	    printf "  %10s $DB{$h}\n", "";
+	    printf "  %10s $DB{$f}\n", "";
+	    printf "  %10s $DB{$m}\n", "";
+	}
+    }
+
+    print "\n";
+}
+
+dbmclose( DB);

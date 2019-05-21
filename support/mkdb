@@ -1,0 +1,23 @@
+#!/usr/local/bin/perl
+
+###
+## @(#) mkdb		falcon@icb.net
+##
+## initialize the user database with the required "server" nickname
+###
+
+$REALNAME="Server Admin";
+$HOME="jon\@luini.com";
+$EMAIL="jon\@luini.com";
+$TEXT="Here to server you!";
+
+dbmopen( %DB, "./icbdb", 0666);
+$DB{ "server.realname"} = $REALNAME;
+$DB{ "server.nick"} = "server";
+$DB{ "server.home"} = $HOME;
+$DB{ "server.email"} = $EMAIL;
+$DB{ "server.text"} = $TEXT;
+$DB{ "server.nummsg"} = "20";
+$DB{ "server.www"} = "http://www.icb.net/";
+
+dbmclose( DB);

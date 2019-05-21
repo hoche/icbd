@@ -1,0 +1,35 @@
+The ICB Server
+--------------
+
+ICB (Internet Citizen's Band) is a renaming of Sean Casey's original
+ForumNet (or fn) program. Much of the code here-in is Sean's, though
+considerable bug-fixing and extensions have been made over the
+years such that it may be somewhat unrecognizable from the original.
+John Atwood deVries and Rich Dellaripa performed some significant
+changes from Sean's sources before I got a hold of it. In May of
+2000, Michel Hoche-Mong performed some organizational clean-up,
+tied in autoconf, and a few others. All of the changes from then
+(approx 1995) up to current are noted in the file README.CHANGEHIST.
+
+README.autoconf lists icbd developer information about autoconf
+README.ToDo lists other desired changes to make.
+
+This server and general ICB resources are maintained at the following
+location:
+
+Web  : http://www.icb.net/
+FTP  : ftp://ftp.icb.net/pub/icb/
+Human: "jon r. luini" <falcon@icb.net>
+       "Michel Hoche-Mong" <hoche@grok.com>
+
+Bugreports should be filed at: http://www.chime.com/bugzilla/
+
+The common platforms this server has been run under are: FreeBSD,
+Linux, SunOS 4.x, and Solaris.  Though it may compile and run fine
+on other UNIX variants, it has not been tested.
+
+Most all of the documentation in the source is horribly outdated, so
+beware. See the file README.fn for Sean's original README file.
+
+jon r. luini
+falcon@icb.net or jon@luini.com

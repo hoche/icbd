@@ -1,0 +1,81 @@
+#	Copyright (c) 2000 Michel Hoche-Mong, under the GPL.
+
+prefix       = @prefix@
+exec_prefix  = @exec_prefix@
+BINDIR       = @bindir@
+MANDIR       = @mandir@
+DATADIR      = @datadir@
+
+LIBDIR       = @top_srcdir@
+
+CC           = @CC@
+CFLAGS       = @CFLAGS@
+CPPFLAGS     = @CPPFLAGS@ @SSL_H_DIR@ -I@srcdir@ -I@top_srcdir@
+
+MAKEDEPEND   = @MAKEDEPEND@
+MDFLAGS      = $(CPPFLAGS)
+
+SSL_LIBS     = @SSL_LIB@
+MURGIL       = ../lmurgil.a
+LIBS         = $(MURGIL) $(SSL_LIBS) @LIBS@
+
+
+OBJ = \
+	access.o \
+	dispatch.o \
+	globals.o \
+	groups.o \
+	icbdb.o \
+	icbutil.o \
+	ipcf.o \
+	lookup.o \
+	main.o \
+	mdb.o \
+	msgs.o \
+	namelist.o \
+	s_admin.o \
+	s_auto.o \
+	s_beep.o \
+	s_group.o \
+	s_info.o \
+	s_motd.o \
+	s_news.o \
+	s_person.o \
+	s_shuttime.o \
+	s_stats.o \
+	s_user.o \
+	s_version.o \
+	s_who.o \
+	send.o \
+	strlist.o \
+	strutil.o \
+	unix.o \
+	users.o \
+	wildmat.o
+
+default: icbd
+
+icbd: $(OBJ) $(MURGIL)
+	@CC@ $(CFLAGS) -o icbd $(OBJ) $(LIBS)
+
+lint:
+	@LINT@ $(SRC)
+
+cxref:
+	@CXREF@ -c $(CFLAGS) $(SRC)
+
+tags:
+	@CTAGS@ -w *.[ch]
+
+clean:
+	@RM@ -f *.o icbd core tags
+
+depend:
+	@MAKEDEPEND@ $(DEPENDFLAGS) $(SRC)
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+.c.o:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<
+
+# DO NOT DELETE THIS LINE -- makedepend uses it.

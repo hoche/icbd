@@ -1,0 +1,22 @@
+#!/usr/local/bin/perl
+
+###
+## @(#) countdb		falcon@icb.net
+##
+## count how many nicks there are. though effective, this is slow & inefficient
+###
+
+$num = 0;
+
+dbmopen (%DB, "./icbdb", 0444);
+while ( ($key, $val) = each (%DB) )
+{
+    if ( $key =~ /^(.+).nick$/ )
+    {
+	$num++;
+    }
+}
+
+print "$num nicknames listed.\n";
+
+dbmclose (DB);

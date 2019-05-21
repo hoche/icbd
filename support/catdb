@@ -1,0 +1,15 @@
+#!/usr/local/bin/perl
+
+###
+## @(#) catdb		falcon@icb.net
+##
+## just cat the entire damn database to stdout
+###
+
+dbmopen (DB, "./icbdb", 0666);
+
+while (($key,$val) = each %DB) {
+    print $key, ' = ', $val, "\n";
+}
+
+dbmclose( DB);

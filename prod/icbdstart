@@ -1,0 +1,40 @@
+#!/bin/ksh
+cd /usr/local/lib/icbd/evolve
+
+if [ -f icbdstart.pid ]
+then
+	if kill -0 `cat icbdstart.pid` >/dev/null 2>/dev/null
+	then
+		exit
+	fi
+fi
+echo $$ > icbdstart.pid
+while /bin/true
+do
+	ICBPID=`cat icbd.pid`
+	CURDATE=`date +%y%m%d`
+	while kill -0 $ICBPID >/dev/null 2>/dev/null
+	do
+		if [ $CURDATE != `date +%y%m%d` ];then
+			test -f icbd.log.3.Z && mv icbd.log.3.Z icbd.log.4.Z
+			test -f icbd.log.2.Z && mv icbd.log.2.Z icbd.log.3.Z
+			test -f icbd.log.1.Z && mv icbd.log.1.Z icbd.log.2.Z
+			test -f icbd.log.0.Z && mv icbd.log.0.Z icbd.log.1.Z
+			mv icbd.log icbd.log.0
+			kill -HUP $ICBPID
+			compress icbd.log.0 2>&1 >/dev/null
+			CURDATE=`date +%y%m%d`
+		fi
+		sleep 30
+		ICBPID=`cat icbd.pid`
+	done
+	date | Mail -s "ICB Started" falcon
+	./icbd $* 2>icbd-2.log	
+	sleep 30
+	if [ -f icbd-2.log ]; then
+		mv icbd-2.log icbd-2.log.`date +%y%m%d%H%M%S`
+	fi
+	if [ -f core ]; then
+		mv core core.`date +%y%m%d%H%M%S`
+	fi
+done

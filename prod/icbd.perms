@@ -1,0 +1,34 @@
+###
+## @(#) icbd.perms
+##
+## format:
+##
+## USER login host perm_string
+## MASK ip mask perm_string
+##
+## where perm string is a combination of:
+##   PERM_NULL: no permissions (default access)
+##   PERM_DENY: deny them access
+##   PERM_SLOWMSGS: restrict the time in between each open message sent
+##
+## multiple permissions can be separated with |s such as:
+## 
+## MASK 165.227.1.0 255.255.255.0 PERM_DENY|PERM_SLOWMSGS
+### 
+
+###
+## example entries
+###
+
+## slow down a specific user@host
+# user torak book5.belgariad.com PERM_SLOWMSGS
+
+## slow down a specific host
+# mask 192.2.0.1 255.255.255.255 PERM_SLOWMSGS
+
+## deny a specific subnet range
+# mask 192.2.0.0 255.255.255.0 PERM_DENY
+
+## allow only 1 ip, 165.227.32.99
+# mask 165.227.32.99 255.255.255.255 PERM_NULL
+# mask 0.0.0.0 0.0.0.0 PERM_DENY

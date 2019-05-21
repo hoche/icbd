@@ -1,0 +1,114 @@
+                    INTRODUCTION TO FN AND FORUMNET
+                    -------------------------------
+
+Forumnet is a teleconferencing system that allows Internet users
+to participate in realtime online discussions. This package
+builds a client program, "fn", that is used to access forumnet.
+
+Fn features:
+
+  *  User controllable paging.
+  *  Online help system.
+  *  Replay buffer to recover things that have scrolled off the screen.
+  *  Tcl interpreter built in. One can easily rebind and define commands.
+  *  (anyone want to help me write this fluff? -sean)
+
+Forumnet features:
+
+  *  Moderated groups creatable by anyone allow users to exercise control
+     of group membership.
+  *  Groups have different attributes such as moderatorship, publicness,
+     and visibility. More attributes are planned.
+  *  (same here)
+
+
+                      COPYRIGHT AND REDISTRIBUTION
+                      ----------------------------
+
+Fn and Forumnet are Copyright (c) 1990 by Carrick Sean Casey.
+
+In this package is a file called COPYING which describes the conditions
+for redistributing this program. It is not a license. 
+
+
+                              DISTRIBUTION
+                              ------------
+
+Fn is available via anonymous ftp from:
+
+	host: f.ms.uky.edu (128.163.128.6)
+	file: /pub/unix/fn.0.10.tar.Z	(compressed tar archive)
+
+NOTE: Access to this archive site may be limited to certain times
+      of the day.
+
+Uncompressed and dearchived, the sources require a little more than
+600K of disk. If you don't have enough disk space to compile, try
+making a directory in /tmp, compiling it in there, and deleting it when
+you're done.
+
+
+                          SYSTEM REQUIREMENTS
+                          -------------------
+Fn runs on Internet Unix systems with Berkeley compatable TCP/IP
+and select(). It has been successfully compiled and run on 4.3BSD,
+4.3BSD-Tahoe, A/UX 1.1, Aix3090, CX/UX, Dynix, HCX/UX 3.0, HP-UX,
+Mach, Pyramid OSx, SunOS, and Ultrix.
+
+
+                               INSTALLING
+                               ----------
+
+To install fn, type "sh setup" and follow the instructions. Look at
+the file "Installing" if you get really stuck.
+
+
+                         MODIFYING THE PROGRAM
+                         ---------------------
+
+Guidelines and tips for messing with the source code are in the file
+"Modifying". I'm always interested in getting patches from people that
+have extended fn's functionality.
+
+
+                              NEW FEATURES
+                              ------------
+
+See the online help topic "news". The history file provides information
+regarding program development.
+
+
+                         BUGS and MAILING LIST
+                         ---------------------
+
+Please send bug reports, fixes, and suggestions for improvements to the
+following address:
+
+	sean@ms.uky.edu
+
+There is an unmoderated mailing list for forumnet related topics. To join,
+send mail to forum-list-request@ms.uky.edu. Note: this list sometimes gets
+quite technical. It tends to be low volume for long periods of time, with
+sudden floods of discussion.
+
+If you mail me a request to be on the list, give me about a week to add
+you, for I usually wait and add people in batches. I can mail back issues.
+
+
+                            ACKNOWLEDGEMENTS
+                            ----------------
+
+Extra credit to Keith Graham and Mark Reed for good ideas, extra
+interest in the development process, and for their efforts towards
+enhancing forumnet.
+
+Kudos for ideas and bugfixes go to Aashi Deacon, Bill Fenner, Bill
+Wisner, Brian Kendig, Dan Chaney, David Herron, Eric Lechner, Eric
+Scott, Eric Zamost, George Herbert, Glenn Stone, Jessica Koeppel, Jim
+Griffith, Jim Lai, Joel Abbott, John deVries, Kris Cox, Lisa Hamilton,
+Mark Hopkins, Paul Callahan, Stephen Chappell, Thomas Kunselman, and
+many others.
+
+Sean Casey
+sean@ms.uky.edu, sean@ukma.bitnet, ukma!sean
+USmail: P.O. Box 22502, Lexington, KY, 40522-2502 (good till June 1990)

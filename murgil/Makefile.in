@@ -1,0 +1,67 @@
+#	Copyright (c) 2000,  Michel Hoche-Mong, under the GPL.
+#
+#	Makefile for lmurgil.a
+#
+
+prefix       = @prefix@
+exec_prefix  = @exec_prefix@
+BINDIR       = @bindir@
+MANDIR       = @mandir@
+DATADIR      = @datadir@
+
+LIBDIR       = @top_srcdir@
+
+CC           = @CC@
+CFLAGS       = @CFLAGS@
+CPPFLAGS     = @CPPFLAGS@ @SSL_H_DIR@ -I@srcdir@ -I@top_srcdir@
+
+MAKEDEPEND   = @MAKEDEPEND@
+MDFLAGS      = $(CPPFLAGS)
+
+SSL_LIBS     = @SSL_LIB@
+LIBS         = $(SSL_LIBS) @LIBS@
+
+OBJ = \
+	cbuf.o \
+	discuser.o \
+	getrname.o \
+	globals.o \
+	ignore.o \
+	makeport.o \
+	newconnect.o \
+	readpacket.o \
+	sendpacket.o \
+	serverserve.o \
+	sslconf.o
+
+all: $(LIBDIR)/lmurgil.a
+
+$(LIBDIR)/lmurgil.a: $(OBJ)
+	@RM@ -f $(LIBDIR)/lmurgil.a
+	@AR@ -q $(LIBDIR)/lmurgil.a $(OBJ)
+	@RANLIB@ $(LIBDIR)/lmurgil.a
+
+install: $(LIBDIR)/lmurgil.a
+
+tags:
+	@CTAGS@ -w *[ch]
+
+lint:
+	@LINT@ $(LFLAGS) $(SRC)
+
+cxref:
+	@CXREF@ -c @CFLAGS@ $(SRC)
+
+clean:
+	@RM@ -f *.o lmurgil.a core tags
+
+depend:
+	@MAKEDEPEND@ $(DEPENDFLAGS) $(SRC)
+
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+.c.o:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<
+
+# DO NOT DELETE THIS LINE -- makedepend uses it.

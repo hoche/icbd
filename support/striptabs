@@ -1,0 +1,7 @@
+#!/bin/sh
+
+for i in h_*
+do
+	expand $i > $i.x
+	mv $i.x $i
+done

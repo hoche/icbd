@@ -1,0 +1,125 @@
+#!/usr/local/bin/perl
+
+###
+## @(#) nickprune.pl		jon@luini.com		11/23/98
+##
+## find (and perhaps delete) all database entries for nicks past
+## a certain age
+###
+
+use Getopt::Std;
+require "timelocal.pl";
+
+%months =
+(
+    'Jan',	0,
+    'Feb',	1,
+    'Mar',	2,
+    'Apr',	3,
+    'May',	4,
+    'Jun',	5,
+    'Jul',	6,
+    'Aug',	7,
+    'Sep',	8,
+    'Oct',	9,
+    'Nov',	10,
+    'Dec',	11,
+);
+
+$DELETE = "/usr/local/lib/icbd/deldb";
+$AGE = (60 * 60 * 24 * 365);	## one year
+
+$| = 1;
+
+do getopts ('yhd:q');
+
+if ( defined ($opt_h) )
+{
+    print <<_EOF_;
+Usage: $0 [-yh] [-d days]
+  -h       display this help screen
+  -y       default to "yes" for queries "Delete this nick?"
+  -d days  delete nicks > this many days old (default=365)
+  -q	   quiet mode; don't display deleted nicks
+_EOF_
+    exit (0);
+}
+
+if ( defined ($opt_d) )
+{
+    $AGE = (60 * 60 * 24 * $opt_d);
+}
+
+if ( !defined ($opt_q) )
+    { printf "Running with %d days expiry.\n", $AGE / (60 * 60 * 24); }
+
+dbmopen (%DB, "./icbdb", 0444);
+
+while ( ($key, $val) = each (%DB) )
+{
+    if ( $key =~ /^(.+).nick$/ )
+    {
+	local ($rootkey) = $1;
+	local ($so) = $rootkey. ".signoff";
+
+	if ( $DB{$key} eq "server"
+	    || $DB{$key} eq "admin" )
+	{
+	    next;
+	}
+
+	## if there is no signoff, try signon
+	if ( $DB{$so} eq "" )
+	{
+	    $so = $rootkey . ".signon";
+	}
+
+	# signoff:  6-Jan-1997 21:27 PST
+	if ( $DB{$so} =~ /\s*(\d+)-([^-]+)-(\d+) .*/ )
+	{
+	    local($then, $now);
+
+	    $then = &timelocal (0, 0, 0, $1, $months{$2}, $3);
+	    $now = time;
+
+	    if ( $now - $then > $AGE )
+	    {
+		if ( !defined ($opt_q) )
+		{
+		    printf "$DB{$key} is %d days old ($DB{$so})\n",
+			($now - $then) / ( 60 * 60 * 24);
+		}
+		if ( !defined ($opt_y) )
+		{
+		    local ($yn);
+
+		    print "Delete $rootkey? [n] ";
+		    $yn = <STDIN>;
+		    chop ($yn);
+		    if ( $yn eq "" ) { $yn = "no"; }
+		    if ( $yn =~ /^[qQ]/ ) { last; }
+		    if ( $yn !~ /^[yY]/ ) { next; }
+		}
+
+		if ( ! defined ($opt_q) )
+		    { print "  deleting...."; }
+
+		if ( ($pid = fork()) == 0 )
+		{
+		    if ( defined ($opt_q) )
+			{ exec $DELETE, "-q", '--', $rootkey; }
+		    else
+			{ exec $DELETE, '--', $rootkey; }
+		    print "Failed to exec $DELETE\n";
+		    exit 1;
+		}
+		elsif ( $pid > 0 )
+		{
+		    wait;
+		}
+	    }
+	}
+    }
+}
+
+dbmclose (DB);

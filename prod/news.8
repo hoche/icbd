@@ -1,0 +1,76 @@
+wed aug 2, '00:
+   upgraded server to v1.2b. some bug fixes and new server-side aways
+   see /m server s_help for usage. client authors are encouraged to
+   use server-side away features. users who are away now show up with
+   a (aw) after their user@host account name. of particular note, having
+   echoback set to "verbose" while away is set will timestamp when your
+   away was triggered and by whom.
+
+   also, as a test, MAX_IDLE has been unset for this server which means
+   that no clients will be disconnected by being idle. idleboot is still
+   defaulted to 60 minutes to shove people into group ~IDLE~ and can be
+   overridden with /status b [minutes] or /status b 0 to disable
+
+   to address the issue of groups that get held onto by super-idle
+   moderators, a new feature "idlemod" is available. set this with
+   /status im [minutes] (default 60, maximum 240 [4 hours]). current
+   setting for your current group is included in /status output.
+   if a mod is idle more than the idlemod value *and* there are other
+   people in the group less idle than them, mod will be passed.
+
+tue jun 6, '00:
+   upgraded server to v1.2a. no performance changes, just a some source
+   tweaks.
+
+mon may 8, '00:
+   /whereis has been updated to be useful in tracking people who send you
+   annoying messages. if run without any arguments, /whereis will now report
+   info on the source of the last private message or group Probe attempt.
+
+   also, the private hush list is now used to filter group Probe messages
+   from hushed users.
+
+mon mar 8, '99:
+   server upgraded to 128MB ram and a few days ago freebsd 3.1
+
+mon feb 1, '99:
+   fixed bug which allowed people to use /exclude to send open messages in
+   quiet groups.
+
+tue nov 3, '98:
+   added optional parameter to /boot to personalize the message.
+   usage: /boot nick Jackie Chan pops by and boots %s with a flying roundhouse.
+   if you just do "/boot nick", it will default to "%s has been booted."
+
+tue oct 20, '98:
+   /ping is back, though i can't recall if it behaves the same as it used to.
+   current use is to see how long it takes a client (which supports M_PING)
+   to send a M_PONG message back to the server. if it never replies, you'll
+   just not get a message back.
+
+   a bug which was making /drop not work reliably has been fixed.
+
+   oh yeah, max # users was upped to 1,000 and max groups was upped to 150
+   (from 250/75) a while ago.
+
+   the idleboot setting is now configurable on a per-group basis by the
+   group's moderator with /status b.  default value is 1 hour, meaning 
+   > 1hr idle people in the group will be booted to -IDLE-. 
+   /status b 120    -> changes the idleboot to 2 hours
+   /status b 0      -> disables idleboot for this group
+
+   the message displayed when people are idle-booted is also configurable
+   on a per-group basis by the moderator.  the default is:
+       /status idlebootmsg A swarm of bats swoops down and carries %s away.
+   the "%s" is replaced with the nickname of the user being booted for
+   the public message to the group and with "you" for the private message
+   to the booted user. other users can any non-default value with
+   /status.
+
+   fixes in /restart code were done which should remove the hanging-on-restart
+   problem that is so damn annoying.
+
+mon oct 19, '98:
+   new idle behaviour implemented. if you're idle for 1 hr, you get
+   autobooted to group -IDLE-. the disconnect idle-out is extended from
+   90 minutes to 4 hrs

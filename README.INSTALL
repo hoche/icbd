@@ -1,0 +1,110 @@
+Believe it or not, this is the first doc about installing the
+ICB server. As such, it's only the most basic of information to
+point out the most common problems in trying to make sense of 
+making icbd run on your machine. Future revisions will contains
+expanded (and actually useful) information here.
+
+0. THE QUICK VERSION
+
+Unpack the source.
+% ./configure.
+Edit config.h and update anything you desire (MAX_IDLE for example)
+Edit support/mkdb to show correct path to perl and correct admin values.
+Edit prod/motd
+% make depend ; make
+% cd prod
+% ../support/mkdb
+% ../server/icbd
+
+I. UNPACK THE SOURCE
+
+You're reading this, so we assume you unpacked the source already.
+If not, go get it (from ftp://ftp.icb.net/pub/icb/) and unpack it.
+You should have retrieved the source in a .tgz (or .tar.gz) format,
+meaning it's a gzip compressed tar archive. Modern versions of tar
+allow you to unpack it by doing: tar zxvf file.tgz
+though older systems may require: gzip -d < file.tgz | tar xvf -
+
+Upon unpacking the tarfile, you should have found this README.INSTALL
+file in the same directory as the rest of the sources.
+
+II. CONFIGURATION
+
+Run ./configure to create your makefile and config.h file. You'll want
+to edit config.h and at least update the following values:
+
+SERVER_ADMIN - should point to the email address of the server
+    administrator
+
+ADMIN_PASSWD - this should be set to the password that is used for admin
+    access.  the method of authentication is particularly screwy.
+    what happens is you register a nickname with the same password
+    as what you define TheKey to be and that allows you to do /name
+    admin when signed on (and registered as) that nickname. don't
+    ask, i don't know why and yes, it likely will change.
+
+There are a number of other values you can change at your own risk.
+Documentation included in config.h is minimal though advanced users
+can probably understand them well enough to change them without
+causing their machine to explode and ooze green slime.
+
+There also are a number of support scripts for initializing the
+user database and maintaining it. At this point, documentation is
+minimal so you'll have to figure it out by the filename or reading
+the source. You definitely will need to update the perl scripts to
+have the correct path to perl.
+
+You will want to edit support/mkdb to have the correct admin values.
+
+Also, edit prod/motd as you desire.
+
+If you want to use it, edit support/icbdstart to show your planned
+installation directory and/or user to run under. You can then call
+this script from your system startup rc scripts.
+
+III. COMPILATION
+
+You "should" be able to just type "make depend" and then "make"
+and have it compile.  Platforms tested are somewhat minimal, though
+it should work well on any modern Unix OS. It has been tested on
+Linux, FreeBSD, and Solaris 2. Beyond that, all bets are off, but
+please mail me if it works on something else so I can update this
+list.
+
+If you have problems compiling, you can try to email me for
+assistance, though I am likely to request an account on your machine
+to fix it myself.
+
+IV. INSTALLATION
+
+You'd expect me at this point to tell you: ``now just run "make
+install" and you'll be done and ready to roll!'' However, this is
+not the case. Remember what I said earlier about this being the
+first doc?
+
+The easiest thing to do is use the prod directory as a template
+for running the server from. You can either use it where it is, or
+install it somewhere else. The most important detail is that the
+icbd binary and all support scripts run looking for all related 
+files in the local directory.  This means that you must run them
+from the directory that your prod files reside in. 
+
+Before you start the server for the first time, you'll want to run
+the ``mkdb'' script to initialize the database with the special
+'Server' nickname. You did edit that in step II above, right?
+Assuming you use the prod directory in the distribution to run
+from, you can start up icbd as follows:
+
+% cd prod
+% ../support/mkdb
+% ../server/icbd
+
+The server will fork itself off and run in the background. It logs
+errors & connections info to icbd.log in the current directory.
+Systems with heavy traffic may want to symlink this file to /dev/null.
+
+Get a client (many are listed at http://www.icb.net/) and test a
+connection to your server. If you don't mind, drop an email to
+falcon@icb.net and let me know you successfully are running a server
+and I'll be happy to add an entry in .icb.net for you to use.
+
