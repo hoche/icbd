@@ -47,83 +47,83 @@ struct timeval ping_time[MAX_USERS];
 /* commands */
 const char *command_table[] =
 {
-	"drop",
-	"shutdown",
-	"wall",
-	"beep",
-	"cancel",
-	"g",
-	"invite",
-	"pass",
-	"boot",
-	"status",
-	"topic",
-	"motd",
-	"m",
-	"echoback",
-	"name",
-	"v",
-	"w",
-	"whereis",
-	"restart",
-	"news",
-	"hush",
-	"shush",
-	"s_help",
-	"exclude",
-	"shuttime",
-	"notify",
-	"talk",
-	"ping",
-	"nobeep",
-	"away",
-	"noaway",
-	"log",
-	"stats",
-	(char *) 0
+    "drop",
+    "shutdown",
+    "wall",
+    "beep",
+    "cancel",
+    "g",
+    "invite",
+    "pass",
+    "boot",
+    "status",
+    "topic",
+    "motd",
+    "m",
+    "echoback",
+    "name",
+    "v",
+    "w",
+    "whereis",
+    "restart",
+    "news",
+    "hush",
+    "shush",
+    "s_help",
+    "exclude",
+    "shuttime",
+    "notify",
+    "talk",
+    "ping",
+    "nobeep",
+    "away",
+    "noaway",
+    "log",
+    "stats",
+    (char *) 0
 };
 
 const char *status_table[] =
 {
-        "r",	/* control: restricted */
-        "m",	/* control: moderated */
-        "p",	/* control: public */
-        "i",	/* visibility: invisible */
-        "s",	/* visibility: secret */
-        "v",	/* visibility: visible */
-	"q",	/* volume: quiet */
-	"n",	/* volume: normal */
-	"l",	/* volume: loud */
-	"name", /* name of the group */
-	"?",	/* list this table */
-	"c",	/* control: controlled */
-	"#",	/* maximum number of users in the group */
-	"b",	/* idleboot setting for the group */
-	"idlebootmsg",	/* idleboot string setting for the group */
-	"im",	/* idlemod setting for the group */
-        (char *) 0
+    "r",	/* control: restricted */
+    "m",	/* control: moderated */
+    "p",	/* control: public */
+    "i",	/* visibility: invisible */
+    "s",	/* visibility: secret */
+    "v",	/* visibility: visible */
+    "q",	/* volume: quiet */
+    "n",	/* volume: normal */
+    "l",	/* volume: loud */
+    "name", /* name of the group */
+    "?",	/* list this table */
+    "c",	/* control: controlled */
+    "#",	/* maximum number of users in the group */
+    "b",	/* idleboot setting for the group */
+    "idlebootmsg",	/* idleboot string setting for the group */
+    "im",	/* idlemod setting for the group */
+    (char *) 0
 };
 
 const char *auto_table[] =
 {
-        "read",		/* read messages left for you */
-        "whois",	/* whois (lookup) */
-        "p",		/* register (loginid, nodeid, nickname, password) */
-        "rname",	/* set or change real name */
-        "write",	/* leave a message for someone */
-        "text",		/* text message */
-	"addr",		/* snailmail address */
-	"phone",	/* phone number */
-        "delete",	/* delete some item */
-        "info",		/* information on this service */
-        "help",		/* help for use of the service */
-        "?",		/* list this table */
-	"cp",		/* change password */
-	"email",	/* e-mail address */
-	"secure", 	/* Secure more secure */
-	"nosecure", 	/* Secure less secure */
-	"www", 		/* www home pageinfo */
-        (char *) 0
+    "read",		/* read messages left for you */
+    "whois",	/* whois (lookup) */
+    "p",		/* register (loginid, nodeid, nickname, password) */
+    "rname",	/* set or change real name */
+    "write",	/* leave a message for someone */
+    "text",		/* text message */
+    "addr",		/* snailmail address */
+    "phone",	/* phone number */
+    "delete",	/* delete some item */
+    "info",		/* information on this service */
+    "help",		/* help for use of the service */
+    "?",		/* list this table */
+    "cp",		/* change password */
+    "email",	/* e-mail address */
+    "secure", 	/* Secure more secure */
+    "nosecure", 	/* Secure less secure */
+    "www", 		/* www home pageinfo */
+    (char *) 0
 };
 
 /* flags set in .icbdrc */
@@ -134,7 +134,7 @@ int m_watchtime = 0;	/* using boring time format */
 
 #if 0
 GLOBS const gv = {
-	ICBDLOG,	/* logfile */
-	"normal",	/* timedisplay */
+    ICBDLOG,	/* logfile */
+    "normal",	/* timedisplay */
 };
 #endif

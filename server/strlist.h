@@ -5,9 +5,9 @@
 /* routines to maintain a generic linked list of strings */
 
 typedef struct Strlist {
-	struct Strlist *next;
-	struct Strlist *prev;
-	char str[1];
+    struct Strlist *next;
+    struct Strlist *prev;
+    char str[1];
 } STRLIST;
 
 

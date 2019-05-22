@@ -14,28 +14,28 @@
 
 STRLIST *strmakenode(int size)
 {
-	STRLIST *p;
-	if ((p = (STRLIST *) malloc(sizeof(STRLIST) + size)) == NULL)
-		return(NULL);
-	p->next = NULL;
-	p->prev = NULL;
-	*p->str = '\0';
-	return(p);
+    STRLIST *p;
+    if ((p = (STRLIST *) malloc(sizeof(STRLIST) + size)) == NULL)
+        return(NULL);
+    p->next = NULL;
+    p->prev = NULL;
+    *p->str = '\0';
+    return(p);
 }
 
 /* link node s to the head of the list */
 
 void strlinkhead(STRLIST *s, STRLIST **head, STRLIST **tail)
 {
-	if (*tail == 0) {
-		s->prev = s->next = 0;
-		*head = *tail = s;
-	} else {
-		(*head)->prev = s;
-		s->prev = 0;
-		s->next = *head;
-		*head = s;
-	}
+    if (*tail == 0) {
+        s->prev = s->next = 0;
+        *head = *tail = s;
+    } else {
+        (*head)->prev = s;
+        s->prev = 0;
+        s->next = *head;
+        *head = s;
+    }
 }
 
 
@@ -43,15 +43,15 @@ void strlinkhead(STRLIST *s, STRLIST **head, STRLIST **tail)
 
 void strlinktail(STRLIST *s, STRLIST **head, STRLIST **tail)
 {
-	if (*head == 0) {
-		s->prev = s->next = 0;
-		*head = *tail = s;
-	} else {
-		(*tail)->next = s;
-		s->prev = *tail;
-		s->next = 0;
-		*tail = s;
-	}
+    if (*head == 0) {
+        s->prev = s->next = 0;
+        *head = *tail = s;
+    } else {
+        (*tail)->next = s;
+        s->prev = *tail;
+        s->next = 0;
+        *tail = s;
+    }
 }
 
 
@@ -60,13 +60,13 @@ void strlinktail(STRLIST *s, STRLIST **head, STRLIST **tail)
 
 void strlinkafter(STRLIST *s, STRLIST *i, STRLIST **head, STRLIST **tail)
 {
-	s->prev = i;
-	s->next = i->next;
-	i->next = s;
-	if (i == *tail)
-		*tail = s;
-	else
-		s->next->prev = s;
+    s->prev = i;
+    s->next = i->next;
+    i->next = s;
+    if (i == *tail)
+        *tail = s;
+    else
+        s->next->prev = s;
 }
 
 
@@ -75,10 +75,10 @@ void strlinkafter(STRLIST *s, STRLIST *i, STRLIST **head, STRLIST **tail)
 
 void strlinkbefore(STRLIST *s, STRLIST *i, STRLIST **head, STRLIST **tail)
 {
-	s->prev = i->prev;
-	s->next = i;
-	i->prev = s;
-	s->prev->next = s;
+    s->prev = i->prev;
+    s->next = i;
+    i->prev = s;
+    s->prev->next = s;
 }
 
 
@@ -86,22 +86,22 @@ void strlinkbefore(STRLIST *s, STRLIST *i, STRLIST **head, STRLIST **tail)
 
 void strunlink(STRLIST *s, STRLIST **head, STRLIST **tail)
 {
-	if (s->prev == 0)
-		if (s->next) {
-			*head = s->next;
-			s->next->prev = 0;
-		} else
-			*tail = *head = 0;
-	else if (s->next == 0)
-		if (s->prev) {
-			*tail = s->prev;
-			s->prev->next = 0;
-		} else
-			*tail = *head = 0;
-	else {
-		s->prev->next = s->next;
-		s->next->prev = s->prev;
-	}
+    if (s->prev == 0)
+        if (s->next) {
+            *head = s->next;
+            s->next->prev = 0;
+        } else
+            *tail = *head = 0;
+        else if (s->next == 0)
+            if (s->prev) {
+                *tail = s->prev;
+                s->prev->next = 0;
+            } else
+                *tail = *head = 0;
+            else {
+                s->prev->next = s->next;
+                s->next->prev = s->prev;
+            }
 }
 
 /* link s into the list such that it is inserted in alphabetical order */
@@ -109,33 +109,33 @@ void strunlink(STRLIST *s, STRLIST **head, STRLIST **tail)
 
 void strlinkalpha(STRLIST *s, STRLIST **head, STRLIST **tail, int caseindep)
 {
-	STRLIST *i;
+    STRLIST *i;
 
-	/* link into head if list is empty */
-	if (!*head)
-		strlinkhead(s, head, tail);
+    /* link into head if list is empty */
+    if (!*head)
+        strlinkhead(s, head, tail);
 
-	/* otherwise, alphabetize */
-	else {
-		/* find insertion point */
-		for (i = *head; i; i = i->next) {
-			if (caseindep) {
-				if (strcasecmp(s->str, i->str) < 0)
-					break;
-			} else
-				if (strcmp(s->str, i->str) < 0)
-					break;
-		}
+    /* otherwise, alphabetize */
+    else {
+        /* find insertion point */
+        for (i = *head; i; i = i->next) {
+            if (caseindep) {
+                if (strcasecmp(s->str, i->str) < 0)
+                    break;
+            } else
+                if (strcmp(s->str, i->str) < 0)
+                    break;
+        }
 
-		/* see what we found */
-		if (i) {
-			if (i == *head)
-				strlinkhead(s, head, tail);
-			else
-				strlinkbefore(s, i, head, tail);
-		} else
-			strlinktail(s, head, tail);
-	}
+        /* see what we found */
+        if (i) {
+            if (i == *head)
+                strlinkhead(s, head, tail);
+            else
+                strlinkbefore(s, i, head, tail);
+        } else
+            strlinktail(s, head, tail);
+    }
 }
 
 
@@ -145,25 +145,25 @@ void strlinkalpha(STRLIST *s, STRLIST **head, STRLIST **tail, int caseindep)
 
 STRLIST *strgetnode(char *str, STRLIST *head, int caseindep, int pattern)
 {
-	STRLIST *p;
+    STRLIST *p;
 
-	for (p = head; p; p = p->next) {
-		if (!pattern) {
-			if (caseindep) {
-				if (!strcasecmp(str, p->str))
-					break;
-			} else
-				if (!strcmp(str, p->str))
-					break;
-			}
-		else {
-				if (wildmat(str, p->str))
-					break;
-			}
-	}
+    for (p = head; p; p = p->next) {
+        if (!pattern) {
+            if (caseindep) {
+                if (!strcasecmp(str, p->str))
+                    break;
+            } else
+                if (!strcmp(str, p->str))
+                    break;
+        }
+        else {
+            if (wildmat(str, p->str))
+                break;
+        }
+    }
 
-	if (p)
-		return(p);
-	else
-		return(0);
+    if (p)
+        return(p);
+    else
+        return(0);
 }

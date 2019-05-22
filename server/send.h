@@ -44,26 +44,26 @@ void autoBeep(int to);
 
 /* send "W" information to the client */
 void user_wline(int to, 
-		char *mod, 
-		char *nick, 
-		int idle, 
-		int resp, 
-		int login, 
-		char *user, 
-		char *site, 
-		char *name);
+                char *mod, 
+                char *nick, 
+                int idle, 
+                int resp, 
+                int login, 
+                char *user, 
+                char *site, 
+                char *name);
 
 
 /* XXX what the hell does this do? what are c and d? -hoche 5/10/00 */
 /*
-void user_wgroupline(int to, char *group, char* topic, c, d)
-{ 
-	sprintf(pbuf,
-		"%cwg\001%s\001%s\001%s\001%s\000",
-		ICB_M_CMDOUT, group, topic, c, d);
-	doSend(-1, to);
-}
-*/
+   void user_wgroupline(int to, char *group, char* topic, c, d)
+   { 
+   sprintf(pbuf,
+   "%cwg\001%s\001%s\001%s\001%s\000",
+   ICB_M_CMDOUT, group, topic, c, d);
+   doSend(-1, to);
+   }
+ */
 
 void user_whead(int to);
 

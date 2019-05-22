@@ -47,7 +47,7 @@ int find_empty_group(void);
  *
  * case insensitive
  *
- * u_index	index in user table of this user
+ * u_index    index in user table of this user
  */
 
 int check_mods(int u_index);
@@ -57,11 +57,11 @@ int check_mods(int u_index);
  * leave the invite list as it was 
  */
 void fill_group_entry(int n, 
-		const char *name, 
-		const char *topic, 
-		int visibility, 
-		int control, 
-		int mod, 
-		int volume);
+                      const char *name, 
+                      const char *topic, 
+                      int visibility, 
+                      int control, 
+                      int mod, 
+                      int volume);
 
 #endif /* #ifndef _SERVER_GROUPS_H_ */

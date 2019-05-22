@@ -13,15 +13,15 @@
 
 int lookup(char *s, char *table[])
 {
-	int i;
-	int result = -1;
+    int i;
+    int result = -1;
 
-        for (i = 0; table[i] != 0; i++) {
-		if(strcasecmp(s, table[i]) == 0) {
-			result = i;
-			break;
-		}
-	}
-	return result;
+    for (i = 0; table[i] != 0; i++) {
+        if(strcasecmp(s, table[i]) == 0) {
+            result = i;
+            break;
+        }
+    }
+    return result;
 }
 

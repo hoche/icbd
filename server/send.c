@@ -51,16 +51,16 @@ void sendperson(int from, int to, const char *message_string)
     ucaseit(two);
 
     if ((!nlmatch(one, *u_tab[to].pri_s_hushed)) &&
-       (!nlmatch(two, *u_tab[to].pri_n_hushed))) 
+        (!nlmatch(two, *u_tab[to].pri_n_hushed))) 
     {
-	/* see note below in sendopen() as it applies here too */
-	snprintf(pbuf, USER_BUF_SIZE-2, "%c%s\001%s", 
-	    ICB_M_PERSONAL, u_tab[from].nickname, tmpbuf);
-	lpriv_id[to] = from;
-	doSend(from, to);
+        /* see note below in sendopen() as it applies here too */
+        snprintf(pbuf, USER_BUF_SIZE-2, "%c%s\001%s", 
+                 ICB_M_PERSONAL, u_tab[from].nickname, tmpbuf);
+        lpriv_id[to] = from;
+        doSend(from, to);
     }
     else
-	sendstatus(from, "Bounce", "Message did not go through");
+        sendstatus(from, "Bounce", "Message did not go through");
 }
 
 /* send normal open group message to the client */
@@ -87,7 +87,7 @@ void sendopen(int from, int to, const char *txt)
      * clue.
      */
     snprintf(pbuf, USER_BUF_SIZE - 2, "%c%s\001%s", ICB_M_OPEN, 
-	u_tab[from].nickname, tmpbuf);
+             u_tab[from].nickname, tmpbuf);
     doSend(from, to);
 }
 
@@ -118,7 +118,7 @@ void sendstatus(int to, const char *class_string, const char *message_string)
     filtertext(tmpbuf1);
     filtertext(tmpbuf2);
     snprintf(pbuf, USER_BUF_SIZE-2, "%c%s\001%s", 
-	ICB_M_STATUS, tmpbuf1, tmpbuf2);
+             ICB_M_STATUS, tmpbuf1, tmpbuf2);
     doSend(-1, to);
 }
 
@@ -130,7 +130,7 @@ void send_cmdend(int to, const char *output_string)
     snprintf(tmpbuf, BUFSIZ, "%s", output_string);
     filtertext(tmpbuf);
     snprintf(pbuf, USER_BUF_SIZE-2, "%c%s\001\001%s", 
-	ICB_M_CMDOUT, "ec", tmpbuf);
+             ICB_M_CMDOUT, "ec", tmpbuf);
     doSend(-1, to);
 }
 
@@ -142,7 +142,7 @@ void sends_cmdout(int to, const char *output_string)
     snprintf(tmpbuf, BUFSIZ, "%s", output_string);
     filtertext(tmpbuf);
     snprintf(pbuf, USER_BUF_SIZE-2, "%c%s\001%s", 
-	ICB_M_CMDOUT, "co", tmpbuf);
+             ICB_M_CMDOUT, "co", tmpbuf);
     doSend(-1, to);
 }
 
@@ -152,17 +152,17 @@ void sendbeep(int from, int to)
 {
     if ( u_tab[to].nobeep != 0 )
     {
-	senderror(from, "User has nobeep enabled.");
+        senderror(from, "User has nobeep enabled.");
 
-	if ( u_tab[to].nobeep == 2 )
-	{
-	    snprintf (mbuf, MSG_BUF_SIZE,
-		"%s attempted (and failed) to beep you",
-		u_tab[from].nickname);
-	    sendstatus (to, "No-Beep", mbuf);
-	}
+        if ( u_tab[to].nobeep == 2 )
+        {
+            snprintf (mbuf, MSG_BUF_SIZE,
+                      "%s attempted (and failed) to beep you",
+                      u_tab[from].nickname);
+            sendstatus (to, "No-Beep", mbuf);
+        }
 
-	return;
+        return;
     }
 
     snprintf(pbuf, USER_BUF_SIZE-2, "%c%s", ICB_M_BEEP, u_tab[from].nickname);
@@ -183,25 +183,25 @@ void s_new_user(int n)
 
     /* construct proto(col) message */
     snprintf(pbuf, USER_BUF_SIZE-2, "%c%d\001%s\001%s",
-	ICB_M_PROTO,PROTO_LEVEL, thishost, VERSION);
+             ICB_M_PROTO,PROTO_LEVEL, thishost, VERSION);
     doSend(-1, n);
     cp = getremotename(n);
 
     if (cp == NULL) {
-	vmdb(MSG_INFO, mbuf, "[CONNECT] %d", n);
-	return;
+        vmdb(MSG_INFO, mbuf, "[CONNECT] %d", n);
+        return;
     }
 
     if (strlen(cp) == 0) {
-	vmdb(MSG_INFO, mbuf, "[CONNECT] %d", n);
-	return;
+        vmdb(MSG_INFO, mbuf, "[CONNECT] %d", n);
+        return;
     }
 
 #if defined(SHORT_HOSTNAME) && defined(FQDN)
     if(strcasecmp(SHORT_HOSTNAME, cp) == 0) {
-	cp = FQDN;
+        cp = FQDN;
     }
-#endif	/* SHORT_HOSTNAME && FQDN */
+#endif    /* SHORT_HOSTNAME && FQDN */
 
     snprintf(u_tab[n].nodeid, MAX_NODELEN+1, "%s", cp);
 
@@ -226,44 +226,44 @@ void sendimport(int to, const char *class_string, const char *output_string)
     filtertext(tmpbuf1);
     filtertext(tmpbuf2);
     snprintf(pbuf, USER_BUF_SIZE-2, "%c%s\001%s", 
-	ICB_M_IMPORTANT, tmpbuf1, tmpbuf2);
+             ICB_M_IMPORTANT, tmpbuf1, tmpbuf2);
     doSend(-1, to);
 }
 
 
 
 /*
-	Copyright (c) 1991 by Keith Graham
-	Modifications Copyright (c) 1991 by John Atwood deVries II
+   Copyright (c) 1991 by Keith Graham
+   Modifications Copyright (c) 1991 by John Atwood deVries II
 
-	"to" is the destination socket..
-*/
+   "to" is the destination socket..
+ */
 
 void user_wline(int to, 
-		char *mod, 
-		char *nick, 
-		int idle, 
-		int resp, 
-		int login, 
-		char *user, 
-		char *site, 
-		char *name)
+                char *mod, 
+                char *nick, 
+                int idle, 
+                int resp, 
+                int login, 
+                char *user, 
+                char *site, 
+                char *name)
 { 
     snprintf(pbuf, USER_BUF_SIZE-2,
-	"%cwl\001%s\001%s\001%ld\001%ld\001%ld\001%s\001%s\001%s%c",
-	ICB_M_CMDOUT, mod, nick, (long)idle, (long)resp, (long)login, user, site, name, 0);
+             "%cwl\001%s\001%s\001%ld\001%ld\001%ld\001%s\001%s\001%s%c",
+             ICB_M_CMDOUT, mod, nick, (long)idle, (long)resp, (long)login, user, site, name, 0);
     doSend(-1, to);
 }
 
 /* XXX what the hell does this do? what are c and d? -hoche 5/10/00 */
 /*
-void user_wgroupline(int to, char *group, char* topic, c, d)
-{ 
-    snprintf(pbuf, USER_BUF_SIZE-2, "%cwg\001%s\001%s\001%s\001%s\000",
-	ICB_M_CMDOUT, group, topic, c, d);
-    doSend(-1, to);
-}
-*/
+   void user_wgroupline(int to, char *group, char* topic, c, d)
+   { 
+   snprintf(pbuf, USER_BUF_SIZE-2, "%cwg\001%s\001%s\001%s\001%s\000",
+   ICB_M_CMDOUT, group, topic, c, d);
+   doSend(-1, to);
+   }
+ */
 
 void user_whead(int to)
 { 
@@ -278,64 +278,64 @@ int doSend(int from,int to)
     char line[USER_BUF_SIZE-1];
 
     if (to < 0) {
-      vmdb(MSG_ERR, "Attempted to send to negative fd: %d", to);
-      return -1;
+        vmdb(MSG_ERR, "Attempted to send to negative fd: %d", to);
+        return -1;
     }
 
     if (to >= max_users) 
     {
-	pp[0] = ' ';
-	switch (pp[1]) {
-		case ICB_M_BEEP: /* someone beeped us */
-			autoBeep(from);
-			break;
-		case ICB_M_PERSONAL: /* someone sent us a message */
-			split(pp);
-			snprintf(line, USER_BUF_SIZE-2, "%s\001%s", getword(fields[1]), 
-				get_tail(fields[1]));
-			cmdmsg(from, line);
-			break;
-		default: /* do nothing -- ignore */
-			break;
-	}
+        pp[0] = ' ';
+        switch (pp[1]) {
+            case ICB_M_BEEP: /* someone beeped us */
+                autoBeep(from);
+                break;
+            case ICB_M_PERSONAL: /* someone sent us a message */
+                split(pp);
+                snprintf(line, USER_BUF_SIZE-2, "%s\001%s", getword(fields[1]), 
+                         get_tail(fields[1]));
+                cmdmsg(from, line);
+                break;
+            default: /* do nothing -- ignore */
+                break;
+        }
     } 
     else
     {
-      size_t len;
+        size_t len;
 
-      /*
-       * note: we compare against USER_BUF_SIZE
-       * to make sure that no packets slipped through
-       * that are too big.
-       */
-      len = strlen(pbuf) + 1; /* include the null terminator */
-      if ((len + 1) > USER_BUF_SIZE) {
-	mdb(MSG_ERR, "doSend: pbuf too large:");
-	vmdb(MSG_ERR, "from=%d to=%d pbuf=%s len=%d", from, to, pbuf, len);
-	snprintf(mbuf, MSG_BUF_SIZE, "Cannot transmit packet: too large");
-	senderror(from, mbuf);
-	return -1;
-      }
+        /*
+         * note: we compare against USER_BUF_SIZE
+         * to make sure that no packets slipped through
+         * that are too big.
+         */
+        len = strlen(pbuf) + 1; /* include the null terminator */
+        if ((len + 1) > USER_BUF_SIZE) {
+            mdb(MSG_ERR, "doSend: pbuf too large:");
+            vmdb(MSG_ERR, "from=%d to=%d pbuf=%s len=%d", from, to, pbuf, len);
+            snprintf(mbuf, MSG_BUF_SIZE, "Cannot transmit packet: too large");
+            senderror(from, mbuf);
+            return -1;
+        }
 
-      if (S_kill[to] > 0) 
-	return -1;
+        if (S_kill[to] > 0) 
+            return -1;
 
-      pp[0] = (unsigned char)len;
-      if ((ret = sendpacket(to, pp, len + 1 )) < 0) {
-	vmdb(MSG_ERR, "doSend: %d: %s (%d)", to, strerror(errno), ret);
-	if (ret == -2) {
-	  /* bad news! */
-	  S_kill[to]++;
-	  /* need to clear the notifies of this user,
-	     lest he try to someone else who's dead
-	     who has this guy in his notify. Endless
-	     loop! */
-	  /* Don't know if it's still needed, but it
-	     doesn't hurt */
-	  nlclear(u_tab[to].n_notifies);
-	  nlclear(u_tab[to].s_notifies);
-	}
-      }
+        pp[0] = (unsigned char)len;
+        if ((ret = sendpacket(to, pp, len + 1 )) < 0) {
+            vmdb(MSG_ERR, "doSend: %d: %s (%d)", to, strerror(errno), ret);
+            if (ret == -2) {
+                /* bad news! */
+                S_kill[to]++;
+                /* need to clear the notifies of this user,
+                   lest he try to someone else who's dead
+                   who has this guy in his notify. Endless
+                   loop! */
+                /* Don't know if it's still needed, but it
+                   doesn't hurt */
+                nlclear(u_tab[to].n_notifies);
+                nlclear(u_tab[to].s_notifies);
+            }
+        }
     }
     return 0;
 }

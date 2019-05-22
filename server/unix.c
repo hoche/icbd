@@ -19,7 +19,7 @@
 /* stash the current time in curtime */
 void gettime(void)
 {
-	time(&curtime);
+    time(&curtime);
 }
 
 
@@ -27,17 +27,17 @@ void gettime(void)
 /* output will be flushed every newline */
 void linebuffer(FILE *fp)
 {
-	setlinebuf(fp);
+    setlinebuf(fp);
 }
 
 void clearargs(int argc, char *argv[])
 {
-	int x;
-	char *cp;
+    int x;
+    char *cp;
 
-	for (x = 1; x <= argc-1; x++) {
-		cp = argv[x];
-		while(*cp)
-			*cp++ = ' ';
-	}
+    for (x = 1; x <= argc-1; x++) {
+        cp = argv[x];
+        while(*cp)
+            *cp++ = ' ';
+    }
 }

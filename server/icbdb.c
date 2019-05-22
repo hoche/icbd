@@ -18,13 +18,13 @@
 #include <errno.h>
 
 #ifndef DBLKSIZ
-#define DBLKSIZ	4096
+#define DBLKSIZ    4096
 #endif
 
-static DBM	*db = NULL;
-static char	databuf[DBLKSIZ];
+static DBM    *db = NULL;
+static char    databuf[DBLKSIZ];
 
-static int	open_count = 0;
+static int    open_count = 0;
 
 /*
  * This can be set to 1 by an the caller to force a dbm_close()
@@ -33,7 +33,7 @@ static int	open_count = 0;
  * they're messing with the db, and another to say they're done
  * (which would set icbdb_multiuser back to 0).
  */
-static int	icbdb_multiuser = 0;
+static int    icbdb_multiuser = 0;
 
 void
 icbdb_set_multiuser (int value)
@@ -58,8 +58,8 @@ icbdb_open (void)
 
     if (db == NULL)
     {
-	if ((db = dbm_open (USERDB, O_RDWR, ICBDB_MODE)) == NULL)
-	    vmdb (MSG_ERR, "User Database Open: %s", strerror(errno));
+        if ((db = dbm_open (USERDB, O_RDWR, ICBDB_MODE)) == NULL)
+            vmdb (MSG_ERR, "User Database Open: %s", strerror(errno));
     }
 
     return (db != NULL);
@@ -70,34 +70,34 @@ icbdb_close (void)
 {
     if (--open_count > 0 || !icbdb_multiuser)
     {
-	return;
+        return;
     }
 
     if (db != NULL)
     {
-	dbm_close (db);
+        dbm_close (db);
     }
 
     db = NULL;
 }
 
-#define ICBDB_OPEN()	if (icbdb_open() == 0) return (0)
+#define ICBDB_OPEN()    if (icbdb_open() == 0) return (0)
 
-#define ICBDB_DONE(r)	icbdb_close (); return (r)
+#define ICBDB_DONE(r)    icbdb_close (); return (r)
 
 static void
 icbdb_make_key (const char *category, const char *attribute, datum *key)
 {
-    static char	keybuf[DBLKSIZ];
+    static char    keybuf[DBLKSIZ];
 
     if (category == NULL)
     {
-	/* This handles the terminating NULL byte better than strncpy. */
-	snprintf (keybuf, sizeof (keybuf), "%s", attribute);
+        /* This handles the terminating NULL byte better than strncpy. */
+        snprintf (keybuf, sizeof (keybuf), "%s", attribute);
     }
     else
     {
-	snprintf (keybuf, sizeof (keybuf), "%s.%s", category, attribute);
+        snprintf (keybuf, sizeof (keybuf), "%s.%s", category, attribute);
     }
 
     lcaseit (keybuf);
@@ -108,11 +108,11 @@ icbdb_make_key (const char *category, const char *attribute, datum *key)
 
 int
 icbdb_get (const char *category, const char *attribute, icbdb_type type,
-	void *value)
+           void *value)
 {
-    datum	key;
-    datum	data;
-    int		result = 0;
+    datum    key;
+    datum    data;
+    int        result = 0;
 
     ICBDB_OPEN();
 
@@ -121,28 +121,28 @@ icbdb_get (const char *category, const char *attribute, icbdb_type type,
 
     if (data.dptr == NULL)
     {
-	vmdb (MSG_DEBUG, "icbdb_get: %s.%s: NOT FOUND", category, attribute);
-	result = 0;
+        vmdb (MSG_DEBUG, "icbdb_get: %s.%s: NOT FOUND", category, attribute);
+        result = 0;
     }
     else
     {
-	vmdb (MSG_DEBUG, "icbdb_get: %s.%s: '%.*s'", category, attribute,
-		data.dsize, data.dptr);
-	bcopy (data.dptr, databuf, data.dsize);
-	databuf[data.dsize] = '\0';
+        vmdb (MSG_DEBUG, "icbdb_get: %s.%s: '%.*s'", category, attribute,
+              data.dsize, data.dptr);
+        bcopy (data.dptr, databuf, data.dsize);
+        databuf[data.dsize] = '\0';
 
-	switch (type)
-	{
-	    case ICBDB_STRING:
-		if (value != NULL) *((char **) value) = databuf;
-		break;
+        switch (type)
+        {
+            case ICBDB_STRING:
+                if (value != NULL) *((char **) value) = databuf;
+                break;
 
-	    case ICBDB_INT:
-		if (value != NULL) *((int *) value) = atoi (databuf);
-		break;
-	}
+            case ICBDB_INT:
+                if (value != NULL) *((int *) value) = atoi (databuf);
+                break;
+        }
 
-	result = 1;
+        result = 1;
     }
 
     ICBDB_DONE(result);
@@ -150,11 +150,11 @@ icbdb_get (const char *category, const char *attribute, icbdb_type type,
 
 int
 icbdb_set (const char *category, const char *attribute, icbdb_type type,
-	const void *value)
+           const void *value)
 {
-    datum	key;
-    datum	data;
-    int		result;
+    datum    key;
+    datum    data;
+    int        result;
 
     ICBDB_OPEN();
 
@@ -162,20 +162,20 @@ icbdb_set (const char *category, const char *attribute, icbdb_type type,
 
     switch (type)
     {
-	case ICBDB_STRING:
-	    data.dptr = (char *) value;
-	    break;
+        case ICBDB_STRING:
+            data.dptr = (char *) value;
+            break;
 
-	case ICBDB_INT:
-	    snprintf (databuf, sizeof (databuf), "%d", (int) value);
-	    data.dptr = databuf;
-	    break;
+        case ICBDB_INT:
+            snprintf (databuf, sizeof (databuf), "%d", (int) value);
+            data.dptr = databuf;
+            break;
     }
 
     data.dsize = strlen (data.dptr);
 
     vmdb (MSG_DEBUG, "icbdb_set: '%.*s' --> '%.*s'", key.dsize, key.dptr,
-	    data.dsize, data.dptr);
+          data.dsize, data.dptr);
     result = dbm_store (db, key, data, DBM_REPLACE);
 
     ICBDB_DONE(result);
@@ -184,8 +184,8 @@ icbdb_set (const char *category, const char *attribute, icbdb_type type,
 int
 icbdb_delete (const char *category, const char *attribute)
 {
-    datum	key;
-    int		result;
+    datum    key;
+    int        result;
 
     ICBDB_OPEN();
 
@@ -203,17 +203,17 @@ icbdb_delete (const char *category, const char *attribute)
 //
 int
 icbdb_list_get_index (const char *category, const char *attribute, int index,
-    icbdb_type type, void *value)
+                      icbdb_type type, void *value)
 {
-    char	tmp[DBLKSIZ];
+    char    tmp[DBLKSIZ];
 
     if (index == ICBDB_LIST_INDEX_MAX)
     {
-	snprintf (tmp, sizeof (tmp), "%s.max", attribute);
+        snprintf (tmp, sizeof (tmp), "%s.max", attribute);
     }
     else
     {
-	snprintf (tmp, sizeof (tmp), "%s.%d", attribute, index);
+        snprintf (tmp, sizeof (tmp), "%s.%d", attribute, index);
     }
 
     vmdb (MSG_DEBUG, "icbdb_list_get_index: looking up '%s.%s'", category, tmp);
@@ -222,17 +222,17 @@ icbdb_list_get_index (const char *category, const char *attribute, int index,
 
 int
 icbdb_list_set_index (const char *category, const char *attribute, int index,
-    icbdb_type type, void *value)
+                      icbdb_type type, void *value)
 {
-    char	tmp[DBLKSIZ];
+    char    tmp[DBLKSIZ];
 
     if (index == ICBDB_LIST_INDEX_MAX)
     {
-	snprintf (tmp, sizeof (tmp), "%s.max", attribute);
+        snprintf (tmp, sizeof (tmp), "%s.max", attribute);
     }
     else
     {
-	snprintf (tmp, sizeof (tmp), "%s.%d", attribute, index);
+        snprintf (tmp, sizeof (tmp), "%s.%d", attribute, index);
     }
 
     return (icbdb_set (category, tmp, type, value));
@@ -241,15 +241,15 @@ icbdb_list_set_index (const char *category, const char *attribute, int index,
 int
 icbdb_list_delete_index (const char *category, const char *attribute, int index)
 {
-    char	tmp[DBLKSIZ];
+    char    tmp[DBLKSIZ];
 
     if (index == ICBDB_LIST_INDEX_MAX)
     {
-	snprintf (tmp, sizeof (tmp), "%s.max", attribute);
+        snprintf (tmp, sizeof (tmp), "%s.max", attribute);
     }
     else
     {
-	snprintf (tmp, sizeof (tmp), "%s.%d", attribute, index);
+        snprintf (tmp, sizeof (tmp), "%s.%d", attribute, index);
     }
 
     return (icbdb_delete (category, tmp));
@@ -257,9 +257,9 @@ icbdb_list_delete_index (const char *category, const char *attribute, int index)
 
 int
 icbdb_list_find (const char *category, const char *attribute, icbdb_type type, void *value,
-    int *index, int *max_index, int *first_empty, int *last_valid)
+                 int *index, int *max_index, int *first_empty, int *last_valid)
 {
-    int		found = 0;
+    int        found = 0;
 
     ICBDB_OPEN();
 
@@ -271,85 +271,85 @@ icbdb_list_find (const char *category, const char *attribute, icbdb_type type, v
     vmdb (MSG_DEBUG, "icbdb_list_find (%s, %s)", category, attribute);
 
     icbdb_list_get_index (category, attribute, ICBDB_LIST_INDEX_MAX, ICBDB_INT,
-	max_index);
+                          max_index);
 
     vmdb (MSG_DEBUG, "icbdb_list_find: max_index = %d", *max_index);
 
     for (*index = 0; *index <= *max_index; (*index)++)
     {
-	int	empty = 1;
+        int    empty = 1;
 
-	switch (type)
-	{
-	    case ICBDB_STRING:
-		{
-		    char	*compare;
+        switch (type)
+        {
+            case ICBDB_STRING:
+                {
+                    char    *compare;
 
-		    empty = !icbdb_list_get_index (category, attribute, *index,
-			type, &compare);
+                    empty = !icbdb_list_get_index (category, attribute, *index,
+                                                   type, &compare);
 
-		    vmdb (MSG_DEBUG, "icbdb_list_find: comparing '%s' with '%s'",
-			    compare, (char *) value);
-		    if (!empty && strcmp (compare, (char *) value) == 0)
-		    {
-			found = 1;
-		    }
-		}
-		break;
+                    vmdb (MSG_DEBUG, "icbdb_list_find: comparing '%s' with '%s'",
+                          compare, (char *) value);
+                    if (!empty && strcmp (compare, (char *) value) == 0)
+                    {
+                        found = 1;
+                    }
+                }
+                break;
 
-	    case ICBDB_INT:
-		{
-		    int		compare;
+            case ICBDB_INT:
+                {
+                    int        compare;
 
-		    empty = !icbdb_list_get_index (category, attribute, *index,
-			type, &compare);
+                    empty = !icbdb_list_get_index (category, attribute, *index,
+                                                   type, &compare);
 
-		    vmdb (MSG_DEBUG, "icbdb_list_find: comparing %d with %d",
-			    compare, (int) value);
-		    if (!empty && compare == (int) value)
-		    {
-			found = 1;
-		    }
-		}
-		break;
-	    // TODO: Need error for unknown type.
-	}
+                    vmdb (MSG_DEBUG, "icbdb_list_find: comparing %d with %d",
+                          compare, (int) value);
+                    if (!empty && compare == (int) value)
+                    {
+                        found = 1;
+                    }
+                }
+                break;
+                // TODO: Need error for unknown type.
+        }
 
-	if (empty)
-	{
-	    mdb (MSG_DEBUG, "icbdb_list_find: empty");
+        if (empty)
+        {
+            mdb (MSG_DEBUG, "icbdb_list_find: empty");
 
-	    if (first_empty)
-	    {
-		if (*first_empty == -1)
-		{
-		    *first_empty = 0;
-		}
-	    }
+            if (first_empty)
+            {
+                if (*first_empty == -1)
+                {
+                    *first_empty = 0;
+                }
+            }
 
-	    continue;
-	}
+            continue;
+        }
 
-	if (found)
-	{
-	    mdb (MSG_DEBUG, "icbdb_list_find: match");
-	    break;
-	}
+        if (found)
+        {
+            mdb (MSG_DEBUG, "icbdb_list_find: match");
+            break;
+        }
 
-	if (last_valid) *last_valid = *index;
+        if (last_valid) *last_valid = *index;
     }
 
     if (first_empty)
     {
-	if (*first_empty == -1)
-	{
-	    *first_empty = *max_index + 1;
-	}
+        if (*first_empty == -1)
+        {
+            *first_empty = *max_index + 1;
+        }
     }
 
     vmdb (MSG_DEBUG, "icbdb_list_find: returning %d, index = %d, max_index = %d, first_empty = %d, last_valid = %d",
-	    found, *index, *max_index, (first_empty) ? *first_empty : -1,
-	    (last_valid) ? *last_valid : -1);
+          found, *index, *max_index, (first_empty) ? *first_empty : -1,
+          (last_valid) ? *last_valid : -1);
 
     ICBDB_DONE(found);
 }
@@ -357,25 +357,25 @@ icbdb_list_find (const char *category, const char *attribute, icbdb_type type, v
 int
 icbdb_list_add (const char *category, const char *attribute, icbdb_type type, void *value)
 {
-    int		index = -1;
-    int		max_index = -1;
-    int		first_empty = -1;
+    int        index = -1;
+    int        max_index = -1;
+    int        first_empty = -1;
 
     ICBDB_OPEN();
 
     if (icbdb_list_find (category, attribute, type, value, &index, &max_index,
-	&first_empty, NULL))
+                         &first_empty, NULL))
     {
-	/* Already there. */
-	ICBDB_DONE(1);
+        /* Already there. */
+        ICBDB_DONE(1);
     }
 
     icbdb_list_set_index (category, attribute, first_empty, type, value);
 
     if (first_empty > max_index)
     {
-	icbdb_list_set_index (category, attribute, ICBDB_LIST_INDEX_MAX,
-	    ICBDB_INT, (void *) first_empty);
+        icbdb_list_set_index (category, attribute, ICBDB_LIST_INDEX_MAX,
+                              ICBDB_INT, (void *) first_empty);
     }
 
     ICBDB_DONE(1);
@@ -383,39 +383,39 @@ icbdb_list_add (const char *category, const char *attribute, icbdb_type type, vo
 
 int
 icbdb_list_delete (const char *category, const char *attribute, icbdb_type type,
-    void *value)
+                   void *value)
 {
-    int		index = -1;
-    int		max_index = -1;
-    int		last_valid = -1;
+    int        index = -1;
+    int        max_index = -1;
+    int        last_valid = -1;
 
     ICBDB_OPEN();
 
     vmdb (MSG_DEBUG, "icbdb_list_delete (%s, %s)", category, attribute);
 
     if (!icbdb_list_find (category, attribute, type, value, &index, &max_index,
-	NULL, &last_valid))
+                          NULL, &last_valid))
     {
-	/* Already gone. */
-	ICBDB_DONE(1);
+        /* Already gone. */
+        ICBDB_DONE(1);
     }
 
     icbdb_list_delete_index (category, attribute, index);
 
     if (index == max_index)
     {
-	if (last_valid == -1)
-	{
-	    mdb (MSG_DEBUG, "icbdb_list_delete: deleting entire list");
-	    icbdb_list_delete_index (category, attribute,
-		ICBDB_LIST_INDEX_MAX);
-	}
-	else
-	{
-	    vmdb (MSG_DEBUG, "icbdb_list_delete: setting max to %d", last_valid);
-	    icbdb_list_set_index (category, attribute, ICBDB_LIST_INDEX_MAX,
-		ICBDB_INT, (void *) last_valid);
-	}
+        if (last_valid == -1)
+        {
+            mdb (MSG_DEBUG, "icbdb_list_delete: deleting entire list");
+            icbdb_list_delete_index (category, attribute,
+                                     ICBDB_LIST_INDEX_MAX);
+        }
+        else
+        {
+            vmdb (MSG_DEBUG, "icbdb_list_delete: setting max to %d", last_valid);
+            icbdb_list_set_index (category, attribute, ICBDB_LIST_INDEX_MAX,
+                                  ICBDB_INT, (void *) last_valid);
+        }
     }
 
     ICBDB_DONE(1);
@@ -424,25 +424,25 @@ icbdb_list_delete (const char *category, const char *attribute, icbdb_type type,
 int
 icbdb_list_load (const char *category, const char *attribute, NAMLIST *nl)
 {
-    int		index;
-    int		max_index = -1;
-    char	*value;
+    int        index;
+    int        max_index = -1;
+    char    *value;
 
     ICBDB_OPEN();
 
     vmdb (MSG_DEBUG, "icbdb_list_load (%s, %s)", category, attribute);
     icbdb_list_get_index (category, attribute, ICBDB_LIST_INDEX_MAX, ICBDB_INT,
-	&max_index);
+                          &max_index);
 
     vmdb (MSG_DEBUG, "icbdb_list_load: max_index = %d", max_index);
     for (index = 0; index <= max_index; index++)
     {
-	if (icbdb_list_get_index (category, attribute, index, ICBDB_STRING,
-	    &value))
-	{
-	    vmdb (MSG_DEBUG, "icbdb_list_load: adding '%s'", value);
-	    nlput (nl, value);
-	}
+        if (icbdb_list_get_index (category, attribute, index, ICBDB_STRING,
+                                  &value))
+        {
+            vmdb (MSG_DEBUG, "icbdb_list_load: adding '%s'", value);
+            nlput (nl, value);
+        }
     }
 
     ICBDB_DONE(1);
@@ -451,14 +451,14 @@ icbdb_list_load (const char *category, const char *attribute, NAMLIST *nl)
 int
 icbdb_list_save (const char *category, const char *attribute, NAMLIST *nl)
 {
-    int		index;
+    int        index;
 
     ICBDB_OPEN();
 
     vmdb (MSG_DEBUG, "icbdb_list_save (%s, %s)", category, attribute);
     for (index = 0; index < nlcount (*nl); index++)
     {
-	icbdb_list_add (category, attribute, ICBDB_STRING, nlget(nl));
+        icbdb_list_add (category, attribute, ICBDB_STRING, nlget(nl));
     }
 
     ICBDB_DONE(1);
@@ -467,20 +467,20 @@ icbdb_list_save (const char *category, const char *attribute, NAMLIST *nl)
 int
 icbdb_list_clear (const char *category, const char *attribute)
 {
-    int		index;
-    int		max_index = -1;
+    int        index;
+    int        max_index = -1;
 
     ICBDB_OPEN();
 
     vmdb (MSG_DEBUG, "icbdb_list_clear (%s, %s)", category, attribute);
     icbdb_list_get_index (category, attribute, ICBDB_LIST_INDEX_MAX, ICBDB_INT,
-	&max_index);
+                          &max_index);
     icbdb_list_delete_index (category, attribute, ICBDB_LIST_INDEX_MAX);
 
     vmdb (MSG_DEBUG, "icbdb_list_clear: max_index = %d", max_index);
     for (index = 0; index <= max_index; index++)
     {
-	icbdb_list_delete_index (category, attribute, index);
+        icbdb_list_delete_index (category, attribute, index);
     }
 
     ICBDB_DONE(1);

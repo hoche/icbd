@@ -16,15 +16,15 @@
 
 int s_version(int n, int argc)
 {
-        if (argc == 2) {
-		sprintf(mbuf, "%s", VERSION);
-		sends_cmdout(n, mbuf);
-		sprintf(mbuf, "Proto Level: %d Max Users: %d Max Groups: %d", 
-			PROTO_LEVEL, MAX_REAL_USERS, MAX_GROUPS);
-		sends_cmdout(n, mbuf);
-        } else {
-			mdb(MSG_INFO, "version: wrong number of parz");
-        }
+    if (argc == 2) {
+        sprintf(mbuf, "%s", VERSION);
+        sends_cmdout(n, mbuf);
+        sprintf(mbuf, "Proto Level: %d Max Users: %d Max Groups: %d", 
+                PROTO_LEVEL, MAX_REAL_USERS, MAX_GROUPS);
+        sends_cmdout(n, mbuf);
+    } else {
+        mdb(MSG_INFO, "version: wrong number of parz");
+    }
 
-	return 0;
+    return 0;
 }

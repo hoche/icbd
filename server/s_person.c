@@ -24,59 +24,59 @@
 
 int s_personal(int n, int argc)
 {
-	int dest;
-	char tbuf[USER_BUF_SIZE-2];
+    int dest;
+    char tbuf[USER_BUF_SIZE-2];
 
-	if (argc != 2)
-	{
-		mdb(MSG_INFO, "personal: wrong number of parz");
-		return -1;
-	}
+    if (argc != 2)
+    {
+        mdb(MSG_INFO, "personal: wrong number of parz");
+        return -1;
+    }
 
-	/* constraints: 
-		destination nickname exists */
+    /* constraints: 
+       destination nickname exists */
 
-	if( (dest = find_user(getword(fields[1]))) < 0) 
-	{
-		/* error - no such nick */
-		sprintf(mbuf,"%s not signed on.", getword(fields[1]));
-		senderror(n, mbuf);
-	} 
-	else 
-	{
-		char	*tail,
-		*args = (char *)NULL;
+    if( (dest = find_user(getword(fields[1]))) < 0) 
+    {
+        /* error - no such nick */
+        sprintf(mbuf,"%s not signed on.", getword(fields[1]));
+        senderror(n, mbuf);
+    } 
+    else 
+    {
+        char    *tail,
+                *args = (char *)NULL;
 
-		/* check to see if their away is set and pester them if so. */
-		if ( strlen(u_tab[n].awaymsg) > 0 && dest != NICKSERV )
-			sendstatus(n, "Away", "Your away is still set...");
+        /* check to see if their away is set and pester them if so. */
+        if ( strlen(u_tab[n].awaymsg) > 0 && dest != NICKSERV )
+            sendstatus(n, "Away", "Your away is still set...");
 
-		tail = get_tail (fields[1]);
-		args = strdup (tail);
+        tail = get_tail (fields[1]);
+        args = strdup (tail);
 
-		/* send a message to that nick */
-		sendperson(n, dest, tail);
+        /* send a message to that nick */
+        sendperson(n, dest, tail);
 
-		if (u_tab[n].echoback == 2) 
-		{
-			snprintf(tbuf, USER_BUF_SIZE - 2, "<*to: %s*> %s", 
-				u_tab[dest].nickname,
-				(args == (char *)NULL) ? "" : args);
+        if (u_tab[n].echoback == 2) 
+        {
+            snprintf(tbuf, USER_BUF_SIZE - 2, "<*to: %s*> %s", 
+                     u_tab[dest].nickname,
+                     (args == (char *)NULL) ? "" : args);
 
-			sends_cmdout(n, tbuf);
-		}
+            sends_cmdout(n, tbuf);
+        }
 
-		/* send an away message if need-be */
-		away_handle(n, dest);
+        /* send an away message if need-be */
+        away_handle(n, dest);
 
-		/* free temporary memory */
-		if ( args != (char *)NULL )
-		{
-			free (args);
-			args = (char *) NULL;
-		}
-	}
-	return 0;
+        /* free temporary memory */
+        if ( args != (char *)NULL )
+        {
+            free (args);
+            args = (char *) NULL;
+        }
+    }
+    return 0;
 }
 
 /*
@@ -98,34 +98,34 @@ void away_handle (int src, int dest)
      */
     if ( strlen(u_tab[dest].awaymsg) > 0 )
     {
-	if ((u_tab[dest].lastaway != src) || 
-	    (time(NULL) - u_tab[dest].lastawaytime > AWAY_NOSEND_TIME))
-	{
-	    u_tab[dest].lastaway = src;
-	    u_tab[dest].lastawaytime = time(NULL);
-	    /* sendperson(dest, src, u_tab[dest].awaymsg); */
-	    snprintf (mbuf, USER_BUF_SIZE - 2, u_tab[dest].awaymsg,
-		u_tab[dest].nickname);
-	    sendstatus(src, "Away", mbuf);
-	    if (u_tab[dest].echoback == 2) 
-	    {
-		struct tm *t;
-		char tbuf[USER_BUF_SIZE-2];
+        if ((u_tab[dest].lastaway != src) || 
+            (time(NULL) - u_tab[dest].lastawaytime > AWAY_NOSEND_TIME))
+        {
+            u_tab[dest].lastaway = src;
+            u_tab[dest].lastawaytime = time(NULL);
+            /* sendperson(dest, src, u_tab[dest].awaymsg); */
+            snprintf (mbuf, USER_BUF_SIZE - 2, u_tab[dest].awaymsg,
+                      u_tab[dest].nickname);
+            sendstatus(src, "Away", mbuf);
+            if (u_tab[dest].echoback == 2) 
+            {
+                struct tm *t;
+                char tbuf[USER_BUF_SIZE-2];
 
-		gettime ();
-		t = localtime (&curtime);
+                gettime ();
+                t = localtime (&curtime);
 
-		snprintf(tbuf, USER_BUF_SIZE-2, "<*to: %s*> [=@%d:%02d%s=] %s", 
-		    u_tab[src].nickname,
-		    (t->tm_hour > 12) ? (t->tm_hour - 12) :
-			    (t->tm_hour == 0) ? 12 : t->tm_hour,
-		    t->tm_min,
-		    t->tm_hour > 11 ? "pm" : "am",
-		    u_tab[dest].awaymsg);
+                snprintf(tbuf, USER_BUF_SIZE-2, "<*to: %s*> [=@%d:%02d%s=] %s", 
+                         u_tab[src].nickname,
+                         (t->tm_hour > 12) ? (t->tm_hour - 12) :
+                         (t->tm_hour == 0) ? 12 : t->tm_hour,
+                         t->tm_min,
+                         t->tm_hour > 11 ? "pm" : "am",
+                         u_tab[dest].awaymsg);
 
-		snprintf (mbuf, USER_BUF_SIZE - 2, tbuf, u_tab[dest].nickname);
-		sends_cmdout(dest, mbuf);
-	    }
-	}
+                snprintf (mbuf, USER_BUF_SIZE - 2, tbuf, u_tab[dest].nickname);
+                sends_cmdout(dest, mbuf);
+            }
+        }
     }
 }

@@ -7,16 +7,16 @@ void clear_user_item(int n);
 
 /* fill a particular user entry */
 void fill_user_entry(int n, 
-		const char *loginid, 
-		const char *nodeid, 
-		const char *nickname, 
-		const char *password, 
-		const char *group,
-		const char *awaymsg,
-		int mylogin, 
-		int echoback, 
-		int nobeep, 
-		long perms);
+                     const char *loginid, 
+                     const char *nodeid, 
+                     const char *nickname, 
+                     const char *password, 
+                     const char *group,
+                     const char *awaymsg,
+                     int mylogin, 
+                     int echoback, 
+                     int nobeep, 
+                     long perms);
 
 /* clear the entire user table */
 void clear_users(void);

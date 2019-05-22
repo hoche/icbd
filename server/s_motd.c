@@ -37,42 +37,42 @@ int s_motd(int n, int argc)
     /* if the file is there, list it, otherwise report error */
     if (motd_fd >= 0) 
     {
-	while ((i = read(motd_fd, &c, 1)) > 0) 
+        while ((i = read(motd_fd, &c, 1)) > 0) 
         {
-	    if (c == '%') 
-		{
-		    i = read(motd_fd, &c, 1);
-		    if (i <= 0) {
-		       if (close(motd_fd) != 0) {
-			    sprintf(mbuf, "MOTD File Close: %s", strerror(errno));
-			    mdb(MSG_ERR, mbuf);
-			    }
-		    }
-		    else if (c == 'U') {
-		       char	*value;
-		       if (icbdb_get ("server", "signon", ICBDB_STRING,
-				&value))
-			    strncat (temp, value, sizeof (temp));
-		    }
-		    else
-			    strncat(temp, &c, 1);
-		    }
-	    else if (c == '\012') {
-		    sends_cmdout(n, temp);
-		    memset(temp, 0, 255);
-		    }
-	    else strncat(temp, &c, 1);
-	}
-	if (close(motd_fd) != 0) {
-		sprintf(mbuf, "MOTD File Close: %s",
-			strerror(errno));
-		mdb(MSG_ERR, mbuf);
-		}
+            if (c == '%') 
+            {
+                i = read(motd_fd, &c, 1);
+                if (i <= 0) {
+                    if (close(motd_fd) != 0) {
+                        sprintf(mbuf, "MOTD File Close: %s", strerror(errno));
+                        mdb(MSG_ERR, mbuf);
+                    }
+                }
+                else if (c == 'U') {
+                    char    *value;
+                    if (icbdb_get ("server", "signon", ICBDB_STRING,
+                                   &value))
+                        strncat (temp, value, sizeof (temp));
+                }
+                else
+                    strncat(temp, &c, 1);
+            }
+            else if (c == '\012') {
+                sends_cmdout(n, temp);
+                memset(temp, 0, 255);
+            }
+            else strncat(temp, &c, 1);
+        }
+        if (close(motd_fd) != 0) {
+            sprintf(mbuf, "MOTD File Close: %s",
+                    strerror(errno));
+            mdb(MSG_ERR, mbuf);
+        }
     } else {
-	sprintf(mbuf, "MOTD File Open: %s", 
-		strerror(errno));
-	mdb(MSG_ERR, mbuf);
-	senderror(n, "No MOTD file found.");
+        sprintf(mbuf, "MOTD File Open: %s", 
+                strerror(errno));
+        mdb(MSG_ERR, mbuf);
+        senderror(n, "No MOTD file found.");
     }
 
     return 0;

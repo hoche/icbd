@@ -5,10 +5,10 @@
 
 /* manages a name list */
 typedef struct Namlist {
-	STRLIST *head, *tail;       /* head and tail of name list */
-	STRLIST *p;	/* user current location in name list */
-	int num;	/* current number of name list entries */
-	int max;	/* max number of list entries before discard */
+    STRLIST *head, *tail;       /* head and tail of name list */
+    STRLIST *p;	/* user current location in name list */
+    int num;	/* current number of name list entries */
+    int max;	/* max number of list entries before discard */
 } NAMLIST;
 
 
