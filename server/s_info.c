@@ -44,7 +44,11 @@ int s_info(int n, int argc)
         else 
         {
             struct sockaddr_in rs;
+#if HAVE_SOCKLEN_T
             socklen_t rs_size = sizeof (struct sockaddr_in);
+#else
+            size_t rs_size = sizeof (struct sockaddr_in);
+#endif
             int aw, idle;
 
             idle = time(NULL) - u_tab[TheirIndex].t_recv;

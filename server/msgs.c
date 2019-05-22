@@ -65,7 +65,11 @@ long perm2val(char *str)
 long get_perms (int n, char *login)
 {
     struct sockaddr_in    rs;
+#if HAVE_SOCKLEN_T
     socklen_t            rs_size = sizeof(rs);
+#else
+    size_t            rs_size = sizeof(rs);
+#endif
     static FILE        *perms_fp = (FILE *) NULL;
     char        pfilebuf[BUFSIZ];
     long        perm = PERM_NULL;

@@ -92,7 +92,6 @@ AC_DEFUN(ICB_AC_PATH_SSL_H, [
 		icb_ac_cv_ssl_h_dir=`(cd ${with_ssl_include}; pwd)`
 	  elif test -f ${with_ssl_include}/ssl.h ; then
 			icb_ac_cv_ssl_h_dir=`(cd ${with_ssl_include}; pwd)`
-			AC_DEFINE(HAVE_LOCAL_SSL)
 	  else
 		AC_MSG_ERROR([no headers found in ${with_ssl_include} directory])
 	  fi
@@ -120,7 +119,6 @@ AC_DEFUN(ICB_AC_PATH_SSL_H, [
 	  done
 	fi
   ])
-
 
   dnl ok, we've either found it, or we're hosed.
   dnl

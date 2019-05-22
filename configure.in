@@ -7,7 +7,9 @@ dnl
 
 
 dnl standard startup stuff
-AC_INIT(server/main.c)
+AC_INIT
+AC_CONFIG_SRCDIR([server/main.c])
+AC_LANG(C)
 AC_CONFIG_HEADER(config.h)
 
 AC_ARG_ENABLE(debugging,
@@ -17,27 +19,18 @@ AC_ARG_ENABLE(debugging,
                           which toggles debbuging output at runtime.
   --disable-debugging     Disallows debugging code to be built in.
                           This might provide some speed benefits.],
-    AC_DEFINE(DEBUG))
-
-AC_ARG_ENABLE(developer,
-[  --enable-developer      Turns on super-duper-extra-compile-warnings
-                          when using gcc.],
-    developer=yes)
-
-AC_ARG_WITH(efence,
-[  --with-efence[=ARG]     Link against Electric Fence library.],
-    efence="$with_efence", efence="no")
+    AC_DEFINE_UNQUOTED([DEBUG], 1, [Define to 1 to enable debugging output.]))
 
 AC_ARG_WITH(ssl,
 [  --with-ssl              Enable SSL using OpenSSL. (Experimental)],
     ssl="$with_ssl", ssl="no")
 
 AC_ARG_WITH(admin_passwd,
-[  --with-admin-passwd=\"admin_passwd\"  Password for admin user.],
+[  --with-admin-passwd=<passwd>  Password for admin user.],
     ac_cv_user_prompt_ADMIN_PASSWD="$with_admin_passwd")
 
 AC_ARG_WITH(max_users,
-[  --with-max-users=       Maximum # of users to allow.],  
+[  --with-max-users=<num>       Maximum number of users.],
     max_users="$with_max_users")
 
 dnl
@@ -52,6 +45,10 @@ Miscellaneous:
 dnl Checks for programs.
 AC_PROG_MAKE_SET
 AC_PROG_CC
+if test "x$GCC" = "xyes"; then
+    CFLAGS="$CFLAGS -Wall"
+fi
+
 AC_PROG_CPP
 dnl these checks are inane. make them be useful, hoche. -hoche.
 AC_CHECK_PROG(RM, rm, rm, rm)
@@ -64,21 +61,6 @@ AC_CHECK_PROG(TAR, tar, tar, tar)
 AC_CHECK_PROG(MAKEDEPEND, makedepend, makedepend, mkdep)
 AC_PROG_RANLIB
 
-dnl are we in developer mode?
-AC_MSG_CHECKING(for developer flags)
-dnl developer flags?
-dnl shouldn't do this this way. should use a test compile
-if test "x$CC" = "xgcc"; then
-	#CFLAGS="$CFLAGS -fno-strict-aliasing"
-	if test "x$developer" = "xyes" -a "x$ac_cv_prog_gcc" = "xyes"; then
-	  #devflags="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual -Wno-unused -Wno-char-subscripts"
-	  devflags="-Wall -Wstrict-prototypes -Wwrite-strings -Wcast-qual"
-	  CFLAGS="$CFLAGS $devflags"
-	else
-	  devflags="none"
-	fi
-	AC_MSG_RESULT($devflags)
-fi
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -111,23 +93,6 @@ AC_CHECK_LIB(resolv, _res)
 dnl check for solaris sockets and the extra libs solaris needs to link 'em
 AC_CHECK_LIB(socket, socket, LIBS="$LIBS -lsocket -lnsl")
 
-dnl check for Electric Fence
-if test x"$efence" != x"no" ; then
-	if test x"$efence" = x"yes" ; then
-		if test -x /usr/lib/libefence.a ; then
-			efence="/usr/lib/libefence.a"
-		else
-			efence="/usr/local/lib/libefence.a"
-		fi
-	fi
-	oldlibs=$LIBS
-	LIBS=$efence
-	AC_MSG_CHECKING(for Electric Fence lib...)
-	AC_TRY_LINK([], [], 
-		LIBS="$LIBS $oldlibs" AC_MSG_RESULT($efence), 
-		LIBS="$oldlibs" AC_MSG_RESULT(not found))
-fi
-
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
@@ -135,23 +100,45 @@ AC_STRUCT_TM
 
 dnl do we have socklen_t in sys/socket.h ?
 AC_MSG_CHECKING(for socklen_t in sys/socket.h)
-AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/socket.h>
-],[
-        socklen_t foo;
-], AC_DEFINE(HAVE_SOCKLEN_T) AC_MSG_RESULT(yes), AC_MSG_RESULT(no))
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([[
+        #include <sys/types.h>
+        #include <sys/socket.h>
+        ]],
+        [[
+            socklen_t foo;
+        ]])
+    ],
+    [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE_UNQUOTED([HAVE_SOCKLEN_T], 1, [Define to 1 if you have socklen_t.])
+    ],
+    [
+        AC_MSG_RESULT([no])
+        AC_DEFINE_UNQUOTED([HAVE_SOCKLEN_T], 0, [Define to 1 if you have socklen_t.])
+    ])
 
 dnl Do we have the XOpen fdset.__fds_bits or the alternate fdset.fds_bits?
 AC_MSG_CHECKING(for XOpen fds_bits)
-AC_TRY_COMPILE([
-#include <sys/types.h>
-],[
-        fd_set fdset;
-        long bits;
-        bits = fdset.__fds_bits[0];
-], AC_DEFINE(HAVE_XOPEN_FDS_BITS) AC_MSG_RESULT(yes), AC_MSG_RESULT(no))
-
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([[
+        #include <sys/types.h>
+        ]],
+        [[
+            fd_set fdset;
+            long bits;
+            bits = fdset.__fds_bits[0];
+        ]])
+    ],
+    [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE_UNQUOTED([HAVE_XOPEN_FDS_BITS], 1, [Define to 1 if you have the XOpen fdset.])
+    ],
+    [
+        AC_MSG_RESULT([no])
+        AC_DEFINE_UNQUOTED([HAVE_XOPEN_FDS_BITS], 0, [Define to 1 if you have the XOpen fdset.])
+    ])
+    
 dnl Set Max users
 ICB_AC_FD_SETSIZE
 AC_MSG_CHECKING(max_users value)
@@ -163,10 +150,9 @@ else
 	max_users=`expr $ac_cv_icb_fd_setsize - 1`
 fi
 AC_MSG_RESULT($max_users)
-AC_DEFINE_UNQUOTED(MAX_USERS, $max_users)
+AC_DEFINE_UNQUOTED([MAX_USERS], $max_users, [Set to the maximum number of users you want to allow.])
 
 dnl Checks for library functions.
-AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(gethostname gettimeofday select socket strdup strerror)
 AC_CHECK_FUNCS(snprintf)
@@ -174,7 +160,7 @@ AC_CHECK_FUNCS(snprintf)
 if test x"$ssl" != x"no" ; then
 	ICB_AC_PATH_SSL
 	if test x"$no_ssl" = x ; then
-		AC_DEFINE(HAVE_SSL)
+		AC_DEFINE_UNQUOTED([HAVE_SSL], 1, [Define to 1 if you want to use SSL.])
 	fi
 fi
 
@@ -228,6 +214,7 @@ Admin password], TheKey)
 else
 ADMIN_PASSWD="$ac_cv_user_prompt_ADMIN_PASSWD"
 fi
-AC_DEFINE_UNQUOTED(ADMIN_PASSWD, "$ADMIN_PASSWD")
+AC_DEFINE_UNQUOTED(ADMIN_PASSWD, "$ADMIN_PASSWD", [Use as your server admin acount password.])
 
-AC_OUTPUT(server/Makefile murgil/Makefile Makefile)
+AC_CONFIG_FILES([server/Makefile murgil/Makefile Makefile])
+AC_OUTPUT
