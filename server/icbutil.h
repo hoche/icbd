@@ -7,26 +7,26 @@
  *
  * open the log file with append
  */
-RETSIGTYPE icbopenlogs(int sig);
+void icbopenlogs(int sig);
 
 /* icbcloselogs
  *
  * close the current log file
  */
-RETSIGTYPE icbcloselogs(int sig);
+void icbcloselogs(int sig);
 
 /* icbcyclelogs
  *
  * close and reopen the log files
  */
-RETSIGTYPE icbcyclelogs(int sig);
+void icbcyclelogs(int sig);
 
 
 /* icbexit
  *
  * disconnect all users and exit
  */
-RETSIGTYPE icbexit(int sig);
+void icbexit(int sig);
 
 
 /* icbdump
@@ -34,12 +34,12 @@ RETSIGTYPE icbexit(int sig);
  * dump the current state to a file so if we restart we can pick up
  * where we left off.
  */
-RETSIGTYPE icbdump(int sig);
+void icbdump(int sig);
 
 /* icbload
  *
  * load a server state from a file created by icbdump
  */
-RETSIGTYPE icbload(int sig);
+void icbload(int sig);
 
 #endif /* #ifndef _ICBUTIL_H_ */

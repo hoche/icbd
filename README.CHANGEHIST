@@ -18,9 +18,6 @@ ______________________________________________________________________________
     internal buffers before modifying them. He also went through and
     converted a lot of char*'s to const char*'s and stuff like that.
 
-* Michel fixed the signal handlers to use RETSIGTYPE (as defined by
-    config.h).
-
 * Michel added SSL support to the murgil library. This also entailed
   creating new buffering structures so that messages didn't have to be fully
   read/written in one go.

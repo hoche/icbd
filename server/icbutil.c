@@ -35,7 +35,7 @@ const char *dumpfile = "icbd.dump";
  * open the log file with append
  */
 
-RETSIGTYPE icbopenlogs(int sig)
+void icbopenlogs(int sig)
 {
     /* used to have non-portable O_FSYNC */
     if((icbd_log = open(ICBDLOG,O_WRONLY|O_CREAT|O_APPEND, 0644)) < 0) {
@@ -49,7 +49,7 @@ RETSIGTYPE icbopenlogs(int sig)
  *
  * close the current log file
  */
-RETSIGTYPE icbcloselogs(int sig)
+void icbcloselogs(int sig)
 {
     close(icbd_log);
     icbd_log = -1;
@@ -59,7 +59,7 @@ RETSIGTYPE icbcloselogs(int sig)
  *
  * close and reopen the log file
  */
-RETSIGTYPE icbcyclelogs(int sig)
+void icbcyclelogs(int sig)
 {
     icbcloselogs(sig);
     icbopenlogs(sig);
@@ -69,7 +69,7 @@ RETSIGTYPE icbcyclelogs(int sig)
  *
  * disconnect all users and exit
  */
-RETSIGTYPE icbexit(int sig)
+void icbexit(int sig)
 {
     int user;
 
@@ -88,7 +88,7 @@ RETSIGTYPE icbexit(int sig)
  * dump the current state to a file so if we restart we can pick up
  * where we left off.
  */
-RETSIGTYPE icbdump(int sig)
+void icbdump(int sig)
 {
     FILE *dump;
     int i, j, k;
@@ -254,7 +254,7 @@ RETSIGTYPE icbdump(int sig)
  *
  * load a server state from a file created by icbdump
  */
-RETSIGTYPE icbload(int sig)
+void icbload(int sig)
 {
     FILE *dump;
     int i,j;
