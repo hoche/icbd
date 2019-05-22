@@ -327,7 +327,10 @@ int s_lost_user(int n)         /* n = fd of that user */
     int len, i, j;
     char one[255], two[255], three[255];
     int  newmod, was_registered, is_killed;
-    long TheTime, UserTime;
+    long TheTime;
+#ifdef MAX_IDLE
+    long UserTime;
+#endif
 
     if (n >= MAX_REAL_USERS) {
         sprintf(mbuf,"[LOST] %d: >= %d (MAX_REAL_USERS)", n,
@@ -357,7 +360,9 @@ int s_lost_user(int n)         /* n = fd of that user */
     else
         was_registered = 0;
     is_killed = S_kill[n];
+#ifdef MAX_IDLE
     UserTime = u_tab[n].t_recv;
+#endif
     len = strlen(u_tab[n].group);
     how_many = (MAX_GROUPLEN > len) ? len:MAX_GROUPLEN;
     memset(t_grp, 0, MAX_GROUPLEN+1);
