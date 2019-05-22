@@ -1548,8 +1548,8 @@ visible.
                                  || strlen (p1) > IDLEBOOT_MSG_LEN )
                             {
                                 sprintf(mbuf,
-                                        "Idle-Boot message length must be between 1 and %d (yours was %d).",
-                                        IDLEBOOT_MSG_LEN, strlen (p1));
+                                        "Idle-Boot message length must be between 1 and %d (yours was %zu).",
+                                        IDLEBOOT_MSG_LEN, strlen(p1));
                                 senderror (n, mbuf);
                                 cp = NULL;
                             }
