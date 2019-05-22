@@ -1,6 +1,4 @@
-#ifndef _STRLIST_H_
-#define _STRLIST_H_
-
+#pragma once
 
 /* routines to maintain a generic linked list of strings */
 
@@ -40,5 +38,3 @@ void strlinkalpha(STRLIST *s, STRLIST **head, STRLIST **tail, int caseindep);
 /* if caseindep != 0, the searching is done case insensitive */
 /* returns pointer on success, 0 on failure */
 STRLIST *strgetnode(char *str, STRLIST *head, int caseindep, int pattern);
-
-#endif /* #ifndef _STRLIST_H_ */

@@ -4,8 +4,7 @@
 /* In the future, this file will include everything a user needs to */
 /* know about the client-server protocol */
 
-#ifndef _ICB_PROTOCOL_H_
-#define _ICB_PROTOCOL_H_
+#pragma once
 
 #include <sys/types.h>
 #include <string.h>
@@ -33,4 +32,3 @@
 #define ICB_M_NOOP	'n'	/* no-op: this is for keeping tcp connection
 				   active w/out affecting idletime */
 
-#endif /* #ifndef _ICB_PROTOCOL_H_ */

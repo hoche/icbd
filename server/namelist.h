@@ -1,5 +1,4 @@
-#ifndef _S_NAMELIST_H_
-#define _S_NAMELIST_H_
+#pragma once
 
 #include "strlist.h"
 
@@ -28,5 +27,3 @@ int nldelete(NAMLIST *nl, char *name);
 int nlpresent(char name[], NAMLIST nl);
 int nlmatch(char name[], NAMLIST nl);
 
-
-#endif /* #ifndef _S_NAMELIST_H_ */

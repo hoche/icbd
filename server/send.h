@@ -1,5 +1,4 @@
-#ifndef _SEND_H_
-#define _SEND_H_
+#pragma once
 
 /* send normal open group message to the client */
 void sendopen(int from, int to, const char *txt);
@@ -69,5 +68,3 @@ void user_whead(int to);
 
 /* send a text message to the client */
 int  doSend(int from, int to);
-
-#endif /* #ifdef _SEND_H_ */

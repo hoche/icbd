@@ -1,8 +1,7 @@
 /* Copyright (c) 1991 by John Atwood deVries II. */
 /* For copying and distribution information, see the file COPYING. */
 
-#ifndef _S_SERVER_H_
-#define _S_SERVER_H_
+#pragma once
 
 #include "config.h"
 
@@ -126,5 +125,3 @@ typedef struct {
     int  cols;		/* tty word erase char */
 } TTYINFO;
 
-
-#endif /* #define _S_SERVER_H_ */ 

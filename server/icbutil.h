@@ -1,5 +1,4 @@
-#ifndef _ICBUTIL_H_
-#define _ICBUTIL_H_
+#pragma once
 
 #include "config.h"
 
@@ -41,5 +40,3 @@ void icbdump(int sig);
  * load a server state from a file created by icbdump
  */
 void icbload(int sig);
-
-#endif /* #ifndef _ICBUTIL_H_ */

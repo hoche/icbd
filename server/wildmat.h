@@ -11,12 +11,10 @@
 **
 */
 
-#ifndef _WILDMAT_H_
-#define _WILDMAT_H_
+#pragma once
 
 /*
 **  User-level routine.  Returns TRUE or FALSE.
 */
 int wildmat(char *text, char *p);
 
-#endif /* #ifndef _WILDMAT_H_ */

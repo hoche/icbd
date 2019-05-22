@@ -2,8 +2,7 @@
  * the s_foo.c files.
  */
 
-#ifndef _S_COMMANDS_H_
-#define _S_COMMANDS_H_
+#pragma once
 
 int s_auto(int n, int f);
 int s_drop(int n, int argc);
@@ -55,4 +54,3 @@ int s_talk(int n, int argc);
 void talk_report(int n, int gi);
 void away_handle(int src, int dest);
 
-#endif /* #ifndef _S_COMMANDS_H_ */

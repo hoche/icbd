@@ -1,5 +1,4 @@
-#ifndef _DISPATCH_H_
-#define _DISPATCH_H_
+#pragma once
 
 /* dispatch()
  *
@@ -11,5 +10,3 @@
  *
  */ 
 void dispatch(int n, char *pkt);
-
-#endif /* #ifndef  _DISPATCH_H_ */

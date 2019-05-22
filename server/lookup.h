@@ -1,5 +1,4 @@
-#ifndef _LOOKUP_H_
-#define _LOOKUP_H_
+#pragma once
 
 #define	CMD_DROP	0
 #define	CMD_SHUTDOWN	1
@@ -81,6 +80,3 @@
 
 
 int lookup(char *s, char *table[]);
-
-
-#endif /* #ifndef _LOOKUP_H_ */

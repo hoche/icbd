@@ -13,9 +13,7 @@
  */
 
 
-
-#ifndef _BUFTYPES_H_
-#define _BUFTYPES_H_
+#pragma once
 
 #include "../config.h"
 
@@ -84,5 +82,3 @@ struct cbuf_t {
 
 struct msgbuf_t *_alloc_msgbuf(struct msgbuf_t *msgbuf, size_t sz);
 
-
-#endif /* #ifdef _BUFTYPES_H_ */

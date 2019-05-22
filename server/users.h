@@ -1,6 +1,4 @@
-#ifndef _ICB_USERS_H_
-#define _ICB_USERS_H_
-
+#pragma once
 
 /* clear a particular user entry */
 void clear_user_item(int n);
@@ -29,4 +27,3 @@ int count_users_in_group(const char *group);
 /* case insensitive */
 int find_user(char *name);
 
-#endif /* #ifndef _ICB_USERS_H_ */

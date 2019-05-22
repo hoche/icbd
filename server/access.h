@@ -1,5 +1,4 @@
-#ifndef _ACCESS_H_
-#define _ACCESS_H_
+#pragma once
 
 #ifdef HAVE_NDBM_H
 #include <ndbm.h>
@@ -36,4 +35,3 @@ int nickchpass(int forWhom, char *oldpw, char *newpw, DBM *openDb);
 int nickwrite(int forWhom, char *password, int verifyOnly, DBM *openDb);
 int nicklookup(int forWhom, const char *theNick, DBM *openDb);
 
-#endif /* #ifndef _ACCESS_H_ */

@@ -1,5 +1,4 @@
-#ifndef _S_MSGS_H_
-#define _S_MSGS_H_
+#pragma once
 
 /* open message
  *  note that we need to know who sent the message.  it doesn't
@@ -59,5 +58,3 @@ void pong(int n, char *pkt);
  */
 int ok2read(int n);
 
-
-#endif /* #ifndef _S_MSGS_H_ */

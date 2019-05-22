@@ -1,5 +1,4 @@
-#ifndef _SERVER_GROUPS_H_
-#define _SERVER_GROUPS_H_
+#pragma once
 
 /* group table manipulation */
 
@@ -63,5 +62,3 @@ void fill_group_entry(int n,
                       int control, 
                       int mod, 
                       int volume);
-
-#endif /* #ifndef _SERVER_GROUPS_H_ */

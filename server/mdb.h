@@ -1,11 +1,7 @@
 /* Copyright 2001, Michel Hoche-Mong.
- * 
- * Released under the GPL.
- *
  */
 
-#ifndef _MDB_H_
-#define _MDB_H_
+#pragma once
 
 extern int icbd_log;
 extern int log_level;
@@ -25,7 +21,4 @@ extern int log_level;
 
 void mdb(int level, const char *message);
 void vmdb(int level, const char *fmt, ...);
-
-
-#endif /* #ifdef _MDB_H_ */
 

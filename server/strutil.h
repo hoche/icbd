@@ -1,5 +1,4 @@
-#ifndef _S_STRINGS_H_
-#define _S_STRINGS_H_
+#pragma once
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -56,5 +55,3 @@ char *get_tail(char *s);
 /* an array of strings, and return the number of fields found. */
 
 int split(char *s);
-
-#endif /* #define _S_STRINGS_H_ */

@@ -4,8 +4,7 @@
  * Released under the GPL.
  */
 
-#ifndef _S_STATS_H_
-#define _S_STATS_H_
+#pragma once
 
 struct _server_stats
 {
@@ -20,6 +19,4 @@ struct _server_stats
 extern struct _server_stats server_stats;
 
 int s_server_stats (int who, int argc);
-
-#endif /* #ifdef _S_STATS_H_ */
 

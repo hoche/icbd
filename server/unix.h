@@ -1,5 +1,4 @@
-#ifndef _ICB_UNIX_H_
-#define _ICB_UNIX_H_
+#pragma once
 
 /* stash the current time in curtime */
 void gettime(void);
@@ -10,4 +9,3 @@ void linebuffer(FILE *fp);
 
 void clearargs(int argc, char *argv[]);
 
-#endif /* #ifndef _ICB_UNIX_H_ */

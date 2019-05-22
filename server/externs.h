@@ -1,8 +1,7 @@
 /* Copyright (c) 1991 by John Atwood deVries II. */
 /* For copying and distribution information, see the file COPYING */
 
-#ifndef _SERVER_EXTERNS_H_
-#define _SERVER_EXTERNS_H_
+#pragma once
 
 #include "config.h"
 #include "server.h"
@@ -55,6 +54,3 @@ extern int m_watchtime;		/* using boring time format */
 extern long TimeToDie;
 extern int ShutdownNotify;
 extern int restart;
-
-
-#endif /* #ifdef _SERVER_EXTERNS_H_ */

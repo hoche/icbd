@@ -15,8 +15,7 @@
  *
  */
 
-#ifndef _SERVER_GLOBALS_H_
-#define _SERVER_GLOBALS_H_
+#pragma once
 
 #include "../config.h"
 
@@ -48,5 +47,3 @@ extern int highestfd;
 extern struct timeval *polltimeout;
 extern struct itimerval *polldelay;
 
-
-#endif /* #define _SERVER_GLOBALS_H_ */

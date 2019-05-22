@@ -1,3 +1,5 @@
+#pragma once
+
 #define ICBDB_LIST_INDEX_MAX	-1
 
 /*
