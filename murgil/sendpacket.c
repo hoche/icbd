@@ -47,129 +47,129 @@
  */
 int _writepacket(struct cbuf_t* cbuf)
 {
-  int result;
-  size_t remain;
-  struct msgbuf_t *msgbuf;
+    int result;
+    size_t remain;
+    struct msgbuf_t *msgbuf;
 
-  vmdb(MSG_VERBOSE, "writepacket: fd%d has %d packets in queue.", 
-    cbuf->fd, cbuf->wlist_size);
+    vmdb(MSG_VERBOSE, "writepacket: fd%d has %d packets in queue.", 
+         cbuf->fd, cbuf->wlist_size);
 
-  if (cbuf->retries > MAX_SENDPACKET_RETRIES) {
-     return -1;
-  }
+    if (cbuf->retries > MAX_SENDPACKET_RETRIES) {
+        return -1;
+    }
 
-  while (!TAILQ_EMPTY(&(cbuf->wlist))) {
-    msgbuf = TAILQ_FIRST(&(cbuf->wlist));
+    while (!TAILQ_EMPTY(&(cbuf->wlist))) {
+        msgbuf = TAILQ_FIRST(&(cbuf->wlist));
 
-    remain = msgbuf->len - (msgbuf->pos - msgbuf->data);
+        remain = msgbuf->len - (msgbuf->pos - msgbuf->data);
 
-    vmdb(MSG_VERBOSE, "writepacket: fd%d sending %d bytes....", 
-      cbuf->fd, remain);
+        vmdb(MSG_VERBOSE, "writepacket: fd%d sending %d bytes....", 
+             cbuf->fd, remain);
 
 #ifdef HAVE_SSL
-    if (cbuf->ssl_con == NULL) {
-      result = write(cbuf->fd, msgbuf->pos, remain);
-    } else {
-      /* if it's SSL, we have to keep calling it with the whole buffer.
-       * not just the remaining part.
-       */
-      result = SSL_write(cbuf->ssl_con, msgbuf->data, msgbuf->len);
-      if (result <= 0) {
-	int ssl_error;
-	ssl_error = SSL_get_error(cbuf->ssl_con, result);
-	switch (ssl_error) {
-	  case SSL_ERROR_WANT_READ:
-	    vmdb(MSG_INFO, "_writepacket: fd%d: SSL_ERROR_WANT_READ", cbuf->fd);
-	    result = 0; /* retry the write later */
-	    break;
+        if (cbuf->ssl_con == NULL) {
+            result = write(cbuf->fd, msgbuf->pos, remain);
+        } else {
+            /* if it's SSL, we have to keep calling it with the whole buffer.
+             * not just the remaining part.
+             */
+            result = SSL_write(cbuf->ssl_con, msgbuf->data, msgbuf->len);
+            if (result <= 0) {
+                int ssl_error;
+                ssl_error = SSL_get_error(cbuf->ssl_con, result);
+                switch (ssl_error) {
+                    case SSL_ERROR_WANT_READ:
+                        vmdb(MSG_INFO, "_writepacket: fd%d: SSL_ERROR_WANT_READ", cbuf->fd);
+                        result = 0; /* retry the write later */
+                        break;
 
-	  case SSL_ERROR_WANT_WRITE:
-	    vmdb(MSG_INFO, "_writepacket: fd%d: SSL_ERROR_WANT_WRITE", cbuf->fd);
-	    result = 0; /* retry the write later */
-	    break;
+                    case SSL_ERROR_WANT_WRITE:
+                        vmdb(MSG_INFO, "_writepacket: fd%d: SSL_ERROR_WANT_WRITE", cbuf->fd);
+                        result = 0; /* retry the write later */
+                        break;
 
-	  case SSL_ERROR_ZERO_RETURN:
-	    vmdb(MSG_ERR, 
-	      "_writepacket: fd%d: SSL conn maked closed", cbuf->fd);
-	    return -1;
+                    case SSL_ERROR_ZERO_RETURN:
+                        vmdb(MSG_ERR, 
+                             "_writepacket: fd%d: SSL conn maked closed", cbuf->fd);
+                        return -1;
 
-	  case SSL_ERROR_WANT_X509_LOOKUP:
-	    vmdb(MSG_ERR, 
-	      "_writepacket: fd%d: SSL conn wants X509 lookup.", cbuf->fd);
-	    return -1;
+                    case SSL_ERROR_WANT_X509_LOOKUP:
+                        vmdb(MSG_ERR, 
+                             "_writepacket: fd%d: SSL conn wants X509 lookup.", cbuf->fd);
+                        return -1;
 
-	  case SSL_ERROR_SYSCALL:
-	    vmdb(MSG_ERR, 
-	      "_writepacket: fd%d: SSL_ERROR_SYSCALL", cbuf->fd);
-	    return -1;
+                    case SSL_ERROR_SYSCALL:
+                        vmdb(MSG_ERR, 
+                             "_writepacket: fd%d: SSL_ERROR_SYSCALL", cbuf->fd);
+                        return -1;
 
-	  case SSL_ERROR_SSL:
-	    ssl_error = ERR_get_error();
-	    if (ssl_error == 0) {
-	      if (result == 0) {
-		  vmdb(MSG_ERR, 
-		    "_writepacket: fd%d, SSL_write got EOF", cbuf->fd);
-	      } else {
-		  vmdb(MSG_ERR, 
-		    "_writepacket: fd%d, SSL_write got I/O error", cbuf->fd);
-	      }
-	    } else {
-	      char err_buf[256];
-	      ERR_error_string(ssl_error, &err_buf[0]);
-	      vmdb(MSG_ERR, 
-		"_writepacket: fd%d, SSL conn error: %s", cbuf->fd, err_buf);
-	    }
-	    return -1;
-	}
-      }
-    }
+                    case SSL_ERROR_SSL:
+                        ssl_error = ERR_get_error();
+                        if (ssl_error == 0) {
+                            if (result == 0) {
+                                vmdb(MSG_ERR, 
+                                     "_writepacket: fd%d, SSL_write got EOF", cbuf->fd);
+                            } else {
+                                vmdb(MSG_ERR, 
+                                     "_writepacket: fd%d, SSL_write got I/O error", cbuf->fd);
+                            }
+                        } else {
+                            char err_buf[256];
+                            ERR_error_string(ssl_error, &err_buf[0]);
+                            vmdb(MSG_ERR, 
+                                 "_writepacket: fd%d, SSL conn error: %s", cbuf->fd, err_buf);
+                        }
+                        return -1;
+                }
+            }
+        }
 #else
-    result = write(cbuf->fd, msgbuf->pos, remain);
+        result = write(cbuf->fd, msgbuf->pos, remain);
 #endif
 
-    if ( result < 0 ) {
-      if (errno != EWOULDBLOCK) {
-	vmdb(MSG_ERR, 
-	  "fd%d: Couldn't write packet: %s", cbuf->fd, strerror(errno));
-	return -1;
-      }
-      FD_SET(cbuf->fd, &wfdset); /* try again later with the full amount */
-      vmdb(MSG_VERBOSE, 
-	"writepacket: fd%d got EWOULDBLOCK. will retry sending packet later.",
-        cbuf->fd);
-      cbuf->retries++;
-      return 0;
+        if ( result < 0 ) {
+            if (errno != EWOULDBLOCK) {
+                vmdb(MSG_ERR, 
+                     "fd%d: Couldn't write packet: %s", cbuf->fd, strerror(errno));
+                return -1;
+            }
+            FD_SET(cbuf->fd, &wfdset); /* try again later with the full amount */
+            vmdb(MSG_VERBOSE, 
+                 "writepacket: fd%d got EWOULDBLOCK. will retry sending packet later.",
+                 cbuf->fd);
+            cbuf->retries++;
+            return 0;
+        }
+
+        if (result < remain) {
+            /* try again later with the remaining amount */
+            msgbuf->pos += result;
+            FD_SET(cbuf->fd, &wfdset);
+            vmdb(MSG_VERBOSE, 
+                 "writepacket: fd%d sent partial packet (%d bytes). will retry sending later.",
+                 cbuf->fd, result);
+            cbuf->retries++;
+            return 0;
+        } 
+
+
+        /* SUCCESS! pop the msgbuf off the send stack and delete it */
+        TAILQ_REMOVE(&(cbuf->wlist), msgbuf, entries);
+        cbuf->wlist_size--;
+
+        free(msgbuf->data);
+        free(msgbuf);
+
+        /* also reset the retries */
+        cbuf->retries = 0;
+
+        vmdb(MSG_VERBOSE, "writepacket: fd%d sent packet. queue is now %d.",
+             cbuf->fd, cbuf->wlist_size);
     }
-    
-    if (result < remain) {
-      /* try again later with the remaining amount */
-      msgbuf->pos += result;
-      FD_SET(cbuf->fd, &wfdset);
-      vmdb(MSG_VERBOSE, 
-	"writepacket: fd%d sent partial packet (%d bytes). will retry sending later.",
-        cbuf->fd, result);
-      cbuf->retries++;
-      return 0;
-    } 
-    
 
-    /* SUCCESS! pop the msgbuf off the send stack and delete it */
-    TAILQ_REMOVE(&(cbuf->wlist), msgbuf, entries);
-    cbuf->wlist_size--;
-
-    free(msgbuf->data);
-    free(msgbuf);
-
-    /* also reset the retries */
-    cbuf->retries = 0;
-
-    vmdb(MSG_VERBOSE, "writepacket: fd%d sent packet. queue is now %d.",
-      cbuf->fd, cbuf->wlist_size);
-  }
-
-  /* we've sent everything, so let's remove this fd */
-  FD_CLR(cbuf->fd, &wfdset);
-  return 0;
+    /* we've sent everything, so let's remove this fd */
+    FD_CLR(cbuf->fd, &wfdset);
+    return 0;
 }
 
 
@@ -189,19 +189,19 @@ int sendpacket(int s, char *pkt, size_t len)
     cbuf = &(cbufs[s]);
 
     vmdb(MSG_VERBOSE, "sendpacket: len=%d, pktlen=%d, pkt=\"%s\"", 
-      len, (unsigned char)*pkt, pkt+1);
+         len, (unsigned char)*pkt, pkt+1);
 
     /* if we already have an unwritten message, bomb out */
     if (cbuf->wlist_size >= MAX_SENDPACKET_QUEUE) {
-    	vmdb(MSG_ERR, 
-	  "sendpacket: fd%d already has %d pending writes.", cbuf->wlist_size);
-	return -1;
+        vmdb(MSG_ERR, 
+             "sendpacket: fd%d already has %d pending writes.", cbuf->wlist_size);
+        return -1;
     }
 
     /* allocate a write buffer */
     msgbuf = _alloc_msgbuf(NULL, len);
     if (!msgbuf)
-      return -1;
+        return -1;
 
     memcpy(msgbuf->data, pkt, len);
     msgbuf->len = len;
@@ -212,18 +212,18 @@ int sendpacket(int s, char *pkt, size_t len)
      * linux TAILQ macros choke gcc without them.
      */
     if (TAILQ_EMPTY(&(cbuf->wlist))) {
-      TAILQ_INSERT_HEAD(&(cbuf->wlist), msgbuf, entries);
+        TAILQ_INSERT_HEAD(&(cbuf->wlist), msgbuf, entries);
     } else {
-      TAILQ_INSERT_TAIL(&(cbuf->wlist), msgbuf, entries);
+        TAILQ_INSERT_TAIL(&(cbuf->wlist), msgbuf, entries);
     }
     cbuf->wlist_size++;
 
     /* try a write */
     if (_writepacket(cbuf) < 0) {
-	vmdb(MSG_WARN, 
-	  "sendpacket: fd%d, error sending packet. disconnecting user.", s);
-	disconnectuser(s);
-	return -1;
+        vmdb(MSG_WARN, 
+             "sendpacket: fd%d, error sending packet. disconnecting user.", s);
+        disconnectuser(s);
+        return -1;
     }
 
     return 0;

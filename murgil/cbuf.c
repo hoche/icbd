@@ -33,35 +33,35 @@
  */
 struct msgbuf_t *_alloc_msgbuf(struct msgbuf_t *msgbuf, size_t sz)
 {
-  if (msgbuf && msgbuf->sz >= sz) {
-    memset(msgbuf->data, 0, msgbuf->sz);
+    if (msgbuf && msgbuf->sz >= sz) {
+        memset(msgbuf->data, 0, msgbuf->sz);
+        msgbuf->len = 0;
+        msgbuf->pos = msgbuf->data;
+        return msgbuf;
+    }
+
+    if (msgbuf && msgbuf->sz)
+        free(msgbuf->data);
+
+    if (!msgbuf) {
+        msgbuf = (struct msgbuf_t*)malloc(sizeof(struct msgbuf_t));
+        if (!msgbuf) {
+            errno = ENOMEM;
+            return NULL;
+        }
+    }
+
+    msgbuf->data = (char*)malloc(sz);
+    if (!msgbuf->data) {
+        free(msgbuf);
+        errno = ENOMEM;
+        return NULL;
+    }
+
+    msgbuf->sz = sz;
     msgbuf->len = 0;
     msgbuf->pos = msgbuf->data;
+
     return msgbuf;
-  }
-
-  if (msgbuf && msgbuf->sz)
-    free(msgbuf->data);
-
-  if (!msgbuf) {
-    msgbuf = (struct msgbuf_t*)malloc(sizeof(struct msgbuf_t));
-    if (!msgbuf) {
-      errno = ENOMEM;
-      return NULL;
-    }
-  }
-
-  msgbuf->data = (char*)malloc(sz);
-  if (!msgbuf->data) {
-    free(msgbuf);
-    errno = ENOMEM;
-    return NULL;
-  }
-
-  msgbuf->sz = sz;
-  msgbuf->len = 0;
-  msgbuf->pos = msgbuf->data;
-
-  return msgbuf;
 }
 

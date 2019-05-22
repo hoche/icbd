@@ -30,51 +30,51 @@
  */
 void disconnectuser(int s)
 {
-  int i;
-  struct cbuf_t *cbuf;
-  struct msgbuf_t *msgbuf;
+    int i;
+    struct cbuf_t *cbuf;
+    struct msgbuf_t *msgbuf;
 
-  cbuf = &(cbufs[s]);
+    cbuf = &(cbufs[s]);
 
-  /* clear out the read buffer */
-  if (cbuf->rbuf) {
-    if (cbuf->rbuf->data)
-      free(cbuf->rbuf->data);
-    free(cbuf->rbuf);
-    cbuf->rbuf = NULL;
-  }
+    /* clear out the read buffer */
+    if (cbuf->rbuf) {
+        if (cbuf->rbuf->data)
+            free(cbuf->rbuf->data);
+        free(cbuf->rbuf);
+        cbuf->rbuf = NULL;
+    }
 
 
-  /* clear out the write buffers */
-  while (!TAILQ_EMPTY(&(cbuf->wlist))) {
-    msgbuf = TAILQ_FIRST(&(cbuf->wlist));
-    TAILQ_REMOVE(&(cbuf->wlist), msgbuf, entries);
-    if (msgbuf->data)
-      free(msgbuf->data);
-    free(msgbuf);
-  }
+    /* clear out the write buffers */
+    while (!TAILQ_EMPTY(&(cbuf->wlist))) {
+        msgbuf = TAILQ_FIRST(&(cbuf->wlist));
+        TAILQ_REMOVE(&(cbuf->wlist), msgbuf, entries);
+        if (msgbuf->data)
+            free(msgbuf->data);
+        free(msgbuf);
+    }
 
-  /* close the fd */
-  close(cbuf->fd);
+    /* close the fd */
+    close(cbuf->fd);
 
 #ifdef HAVE_SSL
-  /* clear out the SSL info */
-  if (cbuf->ssl_con != NULL) {
-      SSL_free(cbuf->ssl_con);
-      cbuf->ssl_con = NULL;
-  }
+    /* clear out the SSL info */
+    if (cbuf->ssl_con != NULL) {
+        SSL_free(cbuf->ssl_con);
+        cbuf->ssl_con = NULL;
+    }
 #endif
 
-  /* remove the fd from the fdsets and reset the highest fd */
-  FD_CLR(cbuf->fd, &rfdset);
-  FD_CLR(cbuf->fd, &wfdset);
-  FD_CLR(cbuf->fd, &ignorefdset);
-  if (cbuf->fd == highestfd) {
-      for (i = FD_SETSIZE-1; i > 0 && !FD_ISSET(i, &rfdset); i--);
-      highestfd = i;
-  }
+    /* remove the fd from the fdsets and reset the highest fd */
+    FD_CLR(cbuf->fd, &rfdset);
+    FD_CLR(cbuf->fd, &wfdset);
+    FD_CLR(cbuf->fd, &ignorefdset);
+    if (cbuf->fd == highestfd) {
+        for (i = FD_SETSIZE-1; i > 0 && !FD_ISSET(i, &rfdset); i--);
+        highestfd = i;
+    }
 
-  /* let main program know user went bye bye */
-  /* XXX stupid callback */
-  s_lost_user(cbuf->fd);
+    /* let main program know user went bye bye */
+    /* XXX stupid callback */
+    s_lost_user(cbuf->fd);
 }
