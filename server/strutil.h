@@ -2,7 +2,7 @@
 #define _S_STRINGS_H_
 
 #include <ctype.h>
-#include <varargs.h>
+#include <stdarg.h>
 
 
 /* replace illegal characters in a nickname */

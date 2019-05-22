@@ -5,7 +5,7 @@
 #include "config.h"
 
 #include <ctype.h>
-#include <varargs.h>
+#include <stdarg.h>
 
 #include "server.h"
 #include "externs.h"
