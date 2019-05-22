@@ -19,12 +19,33 @@ ______________________________________________________________________________
     converted a lot of char*'s to const char*'s and stuff like that.
 
 * Michel fixed the signal handlers to use RETSIGTYPE (as defined by
-    config.h). He also made some minor updates to the configure script.
+    config.h).
 
-* Um. Jon made some bug fixes. Need to do some cvs diffs to remember what they
-    were and list any relevent ones here.
+* Michel added SSL support to the murgil library. This also entailed
+  creating new buffering structures so that messages didn't have to be fully
+  read/written in one go.
 
-* Michel did a buncha stuff he needs to summarize.
+* Michel made some changes to the configure script.
+    * It now attempts to figure out FD_SETSIZE automatically.
+    * It now knows how to look for OpenSSL headers and libraries.
+    * You can use --with-ssl to enable SSL connections on port 7327.
+    * You can use --with-efence to link against ElectricFence for catching
+      memory bounds bugs.
+
+* A bunch of db calls got cleaned up and duplicated code coalesced into
+  neater function calls.
+
+* A varargs version of the debug message system was added along with
+  message severity levels (WARN, INFO, DEBUG, etc), and most of the mdb()
+  calls are now routed through this new vmdb() call.
+
+* Jon made a bunch of bugfixes and feature additions:
+    * Fix the kill message so it's sent before the user's connection is killed.
+    * Add "log" and "stats" commands.
+    * Cleaned up the idlemod handling.
+    * fixed the error handling for people who try to use a space in their nick.
+    * Add secret and supersecret groups.
+    * Fixed a bunch of user auth and validation issues.
 
 * Added new BOOT_GROUP variable to define what group people get moved to
     when they are booted. Also made it under the same restrictions as
