@@ -2180,6 +2180,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_config_headers="$ac_config_headers config.h"
 
 
+
 # Check whether --enable-debugging was given.
 if test "${enable_debugging+set}" = set; then :
   enableval=$enable_debugging;
@@ -3918,7 +3919,7 @@ if test "x$ac_cv_header_ndbm_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_NDBM_H 1
 _ACEOF
- ndbm=ndbm
+ ndbm=yes
 fi
 
 done
@@ -3931,7 +3932,7 @@ if test "x$ac_cv_header_gdbm_ndbm_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_GDBM_NDBM_H 1
 _ACEOF
- ndbm=gdbm
+ ndbm=yes
 fi
 
 done
@@ -3945,21 +3946,22 @@ if test "x$ac_cv_header_db1_ndbm_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_DB1_NDBM_H 1
 _ACEOF
- ndbm=gdbm
+ ndbm=yes
 fi
 
 done
 
 fi
 
-if test $ndbm = gdbm; then
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for dbm_open in -lgdbm" >&5
-$as_echo_n "checking for dbm_open in -lgdbm... " >&6; }
-if ${ac_cv_lib_gdbm_dbm_open+:} false; then :
+
+if test $ndbm = yes; then
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gdbm_version in -lgdbm" >&5
+$as_echo_n "checking for gdbm_version in -lgdbm... " >&6; }
+if ${ac_cv_lib_gdbm_gdbm_version+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lgdbm  $LIBS"
+LIBS="-lgdbm -lgdbm_compat $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -3969,33 +3971,28 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char dbm_open ();
+char gdbm_version ();
 int
 main ()
 {
-return dbm_open ();
+return gdbm_version ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_gdbm_dbm_open=yes
+  ac_cv_lib_gdbm_gdbm_version=yes
 else
-  ac_cv_lib_gdbm_dbm_open=no
+  ac_cv_lib_gdbm_gdbm_version=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gdbm_dbm_open" >&5
-$as_echo "$ac_cv_lib_gdbm_dbm_open" >&6; }
-if test "x$ac_cv_lib_gdbm_dbm_open" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBGDBM 1
-_ACEOF
-
-  LIBS="-lgdbm $LIBS"
-
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gdbm_gdbm_version" >&5
+$as_echo "$ac_cv_lib_gdbm_gdbm_version" >&6; }
+if test "x$ac_cv_lib_gdbm_gdbm_version" = xyes; then :
+  LIBS="$LIBS -lgdbm -lgdbm_compat"
 fi
 
 fi
