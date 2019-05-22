@@ -1,4 +1,3 @@
-#	Copyright (c) 1989 Carrick Sean Casey. All rights reserved.
 #
 #	Master makefile for the "internation CB" Internet chat system.
 #	The file COPYING details the usage license.
@@ -24,7 +23,7 @@ MANDIRS		=
 TOPCLEAN	= lmurgil.a core
 
 #	Files that configure creates
-CONFIG_CLEAN	= Makefile murgil/Makefile server/Makefile config.h config.log config.cache config.status
+CONFIG_CLEAN	= Makefile murgil/Makefile server/Makefile config.h config.log config.cache config.status autom4te.cache
 
 #	Files to be tarred up with "make dist".
 DISTFILES	= COPYING \
@@ -87,7 +86,7 @@ distclean:
 		(echo Making clean in $${dir}; \
 		cd $${dir}; ${MAKE} clean); done
 	-rm -f $(TOPCLEAN)
-	-rm -f $(CONFIG_CLEAN)
+	-rm -rf $(CONFIG_CLEAN)
 
 dist:	depend clean
 	rm -rf dist
