@@ -128,7 +128,7 @@ char *getlocalname(int socketfd)
     static char rname[256];
     struct hostent *host;
     struct sockaddr_in rs;
-    size_t rs_size = sizeof(rs);
+    socklen_t rs_size = sizeof(rs);
 
 #ifdef HAVE_LIBRESOLV
     /* Don't want to wast all our time in resolving stuff... */
