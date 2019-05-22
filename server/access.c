@@ -84,7 +84,7 @@ int check_auth(int n)
     auth = 0;
     if (strcasecmp(u_tab[n].nickname, "ADMIN") == 0)
         auth++;
-    if (strcasecmp(u_tab[n].password, ADMIN_PASSWD) == 0)
+    if (strcasecmp(u_tab[n].password, ADMIN_PWD) == 0)
         auth++;
     sprintf(mbuf, "Checking authorization of %s: %s",
             u_tab[n].nickname, auth == 2 ? "yes" : "no");

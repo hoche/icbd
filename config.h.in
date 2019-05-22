@@ -2,8 +2,8 @@
 
 #include "icb_config.h"
 
-/* Use as your server admin acount password. */
-#undef ADMIN_PASSWD
+/* Sets the admin password. */
+#undef ADMIN_PWD
 
 /* Define to 1 to enable debugging output. */
 #undef DEBUG

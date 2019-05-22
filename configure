@@ -643,6 +643,7 @@ LDFLAGS
 CFLAGS
 CC
 SET_MAKE
+ADMIN_PWD
 target_alias
 host_alias
 build_alias
@@ -686,15 +687,15 @@ ac_user_opts='
 enable_option_checking
 enable_debugging
 with_ssl
-with_admin_passwd
 with_max_users
-with_defaults
+with_admin_pwd
 with_ssl_include
 with_ssl_lib
 '
       ac_precious_vars='build_alias
 host_alias
 target_alias
+ADMIN_PWD
 CC
 CFLAGS
 LDFLAGS
@@ -1319,15 +1320,17 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-ssl              Enable SSL using OpenSSL. (Experimental)
-  --with-admin-passwd=<passwd>  Password for admin user.
-  --with-max-users=<num>       Maximum number of users.
-
-Miscellaneous:
-  --with-defaults         Use defaults for prompted values.
+  --with-max-users=<num>  Maximum number of users.
+  --with-admin-pwd=<pwd>  REQUIRED. Password for the admin user. To
+                          become the admin user, you will need to log in
+                          with another user name that has the SAME password,
+                          register (/p <password>), then become the admin
+                          user (/name admin), and reregister (/p <password>).
   --with-ssl-include      directory containing openssl headers
   --with-ssl-lib          directory containing the ssl library
 
 Some influential environment variables:
+  ADMIN_PWD   Password for the admin user. Overridden by --with-admin-pwd
   CC          C compiler command
   CFLAGS      C compiler flags
   LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
@@ -2201,13 +2204,6 @@ fi
 
 
 
-# Check whether --with-admin_passwd was given.
-if test "${with_admin_passwd+set}" = set; then :
-  withval=$with_admin_passwd; ac_cv_user_prompt_ADMIN_PASSWD="$with_admin_passwd"
-fi
-
-
-
 # Check whether --with-max_users was given.
 if test "${with_max_users+set}" = set; then :
   withval=$with_max_users; max_users="$with_max_users"
@@ -2215,12 +2211,12 @@ fi
 
 
 
-# Check whether --with-defaults was given.
-if test "${with_defaults+set}" = set; then :
-  withval=$with_defaults; defaults="yes"
-else
-  defaults="no"
+# Check whether --with-admin_pwd was given.
+if test "${with_admin_pwd+set}" = set; then :
+  withval=$with_admin_pwd; admin_pwd="$with_admin_pwd"
 fi
+
+
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ${MAKE-make} sets \$(MAKE)" >&5
@@ -4543,98 +4539,18 @@ _ACEOF
 	fi
 fi
 
-
-
-if test "x$ac_cv_user_prompt_ADMIN_PASSWD" = "x"; then
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if you have run configure before" >&5
-$as_echo_n "checking if you have run configure before... " >&6; }
-if ${ac_cv_have_warned+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-if test "x$defaults" = "xno"; then
-cat << EOF
-
-     ************** Configuration Section **************
-
-    You are about to be prompted by a series of questions.  Answer
-them carefully, as they determine how the icbd is to function.
-
-    After the configure script finishes, you can browse the newly
-created config.h file for further - less important - parameters to
-modify.  Be careful if you re-run configure though since config.h will
-be over written.
-
--Press return to continue-
-EOF
-
-read tmpinput
-ac_cv_have_warned="yes"
-echo $ac_n "disabling above prompt for future runs...  $ac_c"
-else
-  ac_cv_have_warned="no"
+if test x"$admin_pwd" = x ; then
+    if test x"$ADMIN_PWD" != x ; then
+        admin_pwd="$ADMIN_PWD"
+    else
+        as_fn_error $? "either --with-admin-pwd must be used or the ADMIN_PWD environment variable must be set" "$LINENO" 5
+    fi
 fi
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_have_warned" >&5
-$as_echo "$ac_cv_have_warned" >&6; }
-else
-  ac_cv_have_warned="yes"
-fi
-
-if test "x$ac_cv_user_prompt_ADMIN_PASSWD" = "x"; then
-
-MSG_CHECK=`echo "
-
-*** Admin password
-
-	Please pick a password for the admin user. To become the admin user, you
-will need to log in with another user name that has the SAME password,
-register (/p <password>), then become the admin user (/name admin), and
-reregister (/p <password>).
-
-Admin password" | tail -1`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $MSG_CHECK" >&5
-$as_echo_n "checking $MSG_CHECK... " >&6; }
-if ${ac_cv_user_prompt_ADMIN_PASSWD+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  echo ""
-
-if test "x$defaults" = "xno"; then
-echo $ac_n "
-
-*** Admin password
-
-	Please pick a password for the admin user. To become the admin user, you
-will need to log in with another user name that has the SAME password,
-register (/p <password>), then become the admin user (/name admin), and
-reregister (/p <password>).
-
-Admin password (TheKey): $ac_c"
-read tmpinput
-if test "$tmpinput" = "" -a "TheKey" != ""; then
-  tmpinput="TheKey"
-fi
-eval ADMIN_PASSWD=\"$tmpinput\"
-else
-tmpinput="TheKey"
-eval ADMIN_PASSWD=\"$tmpinput\"
-fi
-
-eval ac_cv_user_prompt_ADMIN_PASSWD=\$ADMIN_PASSWD
-echo $ac_n "setting $MSG_CHECK to...  $ac_c"
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_user_prompt_ADMIN_PASSWD" >&5
-$as_echo "$ac_cv_user_prompt_ADMIN_PASSWD" >&6; }
-
-else
-ADMIN_PASSWD="$ac_cv_user_prompt_ADMIN_PASSWD"
-fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: Setting ADMIN_PWD to \"$admin_pwd\"" >&5
+$as_echo "Setting ADMIN_PWD to \"$admin_pwd\"" >&6; }
 
 cat >>confdefs.h <<_ACEOF
-#define ADMIN_PASSWD "$ADMIN_PASSWD"
+#define ADMIN_PWD "$admin_pwd"
 _ACEOF
 
 

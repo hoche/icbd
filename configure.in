@@ -26,22 +26,19 @@ AC_ARG_WITH(ssl,
 [  --with-ssl              Enable SSL using OpenSSL. (Experimental)],
     ssl="$with_ssl", ssl="no")
 
-AC_ARG_WITH(admin_passwd,
-[  --with-admin-passwd=<passwd>  Password for admin user.],
-    ac_cv_user_prompt_ADMIN_PASSWD="$with_admin_passwd")
-
 AC_ARG_WITH(max_users,
-[  --with-max-users=<num>       Maximum number of users.],
+[  --with-max-users=<num>  Maximum number of users.],
     max_users="$with_max_users")
 
-dnl
-dnl otherwise prompted information
-dnl
-AC_ARG_WITH(defaults,
-[
-Miscellaneous:
-  --with-defaults         Use defaults for prompted values.],
-    defaults="yes",defaults="no")
+AC_ARG_WITH(admin_pwd,
+[  --with-admin-pwd=<pwd>  REQUIRED. Password for the admin user. To
+                          become the admin user, you will need to log in
+                          with another user name that has the SAME password,
+                          register (/p <password>), then become the admin
+                          user (/name admin), and reregister (/p <password>).],
+    admin_pwd="$with_admin_pwd")
+
+AC_ARG_VAR(ADMIN_PWD, [Password for the admin user. Overridden by --with-admin-pwd])
 
 dnl Checks for programs.
 AC_PROG_MAKE_SET
@@ -167,57 +164,15 @@ if test x"$ssl" != x"no" ; then
 	fi
 fi
 
-
-dnl
-dnl Prompt for various bits of user information
-dnl
-
-dnl stick more tests in here if you have other questions to ask
-if test "x$ac_cv_user_prompt_ADMIN_PASSWD" = "x"; then
-AC_CACHE_CHECK(if you have run configure before, ac_cv_have_warned,
-[
-if test "x$defaults" = "xno"; then
-cat << EOF
-
-     ************** Configuration Section **************
-
-    You are about to be prompted by a series of questions.  Answer
-them carefully, as they determine how the icbd is to function.
-
-    After the configure script finishes, you can browse the newly
-created config.h file for further - less important - parameters to
-modify.  Be careful if you re-run configure though since config.h will
-be over written.
-
--Press return to continue-
-EOF
-
-read tmpinput
-ac_cv_have_warned="yes"
-echo $ac_n "disabling above prompt for future runs...  $ac_c"
-else
-  ac_cv_have_warned="no"
+if test x"$admin_pwd" = x ; then
+    if test x"$ADMIN_PWD" != x ; then
+        admin_pwd="$ADMIN_PWD"
+    else
+        AC_MSG_ERROR([either --with-admin-pwd must be used or the ADMIN_PWD environment variable must be set])
+    fi
 fi
-])
-else
-  ac_cv_have_warned="yes"
-fi
-
-if test "x$ac_cv_user_prompt_ADMIN_PASSWD" = "x"; then
-AC_PROMPT_USER(ADMIN_PASSWD,[
-
-*** Admin password
-
-	Please pick a password for the admin user. To become the admin user, you
-will need to log in with another user name that has the SAME password,
-register (/p <password>), then become the admin user (/name admin), and
-reregister (/p <password>).
-
-Admin password], TheKey)
-else
-ADMIN_PASSWD="$ac_cv_user_prompt_ADMIN_PASSWD"
-fi
-AC_DEFINE_UNQUOTED(ADMIN_PASSWD, "$ADMIN_PASSWD", [Use as your server admin acount password.])
+AC_MSG_RESULT([Setting ADMIN_PWD to "$admin_pwd"])
+AC_DEFINE_UNQUOTED([ADMIN_PWD], "$admin_pwd", [Sets the admin password.])
 
 AC_CONFIG_FILES([server/Makefile murgil/Makefile Makefile])
 AC_OUTPUT

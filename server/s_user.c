@@ -280,7 +280,7 @@ int s_name(int n, int argc)
            a nickname.
            nickname must be at least 1 character long.
            to use the nickname admin, must have password
-           set to ADMIN_PASSWD
+           set to ADMIN_PWD
          */
 
         /* only use so much of it, but at least some of it */
@@ -307,7 +307,7 @@ int s_name(int n, int argc)
 
         /* make sure they are allowed to use this nickname */
         if (strcasecmp(new_name,"admin") == 0) {
-            if (strcmp(u_tab[n].password, ADMIN_PASSWD) != 0) {
+            if (strcmp(u_tab[n].password, ADMIN_PWD) != 0) {
                 /* oops, password is wrong */
                 senderror(n,"Nickname already in use.");
                 return(-1);
