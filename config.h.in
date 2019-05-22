@@ -1,139 +1,239 @@
-/* config.h.in.  Generated from configure.in by autoheader.  */
+/* File:        config.h.in
+ * Created:     00/05/04
+ * Author:      Michel Hoche-Mong (hoche@grok.com)
+ *
+ * $Id: config.h.in,v 1.35 2001/08/04 08:37:24 hoche Exp $
+ *
+ * Based (loosely) on the original written for icb by Mark 
+ * Giaquinto, copyright (C) 1991 
+ */
 
-/* Use as your server admin acount password. */
-#undef ADMIN_PASSWD
+#ifndef _CONFIG_H_
+#define _CONFIG_H_
 
-/* Define to 1 to enable debugging output. */
-#undef DEBUG
 
-/* Define to 1 if you have the <db1/ndbm.h> header file. */
-#undef HAVE_DB1_NDBM_H
+#define POLL_TIMEOUT   1   /* number of sec to wait in select before
+                            * doing idle maintenance stuff. set to 0 to
+                            * have no wait time, and -1 to have select
+                            * block until there's activity.
+                            */
 
-/* Define to 1 if you have the <fcntl.h> header file. */
-#undef HAVE_FCNTL_H
+#define USER_BUF_SIZE	257    /* max msg size + length byte + 1 (for null) */
+#define	MSG_BUF_SIZE	BUFSIZ	/* for general purpose message buffer */
+#define WARN		1
+#define FATAL		2
 
-/* Define to 1 if you have the <gdbm/ndbm.h> header file. */
-#undef HAVE_GDBM_NDBM_H
+/* File definitions */
 
-/* Define to 1 if you have the `gethostname' function. */
-#undef HAVE_GETHOSTNAME
+#define USERDB "./icbdb"
+#define ICBDLOG "./icbd.log"
+#define ICBDMOTD "./motd"
+#define ICBDHELP "./icbd_help"
+#define ICBPEMFILE "./icbd.pem"
 
-/* Define to 1 if you have the `gettimeofday' function. */
-#undef HAVE_GETTIMEOFDAY
 
-/* Define to 1 if you have the <inttypes.h> header file. */
-#undef HAVE_INTTYPES_H
+#undef	NO_DOUBLE_RES_LOOKUPS	/* define to disable double-reverse lookups */
 
-/* Define to 1 if you have the `gdbm' library (-lgdbm). */
-#undef HAVE_LIBGDBM
+#define DEFAULT_PORT 7326
+#define DEFAULT_SSLPORT 7327
+ 
+#define MAX_GROUPS	300	/* total groups */
+#define MAX_FIELDS      20      /* fields in a packet */
+#define MAX_GROUPLEN    8       /* chars in a group name */
+#define MAX_IDLEN       12      /* chars in a login id */
+#define MAX_INPUTSTR    (250 - MAX_NICKLEN - MAX_NICKLEN - 6) /* input line */
+#define MAX_INVITES     50      /* invitations in a group */
+#define MAX_NICKLEN     12      /* chars in a username */
+#define MAX_NODELEN     64      /* chars in a node name */
+#define MAX_NOPONG      600     /* seconds a client may not PONG a PING */
+#define MAX_PASSWDLEN   12      /* chars in a user password */
+#define MAX_REALLEN     64      /* chars in a real life name */
+#define MAX_TEXTLEN     (80 - MAX_NICKLEN - 5)  /* max chars in a message */
+#define MAX_TOPICLEN    32      /* chars in a group topic */
+#define MAX_HUSHED      32      /* maximum number of hushed people */
+#define MAX_NOTIFIES    40      /* maximum notifies allowed */
 
-/* Define to 1 if you have the `resolv' library (-lresolv). */
-#undef HAVE_LIBRESOLV
+#define MAX_WRITES	20	        /* maximum writes allowed to nickname */
+#define MAX_AWAY_LEN	(MAX_INPUTSTR - 17)
+#define AWAY_NOSEND_TIME 10     /* don't send away messages to the same user
+                                 * if you've already sent one within this 
+                                 * number of seconds 
+                                 */
+#define MAX_SENDPACKET_QUEUE 10  /* maximum number of writes to queue up */
+#define MAX_SENDPACKET_RETRIES 10  /* maximum number of retries per write */
 
-/* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
 
-/* Define to 1 if you have the <ndbm.h> header file. */
-#undef HAVE_NDBM_H
+/*
+ * these are all of the idle behaviour settings
+ */
+/* maximum idle seconds before disconnect. 14400 = 4hrs, a good default */
+#undef MAX_IDLE        /* note: undef to disable */
 
-/* Define to 1 if you have the `select' function. */
-#undef HAVE_SELECT
+/* default secs before users are booted to IDLE_GROUP */
+#define	DEF_IDLE_BOOT	3600
 
-/* Define to 1 if you have the `snprintf' function. */
-#undef HAVE_SNPRINTF
+/* seconds before being disconnected that idle users are given a warning msg */
+#define IDLE_WARN		240
 
-/* Define to 1 if you have the `socket' function. */
-#undef HAVE_SOCKET
+/* the warning message displayed before being idle-disconnected */
+#define	IDLE_WARN_MSG	"Your connection will be dropped in %d minutes due to idle timeout."
 
-/* Define to 1 if you have socklen_t. */
-#undef HAVE_SOCKLEN_T
+/* seconds before moderator in a group times out (for registered mods only) */
+#define MOD_TIMEOUT		300
 
-/* Define to 1 if you want to use SSL. */
-#undef HAVE_SSL
+/* max secs before idle mods give up mod */
+#define	MAX_IDLE_MOD	14400
 
-/* Define to 1 if you have the <stdarg.h> header file. */
-#undef HAVE_STDARG_H
+/* maximum idle seconds that can be set for a group */
+#define MAX_MOD_IDLE	600
 
-/* Define to 1 if you have the <stdint.h> header file. */
-#undef HAVE_STDINT_H
+/* default idle mod setting when a group is created */
+#define	DEF_IDLE_MOD	3600
 
-/* Define to 1 if you have the <stdlib.h> header file. */
-#undef HAVE_STDLIB_H
+/*
+ * in the following, %s is replaced with the nickname of the user for the
+ * messages sent to other users in the group and "you" for the user being 
+ * affected
+ */
 
-/* Define to 1 if you have the `strdup' function. */
-#undef HAVE_STRDUP
+/* default msg for being idle booted from a group. */
+#define	IDLE_BOOT_MSG	"A swarm of bats swoops down and carries %s away.";
 
-/* Define to 1 if you have the `strerror' function. */
-#undef HAVE_STRERROR
+/* default msg for a moderator losing mod from being too idle */
+#define	IDLE_MOD_MSG		"A piano suddenly falls on %s, dislodging moderatorship of %s.";
 
-/* Define to 1 if you have the `strftime' function. */
-#undef HAVE_STRFTIME
 
-/* Define to 1 if you have the <strings.h> header file. */
-#undef HAVE_STRINGS_H
+#define PID_FILE "./icbd.pid"
 
-/* Define to 1 if you have the <string.h> header file. */
-#undef HAVE_STRING_H
+#define ACCESS_FILE "./icbd.deny"
 
-/* Define to 1 if you have the <sys/file.h> header file. */
-#undef HAVE_SYS_FILE_H
+#define PERM_FILE "./icbd.perms"
 
-/* Define to 1 if you have the <sys/ioctl.h> header file. */
-#undef HAVE_SYS_IOCTL_H
+/* Since sometimes gethostname doesn't do it right, if the hostname returned
+   is SHORT_HOSTNAME, FQDN is used instead. These are only checked if they
+   are defined.
+*/
+/* #define SHORT_HOSTNAME "icb"		*/
+/* #define FQDN "default.icb.net"	*/
 
-/* Define to 1 if you have the <sys/select.h> header file. */
-#undef HAVE_SYS_SELECT_H
+#define	IDLE_GROUP	"~IDLE~"	/* ~ will put it at the end */
 
-/* Define to 1 if you have the <sys/stat.h> header file. */
-#undef HAVE_SYS_STAT_H
+#define	BOOT_GROUP	"~RESEDA~"	/* o/~ we are all going to reseda o/~ */
 
-/* Define to 1 if you have the <sys/time.h> header file. */
-#undef HAVE_SYS_TIME_H
+/* hostname to actually bind and listen as. set to null if you want to
+   listen on all interfaces you have or depend on the -b flag */
+/* #define BIND_HOSTNAME "default.icb.net" */
 
-/* Define to 1 if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
 
-/* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
-#undef HAVE_SYS_WAIT_H
+/************************************************************************
+ * 
+ * values set by configure
+ *
+ ************************************************************************/
 
-/* Define to 1 if you have the <time.h> header file. */
-#undef HAVE_TIME_H
+/* define if you want debug messages */
+#undef DEBUG 
 
-/* Define to 1 if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
-
-/* Define to 1 if you have the XOpen fdset. */
-#undef HAVE_XOPEN_FDS_BITS
-
-/* Set to the maximum number of users you want to allow. */
+/* Maximum number of users to allow. Must be one less than FD_SETSIZE
+ * as defined in /usr/include/sys/types.h */
 #undef MAX_USERS
 
-/* Define to the address where bug reports for this package should be sent. */
-#undef PACKAGE_BUGREPORT
+/* The master password. Used to validate you as Admin */
+#undef ADMIN_PASSWD
 
-/* Define to the full name of this package. */
-#undef PACKAGE_NAME
+/* Define if you want to use OpenSSL */
+#undef HAVE_SSL
 
-/* Define to the full name and version of this package. */
-#undef PACKAGE_STRING
+/* Define if you have the strftime function.  */
+#undef HAVE_STRFTIME
 
-/* Define to the one symbol short name of this package. */
-#undef PACKAGE_TARNAME
+/* Define if you have <sys/wait.h> that is POSIX.1 compatible.  */
+#undef HAVE_SYS_WAIT_H
 
-/* Define to the home page for this package. */
-#undef PACKAGE_URL
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
 
-/* Define to the version of this package. */
-#undef PACKAGE_VERSION
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
 
-/* Define to 1 if you have the ANSI C header files. */
+/* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
-/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
+/* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #undef TIME_WITH_SYS_TIME
 
-/* Define to 1 if your <sys/time.h> declares `struct tm'. */
+/* Define if your <sys/time.h> declares struct tm.  */
 #undef TM_IN_SYS_TIME
 
-/* Define to `unsigned int' if <sys/types.h> does not define. */
-#undef size_t
+/* Define if you have the gethostname function.  */
+#undef HAVE_GETHOSTNAME
+
+/* Define if you have the gettimeofday function.  */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define if you have the select function.  */
+#undef HAVE_SELECT
+
+/* Define if you have the socket function.  */
+#undef HAVE_SOCKET
+
+/* Define if you have the strdup function.  */
+#undef HAVE_STRDUP
+
+/* Define if you have the snprintf function.  */
+#undef HAVE_SNPRINTF
+
+/* Define if you have the strerror function.  */
+#undef HAVE_STRERROR
+
+/* Define if you have the <fcntl.h> header file.  */
+#undef HAVE_FCNTL_H
+
+/* Define if you have the <time.h> header file.  */
+#undef HAVE_TIME_H
+
+/* Define if you have the <sys/time.h> header file.  */
+#undef HAVE_SYS_TIME_H
+
+/* Define if you have the <sys/file.h> header file.  */
+#undef HAVE_SYS_FILE_H
+
+/* Define if you have the <sys/ioctl.h> header file.  */
+#undef HAVE_SYS_IOCTL_H
+
+/* Define if you have the <sys/select.h> header file.  */
+#undef HAVE_SYS_SELECT_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
+
+/* Define if you have the <stdarg.h> file */
+#undef HAVE_STDARG_H
+
+/* Define if you have the ndbm.h header file */
+#undef HAVE_NDBM_H
+
+/* Define if you have the gdbm/ndbm.h header file */
+#undef HAVE_GDBM_NDBM_H
+
+/* Define if you have the db1/ndbm.h header file */
+#undef HAVE_DB1_NDBM_H
+
+/* Define if you have the resolv library (-lresolv).  */
+#undef HAVE_LIBRESOLV
+
+/* Define if this system uses XOpen fdset.__fdsbits. Undef if it uses
+ * the old-style fdset.fdsbits */
+#undef HAVE_XOPEN_FDS_BITS
+
+/* Define this if this system has socklen_t defined in <sys/socket.h> */
+#undef HAVE_SOCKLEN_T
+
+/*
+ * here is where typdefs that depend on the above settings
+ */
+#ifndef	HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif
+
+#endif /* _CONFIG_H_ */
