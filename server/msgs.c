@@ -854,7 +854,7 @@ void cmdmsg(int n, char *pkt)
 
             default:
                 if (lookup(fields[0], auto_table) >= 0)
-                    s_auto(n, 0);
+                    s_auto(n, 0); /* XXX check return code? -hoche */
                 else {
                     sendstatus(n, "Server", "Unknown command");
                     sprintf(mbuf,

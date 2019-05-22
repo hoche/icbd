@@ -24,7 +24,7 @@ int s_auto(int n, int f)
 {
     char * cp;
     int which;
-    int ret;
+    int ret = 0;
     char p1[256];
 
     if (f > 0)
@@ -207,6 +207,6 @@ int s_auto(int n, int f)
     }
     u_tab[NICKSERV].t_recv = time(NULL);
 
-    return 0;
+    return ret;
 }
 
