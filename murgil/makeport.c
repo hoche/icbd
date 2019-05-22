@@ -3,7 +3,7 @@
 #include "config.h"
 
 #include <stdio.h>
-#include <unistd.h>
+#include <stdlib.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -86,7 +86,7 @@ int makeport(char *host_name, int port_number)
     flags = flags & ~ FD_CLOEXEC;
     if (fcntl(s, F_SETFD, flags) < 0) {
         perror("CLOEXEC");
-        exit (-1);
+        exit(-1);
     }
 
     one = 24576;
