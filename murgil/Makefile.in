@@ -5,6 +5,7 @@
 
 prefix       = @prefix@
 exec_prefix  = @exec_prefix@
+datarootdir  = @datarootdir@
 BINDIR       = @bindir@
 MANDIR       = @mandir@
 DATADIR      = @datadir@
