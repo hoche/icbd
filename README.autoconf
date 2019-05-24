@@ -3,7 +3,12 @@ building the system.
 
 Docs for the autoconf system can be found at any gnu mirror. The main
 one is at www.gnu.org. Specifically, you can look at
-http://www.gnu.org/manual/autoconf-2.13/html_chapter/autoconf_toc.html
+https://www.gnu.org/software/autoconf/manual/.
+
+The autoconf files for the icbd were originally made around 1999 with
+a much older version of autoconf. Therefore they contain some anacronisms
+and may use some deprecated calls. Nonetheless, an attempt was made to
+update them to autoconf 2.69 in May 2019.
 
 If you add a check to the configure.in file, you'll need to run
 autoreconf to have the configure script pick up the changes.
@@ -24,10 +29,9 @@ murgil/Makefile.in and server/Makefile.in.
 
 
 If you need to run the configure process over again, be sure to remove
-config.cache.
-
+all the cached files. The easiest way to do this is to run "make distclean".
 
 
 Michel Hoche-Mong
-12 May 2000
+12 May 2000 (updated 23 May 2019)
 hoche@grok.com
