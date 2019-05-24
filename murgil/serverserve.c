@@ -89,7 +89,7 @@ void handle_fd_activity(void)
 
             /* if we're still waiting for a successful SSL_accept, we
              * shunt off to _newconnect again */
-            if (cbufs[x].want_ssl_accept) {
+            if (cbufs[x].started_ssl_accept) {
                 if ((n = _newconnect(x, 1 )) > 0) {
                     s_new_user(n); /* let server init the user */
                 }
@@ -108,7 +108,7 @@ void handle_fd_activity(void)
 
             /* if we're still waiting for a successful SSL_accept, we
              * shunt off to _newconnect again */
-            if (cbufs[x].want_ssl_accept) {
+            if (cbufs[x].started_ssl_accept) {
                 if ((n = _newconnect(x, 1 )) > 0) {
                     s_new_user(n); /* let server init the user */
                 }
