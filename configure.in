@@ -138,7 +138,6 @@ AC_COMPILE_IFELSE(
     ],
     [
         AC_MSG_RESULT([no])
-        AC_DEFINE_UNQUOTED([HAVE_XOPEN_FDS_BITS], 0, [Define to 1 if you have the XOpen fdset.])
     ])
     
 dnl Set Max users
