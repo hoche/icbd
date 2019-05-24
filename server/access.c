@@ -579,14 +579,14 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
             while (strlen(line) < 36)
                 strcat(line, " ");
             strcat(line, "Address:   ");
-            strncat(line, value, sizeof (line));
+            strncat(line, value, sizeof(line)-1);
             sends_cmdout(forWhom, line);
 
             sprintf(line, "Phone Number: ");
             if (!icbdb_get (theNick, "phone", ICBDB_STRING, &value))
                 strcat(line, "(None)");
             else
-                strncat(line, value, sizeof (line));
+                strncat(line, value, sizeof(line)-1);
 
             while (strlen(line) < 36)
                 strcat(line, " ");
@@ -595,7 +595,7 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
             if (!icbdb_get (theNick, "realname", ICBDB_STRING, &value))
                 strcat(line, "(None)");
             else
-                strncat(line, value, sizeof (line));
+                strncat(line, value, sizeof(line)-1);
 
             sends_cmdout(forWhom, line);
 
@@ -603,7 +603,7 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
             if (!icbdb_get (theNick, "signon", ICBDB_STRING, &value))
                 strcat(line, "(unknown)");
             else
-                strncat(line, value, sizeof (line));
+                strncat(line, value, sizeof(line)-1);
 
             while (strlen(line) < 36)
                 strcat(line, " ");
@@ -612,21 +612,21 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
             if (!icbdb_get (theNick, "signoff", ICBDB_STRING, &value))
                 strcat(line, "(unknown)");
             else
-                strncat(line, value, sizeof (line));
+                strncat(line, value, sizeof(line)-1);
 
             sends_cmdout(forWhom, line);
 
             if (icbdb_get (theNick, "email", ICBDB_STRING, &value))
             {
                 strcpy(line, "E-mail addr:  ");
-                strncat(line, value, sizeof (line));
+                strncat(line, value, sizeof(line)-1);
                 sends_cmdout(forWhom, line);
             }
 
             if (icbdb_get (theNick, "www", ICBDB_STRING, &value))
             {
                 strcpy(line, "WWW:  ");
-                strncat(line, value, sizeof (line));
+                strncat(line, value, sizeof(line)-1);
                 sends_cmdout(forWhom, line);
             }
 
