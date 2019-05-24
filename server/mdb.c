@@ -48,7 +48,11 @@ void mdb(int level, const char *message)
         strftime(timebuf, 64, "%b %d %Y %H:%M:%S", localtime(&now));
         snprintf(tmp, BUFSIZ, "%s %s %s: %s\n", 
                  msgtype, timebuf, thishost, message);
-        write(icbd_log, tmp, strlen(tmp));
+
+      	/* the "void"! ... is an obscure construct to get around the compiler
+	 * warning that we're not checking the return value. There's not
+	 * a whole lot we can do if we can't write at this point. */
+        (void)!write(icbd_log, tmp, strlen(tmp));
     }
 }
 
