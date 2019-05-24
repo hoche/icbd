@@ -7,8 +7,8 @@
 #include <ndbm.h>
 #elif defined (HAVE_GDBM_NDBM_H)
 #include <gdbm/ndbm.h>
-#elif defined (HAVE_DB1_NDBM_H)
-#include <db1/ndbm.h>
+#elif defined (HAVE___GDBM_NDBM_H)
+#include <gdbm-ndbm.h>
 #endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>

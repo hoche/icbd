@@ -8,9 +8,6 @@
 /* Define to 1 to enable debugging output. */
 #undef DEBUG
 
-/* Define to 1 if you have the <db1/ndbm.h> header file. */
-#undef HAVE_DB1_NDBM_H
-
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
@@ -103,6 +100,9 @@
 
 /* Define to 1 if you have the XOpen fdset. */
 #undef HAVE_XOPEN_FDS_BITS
+
+/* Define to 1 if you have the <./gdbm-ndbm.h> header file. */
+#undef HAVE___GDBM_NDBM_H
 
 /* Set to the maximum number of users you want to allow. */
 #undef MAX_USERS
