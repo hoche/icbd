@@ -118,7 +118,6 @@ AC_COMPILE_IFELSE(
     ],
     [
         AC_MSG_RESULT([no])
-        AC_DEFINE_UNQUOTED([HAVE_SOCKLEN_T], 0, [Define to 1 if you have socklen_t.])
     ])
 
 dnl Do we have the XOpen fdset.__fds_bits or the alternate fdset.fds_bits?
