@@ -157,8 +157,7 @@ int _writepacket(struct cbuf_t* cbuf)
         TAILQ_REMOVE(&(cbuf->wlist), msgbuf, entries);
         cbuf->wlist_size--;
 
-        free(msgbuf->data);
-        free(msgbuf);
+        _free_msgbuf(msgbuf);
 
         /* also reset the retries */
         cbuf->retries = 0;

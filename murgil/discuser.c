@@ -36,22 +36,17 @@ void disconnectuser(int s)
 
     cbuf = &(cbufs[s]);
 
-    /* clear out the read buffer */
+    /* clear out the read buffer, zeroing out any data in it */
     if (cbuf->rbuf) {
-        if (cbuf->rbuf->data)
-            free(cbuf->rbuf->data);
-        free(cbuf->rbuf);
+        _free_msgbuf(cbuf->rbuf);
         cbuf->rbuf = NULL;
     }
-
 
     /* clear out the write buffers */
     while (!TAILQ_EMPTY(&(cbuf->wlist))) {
         msgbuf = TAILQ_FIRST(&(cbuf->wlist));
         TAILQ_REMOVE(&(cbuf->wlist), msgbuf, entries);
-        if (msgbuf->data)
-            free(msgbuf->data);
-        free(msgbuf);
+        _free_msgbuf(msgbuf);
     }
 
     /* close the fd */
@@ -74,7 +69,7 @@ void disconnectuser(int s)
         highestfd = i;
     }
 
-    /* let main program know user went bye bye */
-    /* XXX stupid callback */
+    /* call back into the "server" code to let main program know user
+     * went bye bye */
     s_lost_user(cbuf->fd);
 }

@@ -75,10 +75,10 @@ struct hostent *double_reverse_check(struct in_addr in)
     return ( (struct hostent *)NULL );
 }
 
-
+#define REMOTE_NAME_LEN 255
 char *getremotename(int socketfd)
 {
-    static char rname[256];
+    static char rname[REMOTE_NAME_LEN];
     struct hostent *host;
     struct sockaddr_in rs;
     socklen_t rs_size = sizeof(rs);
@@ -94,12 +94,24 @@ char *getremotename(int socketfd)
 #endif
 #endif
 
-    memset(rname, 0, 256);
+    memset(rname, 0, REMOTE_NAME_LEN);
+
     /* get address of remote user */
     if (getpeername(socketfd, (struct sockaddr *)&rs, &rs_size) < 0) {
         vmdb(MSG_ERR, "getpeername failed for socket %d", socketfd);
         return(NULL);
     }
+
+#if 0
+    /* XXX
+     * This is what we'll need to do for ipv6, but we need to sort out the
+     * double-reverse lookup version of it first.
+     * -hoche 5/23/19
+     */
+    if (getnameinfo((struct sockaddr *)&rs, rs_size, rname, REMOTE_NAME_LEN, NULL, 0, NI_NAMEREQD)) {
+        rname[0]='\0';
+#endif 
+
 
 #ifdef NO_DOUBLE_RES_LOOKUPS
     host = gethostbyaddr((char *)&rs.sin_addr.s_addr,

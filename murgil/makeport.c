@@ -1,4 +1,6 @@
-/* Copyright (c) 1988 Carrick Sean Casey. All rights reserved. */
+/* Copyright (c) 1988 Carrick Sean Casey. All rights reserved.
+ * IPv6 rewrite (c) 2008, Michel Hoche-Mong
+ */
 
 #include "config.h"
 

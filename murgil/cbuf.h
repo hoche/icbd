@@ -81,4 +81,5 @@ struct cbuf_t {
 
 
 struct msgbuf_t *_alloc_msgbuf(struct msgbuf_t *msgbuf, size_t sz);
+void _free_msgbuf(struct msgbuf_t *msgbuf);
 

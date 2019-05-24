@@ -66,3 +66,11 @@ struct msgbuf_t *_alloc_msgbuf(struct msgbuf_t *msgbuf, size_t sz)
     return msgbuf;
 }
 
+void _free_msgbuf(struct msgbuf_t *msgbuf)
+{
+    if (msgbuf->data) {
+        memset(msgbuf->data, 0, msgbuf->sz);
+        free(msgbuf->data);
+    }
+    free(msgbuf);
+}
