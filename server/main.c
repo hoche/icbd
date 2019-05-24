@@ -328,7 +328,9 @@ int main(int argc, char* argv[])
     {
         /* write the process id on line 1 */
         sprintf(mbuf, "%d\n", (int)getpid());
-        write(pidf, mbuf, strlen(mbuf));
+        if (write(pidf, mbuf, strlen(mbuf)) < 1) {
+		    vmdb(MSG_ALL, "Couldn't write the %s file!", PID_FILE);
+		}
         fchmod (pidf, 0644);
         close(pidf);
     }
