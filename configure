@@ -3949,9 +3949,8 @@ done
 
 fi
 
-
 if test $ndbm = yes; then
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gdbm_version in -lgdbm" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gdbm_version in -lgdbm" >&5
 $as_echo_n "checking for gdbm_version in -lgdbm... " >&6; }
 if ${ac_cv_lib_gdbm_gdbm_version+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -3991,6 +3990,8 @@ if test "x$ac_cv_lib_gdbm_gdbm_version" = xyes; then :
   LIBS="$LIBS -lgdbm -lgdbm_compat"
 fi
 
+else
+    as_fn_error $? "Cannot find either gdbm or ndbm. Please install one or the other." "$LINENO" 5
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for _res in -lresolv" >&5

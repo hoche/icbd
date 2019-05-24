@@ -6,6 +6,7 @@ expanded (and actually useful) information here.
 
 0. THE QUICK VERSION
 
+Make sure you have gdbm or ndbm installed on your system.
 Unpack the source.
 % ./configure.
 Edit config.h and update anything you desire (MAX_IDLE for example)
@@ -30,21 +31,36 @@ file in the same directory as the rest of the sources.
 
 II. CONFIGURATION
 
-Run ./configure to create your makefile and config.h file. You'll want
-to edit config.h and at least update the following values:
+The server *has* to know the administrator password; it's compiled
+in. You need to either set this as an environment variable or
+specify it as an argument to configure.
+
+Note: The method of authentication is particularly screwy. What happens
+    is you log in to the server and register a nickname with the same
+    password as the one you defined here. When you're signed in as that
+    user you become eligible to switch to the admin user by doing a
+    "/name admin". You cannot log in as the "admin" nick directly.
+    Don't ask, I don't know why it was done that way; it's been that
+    way forever. Yes, it likely will change in the future.
+
+So, run either:
+
+./configure --with-admin-pwd=******
+
+or 
+
+./configure ADMIN_PWD=******
+
+This will create your Makefiles and config.h file.
+
+Next, you'll want to check icb_config.h and verify or update the following
+values:
 
 SERVER_ADMIN - should point to the email address of the server
     administrator
 
-ADMIN_PASSWD - this should be set to the password that is used for admin
-    access.  the method of authentication is particularly screwy.
-    what happens is you register a nickname with the same password
-    as what you define TheKey to be and that allows you to do /name
-    admin when signed on (and registered as) that nickname. don't
-    ask, i don't know why and yes, it likely will change.
-
 There are a number of other values you can change at your own risk.
-Documentation included in config.h is minimal though advanced users
+Documentation included in icb_config.h is minimal though advanced users
 can probably understand them well enough to change them without
 causing their machine to explode and ooze green slime.
 
@@ -64,16 +80,12 @@ this script from your system startup rc scripts.
 
 III. COMPILATION
 
-You "should" be able to just type "make depend" and then "make"
-and have it compile.  Platforms tested are somewhat minimal, though
-it should work well on any modern Unix OS. It has been tested on
-Linux, FreeBSD, and Solaris 2. Beyond that, all bets are off, but
-please mail me if it works on something else so I can update this
-list.
-
-If you have problems compiling, you can try to email me for
-assistance, though I am likely to request an account on your machine
-to fix it myself.
+You should just be able to type "make" and have it compile. Platforms
+tested are somewhat minimal, though it should work well on any modern
+Unix OS. It has been tested on several variants of Linux (Centos 7,
+Ubuntu 18, Debian 9, Slackware 14), FreeBSD, and Solaris 2. Beyond
+that, all bets are off, but please email me if it works on something
+else so I can update this list.
 
 IV. INSTALLATION
 
@@ -105,6 +117,6 @@ Systems with heavy traffic may want to symlink this file to /dev/null.
 
 Get a client (many are listed at http://www.icb.net/) and test a
 connection to your server. If you don't mind, drop an email to
-falcon@icb.net and let me know you successfully are running a server
+falcon@icb.net and let him know you successfully are running a server
 and I'll be happy to add an entry in .icb.net for you to use.
 

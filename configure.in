@@ -78,14 +78,13 @@ if test $ndbm = no; then
 AC_CHECK_HEADERS(db1/ndbm.h, ndbm=yes)
 fi
 
-dnl compile and look for gdbm_version. If it exists, presume it's gdbm.
-
 dnl Checks for libraries.
 dnl for those systems that use the gdbm/ndbm.h, look for gdbm lib
-dnl (this may need to be fixed for systems that have ndbm in libgdbm, but
-dnl have ndbm.h in /usr/include/ndbm.h. (SuSE?) )
+dnl compile and look for gdbm_version. If it exists, presume it's gdbm.
 if test $ndbm = yes; then
-AC_CHECK_LIB(gdbm, gdbm_version, [LIBS="$LIBS -lgdbm -lgdbm_compat"], [], [-lgdbm_compat])
+    AC_CHECK_LIB(gdbm, gdbm_version, [LIBS="$LIBS -lgdbm -lgdbm_compat"], [], [-lgdbm_compat])
+else
+    AC_MSG_ERROR([Cannot find either gdbm or ndbm. Please install one or the other.])
 fi
 
 dnl do we have _res?
