@@ -50,9 +50,8 @@ int s_motd(int n, int argc)
                 }
                 else if (c == 'U') {
                     char    *value;
-                    if (icbdb_get ("server", "signon", ICBDB_STRING,
-                                   &value))
-                        strncat (temp, value, sizeof (temp));
+                    if (icbdb_get ("server", "signon", ICBDB_STRING, &value))
+                        strncat (temp, value, sizeof(temp)-1);
                 }
                 else
                     strncat(temp, &c, 1);

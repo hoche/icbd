@@ -323,7 +323,8 @@ int main(int argc, char* argv[])
             }
     }
 
-    if ((pidf = open(PID_FILE, O_WRONLY|O_CREAT|O_TRUNC)) >= 0)
+    if ((pidf = open(PID_FILE, O_WRONLY|O_CREAT|O_TRUNC,
+                         S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) >= 0)
     {
         /* write the process id on line 1 */
         sprintf(mbuf, "%d\n", (int)getpid());
