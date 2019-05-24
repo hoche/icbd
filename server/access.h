@@ -4,7 +4,7 @@
 #include <ndbm.h>
 #elif defined (HAVE_GDBM_NDBM_H)
 #include <gdbm/ndbm.h>
-#elif defined (HAVE__GDBM_NDBM_H)
+#elif defined (HAVE___GDBM_NDBM_H)
 #include <gdbm-ndbm.h>
 #endif
 
