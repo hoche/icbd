@@ -58,13 +58,14 @@ int _newconnect(int s, int is_ssl)
 
     /* point to our socket's cbuf. note that if this is a new connect,
      * this will point to the listen socket's cbuf. however, the 
-     * want_ssl_accept flag should never be set on that, so we should
+     * started_ssl_accept flag should never be set on that, so we should
      * just fall through to the plain accept() and we'll set the cbuf
      * pointer to point to the new client's socket below.
      */
     cbuf = &cbufs[s];
 
-    if (!cbuf->want_ssl_accept) {
+    /* Do we need to do the raw accept or go directly to the SSL_accept()? */
+    if (!cbuf->started_ssl_accept) {
 
         /* accept the connection */
         if ((ns = accept(s, (struct sockaddr *) NULL, NULL)) < 0) {
@@ -121,15 +122,36 @@ int _newconnect(int s, int is_ssl)
         cbuf->fd = ns;
         cbuf->newmsg = 1;
 
+    } else {
+        ns = cbuf->fd;
     }
 
+    /* Ok, if we're here, one of four things happened:
+     * 1. We're not on an SSL-enabled server at all and we've just done the
+     *    accept. ns is set to the new socket and we've moved cbuf so that
+     *    it points to that socket's cbuf. We skip directly past the SSL
+     *    accept stuff.
+     * 2. We've just done the accept on the non-SSL socket. This is the
+     *    same as case 1. We skip directly past the SSL accept stuff.
+     * 3. We're on the SSL listen socket and have just done the raw accept
+     *    on it, but haven't done the SSL_accept yet. This is just like the
+     *    case above, but we're going to try the SSL_accept next. We've
+     *    moved the cbuf pointer so that it points to the client's socket's
+     *    cbuf.
+     * 4. We did the accept on the SSL socket and tried to do the SSL_accept
+     *    but couldn't complete it yet. In that case, s will be set to
+     *    our client's socket, and when we came into the function we grabbed
+     *    the pointer to the client's cbuf directly. started_ssl_accept will
+     *    have been set on that cbuf. However, ns wasn't set so we had to set
+     *    it when we decided to skip the raw accept.
+     */
 
 #ifdef HAVE_SSL
     if (is_ssl) {
         int result, ssl_error;
 
         /* don't try to reinitialize if we're in the middle of accepting already */
-        if (!cbuf->want_ssl_accept) {
+        if (!cbuf->started_ssl_accept) {
             if ( (cbuf->ssl_con = SSL_new(ctx)) == NULL) {
                 vmdb(MSG_ERR, "_newconnect: fs#%d: could't create ssl_con.");
                 return -1;
@@ -144,13 +166,13 @@ int _newconnect(int s, int is_ssl)
 
                 case SSL_ERROR_WANT_READ:
                     vmdb(MSG_INFO, "SSL_accept on fd%d: SSL_ERROR_WANT_READ", ns);
-                    cbuf->want_ssl_accept = 1;
+                    cbuf->started_ssl_accept = 1;
                     FD_SET(ns, &wfdset); /* add to wfdset. we add to rfdset below */
                     break;
 
                 case SSL_ERROR_WANT_WRITE:
                     vmdb(MSG_INFO, "SSL_accept on fd%d: SSL_ERROR_WANT_WRITE", ns);
-                    cbuf->want_ssl_accept = 1;
+                    cbuf->started_ssl_accept = 1;
                     FD_SET(ns, &wfdset); /* add to wfdset. we add to rfdset below */
                     break;
 
@@ -192,7 +214,7 @@ int _newconnect(int s, int is_ssl)
             }
         } else {
             vmdb(MSG_INFO, "fs#%d: SSL connection accepted.", ns);
-            cbuf->want_ssl_accept = 0;
+            cbuf->started_ssl_accept = 0;
             FD_CLR(ns, &wfdset);
 
             /* XXX -- do X509 validation stuff here */

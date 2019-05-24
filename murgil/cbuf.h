@@ -73,7 +73,7 @@ struct cbuf_t {
 #endif
 
   /* the following should NEVER be set on the listen socket(s) */
-  int want_ssl_accept;	/* need to retry an SSL_accept() */
+  int started_ssl_accept;	/* started but didn't finish an SSL_accept() */
   int want_ssl_read;	/* need to retry an SSL_read() */
   /* we don't need a want_ssl_write flag because our writes will
    * automatically retry themselves */
