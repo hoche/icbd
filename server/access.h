@@ -4,8 +4,8 @@
 #include <ndbm.h>
 #elif defined (HAVE_GDBM_NDBM_H)
 #include <gdbm/ndbm.h>
-#elif defined (HAVE_DB1_NDBM_H)
-#include <db1/ndbm.h>
+#elif defined (HAVE__GDBM_NDBM_H)
+#include <gdbm-ndbm.h>
 #endif
 
 int setsecure(int forWhom, int secure, DBM *openDb);

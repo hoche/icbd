@@ -66,8 +66,12 @@ AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(fcntl.h unistd.h stdarg.h time.h)
 AC_CHECK_HEADERS(sys/file.h sys/ioctl.h sys/time.h sys/select.h)
 
-dnl some systems (redhat) have ndbm.h in /usr/include/gdbm/ndbm.h
-dnl other systems (debian) have ndbm.h in /usr/include/db1/ndbm.h
+dnl eff you, autoconf
+dnl some linux systems (redhat) have ndbm.h in /usr/include/gdbm/ndbm.h
+dnl other systems (debian/ubuntu) have ndbm.h in /usr/include/gdbm-ndbm.h
+dnl autoconf maps both "gdbm/ndbm.h" and "gdbm-ndbm.h" to HAVE_GDBM_NDBM_H
+dnl so we test for "./gdbm-ndbm.h", which maps to HAVE__GDMB_NDBM_H, with
+dnl an extra underscore.
 dnl almost everything else has it in just /usr/include/ndbm.h
 ndbm=no
 AC_CHECK_HEADERS(ndbm.h, ndbm=yes)
@@ -75,7 +79,7 @@ if test $ndbm = no; then
 AC_CHECK_HEADERS(gdbm/ndbm.h, ndbm=yes)
 fi
 if test $ndbm = no; then
-AC_CHECK_HEADERS(db1/ndbm.h, ndbm=yes)
+AC_CHECK_HEADERS(./gdbm-ndbm.h, ndbm=yes)
 fi
 
 dnl Checks for libraries.
