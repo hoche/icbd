@@ -10,6 +10,9 @@
 #include <errno.h>
 #include <sys/param.h>
 #include <netdb.h>
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>	/* for struct timeval */
+#endif
 
 
 /* external definitions for "go" global variables */
