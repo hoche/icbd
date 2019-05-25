@@ -1,21 +1,22 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl
 
 ###
 ## @(#) dbimport		falcon@icb.net
+## Updated by hoche@grok.com       5/24/19
 ##
 ## this builds a database by importing data created by dbexport
 ## it's not hammered on since it's only been used once
 ###
 
-dbmopen (DB, "./icbdb", 0666);
+dbmopen(my %DB, "./icbdb", 0666);
 
-while ( $line = <STDIN> )
+while(my $line = <STDIN> )
 {
 	if ( $line =~ /([^|]+)\|(.*)/ )
 	{
-		print "$1 = $2\n";
+		printf("%s=%s\n", $1, $2);
 		$DB{$1} = $2;
 	}
 }
 
-dbmclose( DB);
+dbmclose(%DB);

@@ -1,7 +1,8 @@
-#!/usr/local/bin/perl
+#!/usr/bin/env perl
 
 ###
 ## @(#) dbexport		falcon@icb.net
+## Updated by hoche@grok.com       5/24/19
 ##
 ## this exports the database in a format that can be used by
 ## dbimport. it's not hammered on since it's only been used once.
@@ -10,10 +11,13 @@
 ## copy them over.
 ###
 
-dbmopen (DB, "./icbdb", 0666);
+use strict;
+use warnings;
 
-while (($key,$val) = each %DB) {
-    print $key, '|', $val, "\n";
+dbmopen(my %DB, "./icbdb", 0666);
+
+while (my ($key,$val) = each %DB) {
+    printf("%s|%s\n", $key, $val);
 }
 
-dbmclose( DB);
+dbmclose(%DB);

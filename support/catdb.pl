@@ -7,10 +7,13 @@
 ## just cat the entire damn database to stdout
 ###
 
+use strict;
+use warnings;
+
 dbmopen(my %DB, "./icbdb", 0666);
 
 while (my ($key,$val) = each %DB) {
-    printf($key, ' = ', $val, "\n");
+    printf("%s = %s\n", $key, $val);
 }
 
 dbmclose(%DB);
