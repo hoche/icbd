@@ -16,7 +16,7 @@ use warnings;
 
 dbmopen(my %DB, "./icbdb", 0666);
 
-while (my ($key,$val) = each %DB) {
+while (my ($key,$val) = each(%DB)) {
     printf("%s|%s\n", $key, $val);
 }
 

@@ -10,7 +10,7 @@
 
 dbmopen(my %DB, "./icbdb", 0666);
 
-while(my $line = <STDIN> )
+while (my $line = <STDIN>)
 {
 	if ( $line =~ /([^|]+)\|(.*)/ )
 	{
