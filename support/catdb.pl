@@ -10,7 +10,7 @@
 dbmopen(my %DB, "./icbdb", 0666);
 
 while (my ($key,$val) = each %DB) {
-    print $key, ' = ', $val, "\n";
+    printf($key, ' = ', $val, "\n");
 }
 
 dbmclose(%DB);

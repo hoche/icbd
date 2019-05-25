@@ -37,22 +37,25 @@ foreach my $nick (@ARGV)
     my $k = "${nick}.nick";
     if ( !defined ($DB{$k}) )
     {
-        print "$nick not registered.\n";
+        printf("%s not registered.\n", $nick);
         next;
     }
 
     if ( $DB{$k} !~ /^$nick$/i )
     {
-        printf "Warning: Nick $nick doesn't match \$DB{$k} ($DB{$k}).\n";
+        printf("Warning: Nick %s doesn't match %s (%s).\n",
+            $nick, "\$DB{$k}", $DB{$k});
         next;
     }
 
-    printf "  %10s %s\n", "NICKNAME:", $nick;
+    printf("  %10s %s\n", "NICKNAME:", $nick);
     foreach my $s (@suffi)
     {
         my $k2 = "${nick}.${s}";
-        printf "  %10s %s\n",
-            "$s:", $DB{$k2};
+        if ( defined $DB{$k2} )
+        {
+            printf("  %10s %s\n", "$s:", $DB{$k2});
+        }
     }
 
     $k = "${nick}.nummsg";
@@ -65,14 +68,14 @@ foreach my $nick (@ARGV)
             my $f = "${nick}.from${i}";
             my $m = "${nick}.message${i}";
 
-            printf "  %10s %s\n", "message:", $i; 
-            printf "  %10s $DB{$h}\n", "";
-            printf "  %10s $DB{$f}\n", "";
-            printf "  %10s $DB{$m}\n", "";
+            printf("  %10s %s\n", "message:", $i); 
+            printf("  %10s %s\n", "", $DB{$h});
+            printf("  %10s %s\n", "", $DB{$f});
+            printf("  %10s %s\n", "", $DB{$m});
         }
     }
 
-    print "\n";
+    printf("\n");
 }
 
 dbmclose(%DB);
