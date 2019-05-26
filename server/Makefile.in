@@ -54,29 +54,22 @@ OBJ = \
 	users.o \
 	wildmat.o
 
-default: icbd
+all: icbd
 
 icbd: $(OBJ) $(MURGIL)
 	@CC@ $(CFLAGS) -o icbd $(OBJ) $(LIBS)
 
-lint:
-	@LINT@ $(SRC)
+# this is a hack
+splint:
+	splint -f ../.splintrc $(CPPFLAGS) *.[ch]
 
-cxref:
-	@CXREF@ -c $(CFLAGS) $(SRC)
-
-tags:
-	@CTAGS@ -w *.[ch]
+cppcheck:
+	cppcheck $(CPPFLAGS) --enable=warning .
 
 clean:
 	@RM@ -f *.o icbd core tags
-
-depend:
-	@MAKEDEPEND@ $(DEPENDFLAGS) $(SRC)
 
 .SUFFIXES:
 .SUFFIXES: .c .o
 .c.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<
-
-# DO NOT DELETE THIS LINE -- makedepend uses it.

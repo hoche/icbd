@@ -42,27 +42,17 @@ $(LIBDIR)/lmurgil.a: $(OBJ)
 	@AR@ -q $(LIBDIR)/lmurgil.a $(OBJ)
 	@RANLIB@ $(LIBDIR)/lmurgil.a
 
-install: $(LIBDIR)/lmurgil.a
+# this is a hack
+splint:
+	splint -f ../.splintrc $(CPPFLAGS) *.[ch]
 
-tags:
-	@CTAGS@ -w *[ch]
-
-lint:
-	@LINT@ $(LFLAGS) $(SRC)
-
-cxref:
-	@CXREF@ -c @CFLAGS@ $(SRC)
+cppcheck:
+	cppcheck $(CPPFLAGS) --enable=warning .
 
 clean:
 	@RM@ -f *.o lmurgil.a core tags
-
-depend:
-	@MAKEDEPEND@ $(DEPENDFLAGS) $(SRC)
-
 
 .SUFFIXES:
 .SUFFIXES: .c .o
 .c.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<
-
-# DO NOT DELETE THIS LINE -- makedepend uses it.

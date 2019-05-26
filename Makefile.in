@@ -9,11 +9,19 @@
 #	"make"         - compile the sources
 #	"make install" - compile sources, install binaries and man pages
 #	"make clean"   - delete everything that "make" generates
-#	"make depend"  - regenerate dependency lists
+#	"make distclean"  - return to pristine, deleting "configure" output
 
+prefix       = @prefix@
+exec_prefix  = @exec_prefix@
+datarootdir  = @datarootdir@
+BINDIR       = @bindir@
+MANDIR       = @mandir@
+DATADIR      = @datadir@
 
-#	Just in case... you wouldn't believe....
-SHELL		= /bin/sh
+LIBDIR       = @top_srcdir@
+
+SH           = /bin/sh
+CPPFLAGS     = @CPPFLAGS@
 
 #	Directories to do a make in.
 DIRS 		= murgil server 
@@ -54,26 +62,7 @@ all:		$(PREREQS)
 		 cd $${dir}; ${MAKE} ${MFLAGS} -${MAKEFLAGS}); done
 
 install:	$(PREREQS)
-	@for dir in ${DIRS} ${MANDIRS}; do \
-		(echo Making install in $${dir}; \
-		cd $${dir}; ${MAKE} ${MFLAGS} -${MAKEFLAGS} install); done
-
-depend:		$(PREREQS)
-	@for dir in ${DIRS}; do \
-		(echo Making depend in $${dir}; \
-		cd $${dir}; ${MAKE} ${MFLAGS} -${MAKEFLAGS} depend); done
-
-lint:		$(PREREQS)
-	@for dir in ${DIRS}; do \
-		(echo Making lint in $${dir}; \
-		cd $${dir}; ${MAKE} ${MFLAGS} -${MAKEFLAGS} lint); done
-
-rebuild:
-	-rm -f $(TOPCLEAN)
-	@for dir in ${DIRS}; do \
-		(echo Making clean in $${dir}; \
-		cd $${dir}; ${MAKE} -f Make clean); done
-	$(MAKE) all
+	$(SH) support/install-sh server/icbd $(BINDIR)
 
 clean:
 	@for dir in ${DIRS}; do \
@@ -81,6 +70,15 @@ clean:
 		cd $${dir}; ${MAKE} clean); done
 	-rm -f $(TOPCLEAN)
 
+splint:		$(PREREQS)
+	@for dir in ${DIRS}; do \
+		(echo Making in $${dir}; \
+		 cd $${dir}; ${MAKE} ${MFLAGS} -${MAKEFLAGS} splint); done
+
+cppcheck:		$(PREREQS)
+	@for dir in ${DIRS}; do \
+		(echo Making in $${dir}; \
+		 cd $${dir}; ${MAKE} ${MFLAGS} -${MAKEFLAGS} cppcheck); done
 distclean:
 	@for dir in ${DIRS}; do \
 		(echo Making clean in $${dir}; \
@@ -97,7 +95,3 @@ dist:	depend clean
 	mv dist/icbd.tar .
 	@COMPRESS@ -v icbd.tar
 	rm -rf dist
-
-
-config:
-# DO NOT DELETE THIS LINE -- makedepend depends on it.

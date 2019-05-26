@@ -25,6 +25,7 @@
 
 
 # set DOITPROG to echo to test this script
+#DOITPROG=echo
 
 # Don't use :- since 4.3BSD and earlier shells don't like it.
 doit="${DOITPROG-}"
@@ -93,11 +94,9 @@ while [ x"$1" != x ]; do
 
 	*)  if [ x"$src" = x ]
 	    then
-		src=$1
+		    src=$1
 	    else
-		# this colon is to work around a 386BSD /bin/sh bug
-		:
-		dst=$1
+		    dst=$1
 	    fi
 	    shift
 	    continue;;
