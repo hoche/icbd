@@ -22,30 +22,11 @@ void filtergroupname(char *txt);
  */
 char *filterfmt (char *newstr, int *n);
 
-/* return 1 if a string is a number */
-/* else return 0 */
-int numeric(char *txt);
-
 /* convert a string to lower case */
 void lcaseit(char *s);
 
 /* convert a string to upper case */
 void ucaseit(char *s);
-
-/* return how many characters in string1 matched string2 */
-int cimatch(char *s1, char *s2);
-
-/* put a string in quotes */
-/* puts backslashes before all special chars appearing in the string */
-/* doesn't interfere with already backslashed chars */
-
-
-void quoteify(char *a, char *b);
-
-
-void catargs(char **argv);
-
-int *wordcmp(char *s1, char *s2);
 
 char *getword(char *s);
 

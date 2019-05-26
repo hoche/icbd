@@ -120,4 +120,4 @@
    listen on all interfaces you have or depend on the -b flag */
 /* #define BIND_HOSTNAME "default.icb.net" */
 
-
+#define ALLOW_UTF8_MESSAGES 1

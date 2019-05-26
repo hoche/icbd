@@ -417,6 +417,8 @@ int loginmsg(int n, char *pkt)
         memset(three, 0, 255);
         sprintf(one, "%s@%s", fields[0], cp);
         ucaseit(one);
+
+        /* Check the deny file */
         access_file = open(ACCESS_FILE, O_RDONLY);
         if (access_file >= 0)
         {

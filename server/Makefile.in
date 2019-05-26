@@ -52,6 +52,7 @@ OBJ = \
 	strutil.o \
 	unix.o \
 	users.o \
+	utf8.o \
 	wildmat.o
 
 all: icbd

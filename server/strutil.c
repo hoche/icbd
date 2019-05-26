@@ -1,11 +1,21 @@
-/* Copyright (c) 1990 by Carrick Sean Casey. */
-/* Modified 1991 by John Atwood deVries II. */
-/* For copying and distribution information, see the file COPYING. */
+/*
+ * Copyright (c) 1990 by Carrick Sean Casey.
+ * Modified 1991 by John Atwood deVries II.
+ * Modified 2019 by Michel Hoche-Mong, stripping out a bunch of archaic
+ *   unused stuff and adding in utf-8 capabilities.
+ *
+ * We allow utf-8 in messages (if enabled), but we still only allow a
+ * subset of characters for nick and group names. The main reason for
+ * this is that we've always been case-insensitive for those.
+ * 
+ */
 
 #include "config.h"
 
 #include <ctype.h>
 #include <stdarg.h>
+
+#include "utf8.h"
 
 #include "server.h"
 #include "externs.h"
@@ -15,8 +25,9 @@ extern char *charmap;
 #define OKGROUPCHARS    "-.!'$+,/?_~"
 #define OKNICKCHARS    "-.!'$+,/?_@"
 
-/* replace illegal characters in a nickname */
 
+/* replace illegal characters in a nickname.
+ */
 void filternickname(char *txt)
 {
     for (; *txt != '\0'; txt++) {
@@ -33,18 +44,37 @@ void filternickname(char *txt)
     }
 }
 
-
-/* replace illegal characters in a regular line of text */
-
-void filtertext(char *s)
+#if ALLOW_UTF8_MESSAGES
+void filtertext(char *text)
 {
+    uint32_t state = UTF8_ACCEPT;
+    size_t len = strlen(text);
+
+    /* still do the old-style scan, prohibiiting things below 0x20.  */
+    char *s = text;
     for (;*s != '\0'; s++)
-        if (!(*s >= ' ' && *s < '\177'))
+        if (*s >= 0x00 && *s < 0x20)
+            *s = '?';
+
+    if (validate_utf8(&state, text, len) == UTF8_REJECT) {
+        snprintf(s, len, "%.*s", (int)len, "?????????????????????????????????????");
+    }
+}
+#else
+/* replace illegal characters in a regular line of text. Assumes
+ * the line is null-terminated.
+ */
+void filtertext(char *text)
+{
+    char *s = text;
+    for (;*s != '\0'; s++)
+        if (!(*s >= 0x20 && *s < 0x7E))
             *s = '?';
 }
+#endif
 
-/* replace illegal characters from a groupname */
-
+/* replace illegal characters in a groupname.
+ */
 void filtergroupname(char *txt)
 {
     for (; *txt != '\0'; txt++) {
@@ -112,20 +142,6 @@ char *filterfmt (char *newstr, int *n)
     return (NULL);
 }
 
-
-/* return 1 if a string is a number */
-/* else return 0 */
-int numeric(char *txt)
-{
-    for (;*txt != '\0'; txt++)
-        if (!(*txt >= '0' && *txt <= '9'))
-            return(0);
-    return(1);
-}
-
-#define UC(x) ((x >= 'a' && x <= 'z') ? x & ~040 : x)
-
-
 /* convert a string to lower case */
 void lcaseit(char *s)
 {
@@ -140,61 +156,6 @@ void ucaseit(char *s)
     for (; *s; s++)
         if (*s >= 'a' && *s <= 'z')
             *s ^= 040;
-}
-
-/* return how many characters in string1 matched string2 */
-int cimatch(char *s1, char *s2)
-{
-    int count = 0;
-
-    for (; *s1 && *s2 && (*s1 == *s2); s1++, s2++)
-        count++;
-    return(count);
-
-}
-
-/* put a string in quotes */
-/* puts backslashes before all special chars appearing in the string */
-/* doesn't interfere with already backslashed chars */
-
-const char *special = "{}[]\";$\\";
-
-void quoteify(char *a, char *b)
-{
-    while (*a != '\0') {
-        if (strchr(special, *a)) {
-            *b++ = '\\';
-            *b++ = *a;
-        } else
-            *b++ = *a;
-        a++;
-    }
-    *b = '\0';
-}
-
-
-void catargs(char **argv)
-{
-    char *s, *p = mbuf;
-
-    while (*argv != NULL) {
-        s = *argv;
-        while (*s) *p++ = *s++;
-        if (*(argv+1) != NULL)
-            *p++ = ' ';
-        argv++;
-    }
-    *p = '\0';
-}
-
-int wordcmp(char *s1, char *s2)
-{
-    while(*s1 == *s2++)
-        if (*s1 == '\0' || *s1 == ' ' || *s1++ == '\t')
-            return(0);
-    if (*s1 == ' ' && *(s2-1) == '\0')
-        return(0);
-    return(*s1 - *--s2);
 }
 
 char *getword(char *s)
@@ -219,8 +180,10 @@ char *get_tail(char *s)
 }
 
 
-/* Read a line containing zero or more colons. Split the string into */
-/* an array of strings, and return the number of fields found. */
+/* Read a line containing zero or more \001's (^A's). Split the
+ * string into an array of strings, and return the number of fields
+ * found.
+ */
 
 char *fields[MAX_FIELDS];
 
