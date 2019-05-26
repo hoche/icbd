@@ -20,6 +20,10 @@ void nlput(NAMLIST *nl, char *name)
 {
     STRLIST *sp;
 
+    if (!nl) {
+        return;
+    }
+
     /* hunt for user within list */
     for (sp = nl->head; sp; sp = sp->next)
         if (!strcasecmp(name, sp->str)) {
@@ -63,7 +67,13 @@ void nlput(NAMLIST *nl, char *name)
 
 char *nlget(NAMLIST *nl)
 {
-    STRLIST *p = nl->p;
+    STRLIST *p;
+
+    if (!nl) {
+        return ""; /* really should return NULL here */
+    }
+
+    p = nl->p;
 
     nl->p = nl->p->next;
     if (nl->p == 0)
@@ -83,20 +93,27 @@ void nlclear(NAMLIST *nl)
 {
     STRLIST *tmp, *p;
 
-    if (nl) {
-        p = nl->p;
-        while (p) {
-            tmp = p->next;
-            free(p);
-            p = tmp;
-        }
+    if (!nl) {
+        return;
     }
+
+    p = nl->p;
+    while (p) {
+        tmp = p->next;
+        free(p);
+        p = tmp;
+    }
+
     nl->num = 0;
     nl->p = nl->head = nl->tail = 0;
 }
 
 void nlinit(NAMLIST *nl, int max)
 {
+    if (!nl) {
+        return;
+    }
+
     nl->num = 0;
     nl->p = nl->head = nl->tail = 0;
     nl->max = max;
@@ -105,21 +122,26 @@ void nlinit(NAMLIST *nl, int max)
 int nldelete(NAMLIST *nl, char *name)
 {
     STRLIST * namep;
-    namep = strgetnode(name, nl->head, 1, 0);
-    if (namep != NULL) {
-        strunlink(namep, &nl->head, &nl->tail);
-        nl->p= nl->head;
-        if (nl->num > 0) {
-            nl->num--;
-            if (nl->num == 0)
-                nl->p = 0; /* just in case */
-        } else {
-            mdb(MSG_ERR, "tried to make nl.num negative");
-        }
-        return 0;
-    } else {
+
+    if (!nl) {
         return -1;
     }
+
+    namep = strgetnode(name, nl->head, 1, 0);
+    if (!namep) {
+        return -1;
+    }
+
+    strunlink(namep, &nl->head, &nl->tail);
+    nl->p= nl->head;
+    if (nl->num > 0) {
+        nl->num--;
+        if (nl->num == 0)
+            nl->p = 0; /* just in case */
+    } else {
+        mdb(MSG_ERR, "tried to make nl.num negative");
+    }
+    return 0;
 }
 
 int nlpresent(char name[], NAMLIST nl)

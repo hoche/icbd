@@ -555,8 +555,8 @@ int list_invites (int n, int gi)
 {
     int i, count, tot_count;
     NAMLIST * ip;
-    char line[75],    /* NOTE: this is MAX_LINE from s_who.c */
-         *cp;
+    char line[75];    /* NOTE: this is MAX_LINE from s_who.c */
+    char *cp;
 
     tot_count = 0;
 
@@ -572,7 +572,9 @@ int list_invites (int n, int gi)
         else
             add_item(n, ", ", line);
         cp = nlget(ip);
-        add_item(n, cp, line);
+        if (cp && *cp) {
+            add_item(n, cp, line);
+        }
     }
     ip = g_tab[gi].nr_invites;
     count = nlcount(*ip);
@@ -584,8 +586,10 @@ int list_invites (int n, int gi)
         else
             add_item(n, ", ", line);
         cp = nlget(ip);
-        sprintf(mbuf, "%s(r)", cp);
-        add_item(n, mbuf, line);
+        if (cp && *cp) {
+            sprintf(mbuf, "%s(r)", cp);
+            add_item(n, mbuf, line);
+        }
     }
     if (strlen(line) > 0)
         sends_cmdout(n, line);
@@ -601,7 +605,9 @@ int list_invites (int n, int gi)
         else
             add_item(n, ", ", line);
         cp = nlget(ip);
-        add_item(n, cp, line);
+        if (cp && *cp) {
+            add_item(n, cp, line);
+        }
     }
     ip = g_tab[gi].sr_invites;
     count = nlcount(*ip);
@@ -613,8 +619,10 @@ int list_invites (int n, int gi)
         else
             add_item(n, ", ", line);
         cp = nlget(ip);
-        sprintf(mbuf, "%s(r)", cp);
-        add_item(n, mbuf, line);
+        if (cp && *cp) {
+            sprintf(mbuf, "%s(r)", cp);
+            add_item(n, mbuf, line);
+        }
     }
     if (strlen(line) > 0)
         sends_cmdout(n, line);
@@ -1188,7 +1196,9 @@ int s_status(int n, int argc)
                 else
                     add_item(n, ", ", line);
                 cp = nlget(ip);
-                add_item(n, cp, line);
+                if (cp && *cp) {
+                    add_item(n, cp, line);
+                }
             }
             ip = g_tab[gi].nr_talk;
             count = nlcount(*ip);
@@ -1199,8 +1209,10 @@ int s_status(int n, int argc)
                 else
                     add_item(n, ", ", line);
                 cp = nlget(ip);
-                sprintf(mbuf, "%s(r)", cp);
-                add_item(n, mbuf, line);
+                if (cp && *cp) {
+                    sprintf(mbuf, "%s(r)", cp);
+                    add_item(n, mbuf, line);
+                }
             }
             if (strlen(line) > 0)
                 sends_cmdout(n, line);
@@ -2129,11 +2141,13 @@ fields[1] is nickname of person to invite
                     for ( i = 0; i < count; i++)
                     {
                         cp = nlget (nl);
-                        if ( talk_delete (cp, gi) > 0
-                             && quiet == 0 )
-                        {
-                            sprintf (mbuf, "%s removed from talk list", cp);
-                            sendstatus (n, "FYI", mbuf);
+                        if (cp && *cp) {
+                            if ( talk_delete (cp, gi) > 0
+                                 && quiet == 0 )
+                            {
+                                sprintf (mbuf, "%s removed from talk list", cp);
+                                sendstatus (n, "FYI", mbuf);
+                            }
                         }
                     }
 
@@ -2142,12 +2156,14 @@ fields[1] is nickname of person to invite
                     for ( i = 0; i < count; i++)
                     {
                         cp = nlget (nl);
-                        if ( talk_delete (cp, gi) > 0
-                             && quiet == 0 )
-                        {
-                            sprintf (mbuf,
-                                     "%s removed from registered talk list", cp);
-                            sendstatus (n, "FYI", mbuf);
+                        if (cp && *cp) {
+                            if ( talk_delete (cp, gi) > 0
+                                 && quiet == 0 )
+                            {
+                                sprintf (mbuf,
+                                         "%s removed from registered talk list", cp);
+                                sendstatus (n, "FYI", mbuf);
+                            }
                         }
                     }
                 }

@@ -458,7 +458,10 @@ icbdb_list_save (const char *category, const char *attribute, NAMLIST *nl)
     vmdb (MSG_DEBUG, "icbdb_list_save (%s, %s)", category, attribute);
     for (index = 0; index < nlcount (*nl); index++)
     {
-        icbdb_list_add (category, attribute, ICBDB_STRING, nlget(nl));
+        char *cp = nlget(nl);
+        if (cp && *cp) {
+            icbdb_list_add (category, attribute, ICBDB_STRING, cp);
+        }
     }
 
     ICBDB_DONE(1);
