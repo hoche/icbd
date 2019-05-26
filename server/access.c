@@ -366,7 +366,7 @@ int nickchinfo(int forWhom, const char *tag, char *data, unsigned int max, const
         memset(newstr, 0, sizeof (newstr));
         strncpy(newstr, data, max);
         data = newstr;
-        sprintf (line, "%s truncated to %d characters", message, max);
+        sprintf (line, "%s truncated to %u characters", message, max);
         senderror(forWhom, line);
     }
 
