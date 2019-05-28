@@ -259,7 +259,7 @@ void user_wline(int to,
                 char *site, 
                 char *name)
 { 
-    snprintf(&packetbuffer[0], MAX_PKT_LEN-1,
+    snprintf(&packetbuffer[1], MAX_PKT_LEN-1,
              "%cwl\001%s\001%s\001%ld\001%ld\001%ld\001%s\001%s\001%s%c",
              ICB_M_CMDOUT, mod, nick, (long)idle, (long)resp, (long)login, user, site, name, 0);
     doSend(-1, to);
