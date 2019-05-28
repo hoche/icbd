@@ -207,8 +207,9 @@ int nickwritemsg(int forWhom, char *user, char *message, DBM *openDb)
     gettime();
     strftime(timebuf, 255, "%e-%h-%Y %H:%M %Z", localtime(&curtime));
     sprintf(line, "Message left at %s:", timebuf);
-    strncpy(msgfilterbuf, message, 4096 - 1);
-    filtertext(msgfilterbuf);
+
+    filtertext(message, msgfilterbuf, 4096 - 1 );
+
     sprintf(key, "header%d", count);
     icbdb_set (user, key, ICBDB_STRING, line);
 
@@ -295,9 +296,7 @@ int nickreadmsg(int forWhom, DBM *openDb)
 
             sprintf(key,"message%d", i);
             if (icbdb_get (nick, key, ICBDB_STRING, &value)) {
-                sprintf(pbuf, "%c%s\001%s", ICB_M_PERSONAL, 
-                        from, value);
-                doSend(-1, forWhom);
+                send_person_stored(forWhom, from, value);
             }
             icbdb_delete (nick, key);
         }

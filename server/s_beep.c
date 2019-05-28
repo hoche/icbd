@@ -42,8 +42,8 @@ int s_beep(int n, int argc)
 
                 if (u_tab[n].echoback == 2) 
                 {
-                    char tbuf[USER_BUF_SIZE-2];
-                    snprintf(tbuf, USER_BUF_SIZE-2, "<*to: %s*> [=Beep=]",
+                    char tbuf[MAX_PKT_DATA];
+                    snprintf(tbuf, MAX_PKT_DATA, "<*to: %s*> [=Beep=]",
                              u_tab[dest].nickname);
                     sends_cmdout(n, tbuf);
                 }

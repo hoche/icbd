@@ -56,7 +56,7 @@ int _readpacket(int user, struct cbuf_t *p)
 
 
         /* set up our packet buffer */
-        if ( (p->rbuf = _alloc_msgbuf(p->rbuf, USER_BUF_SIZE)) == NULL) {
+        if ( (p->rbuf = _alloc_msgbuf(p->rbuf, MAX_PKT_LEN)) == NULL) {
             return -1;
         }
 
@@ -116,11 +116,11 @@ int _readpacket(int user, struct cbuf_t *p)
          * but it's possible. the -1 is for the null we want to
          * tack on at the end.
          */
-        if ( p->rbuf->len > (USER_BUF_SIZE-1) )
+        if ( p->rbuf->len > (MAX_PKT_LEN-1) )
         {
             vmdb(MSG_ERR, 
                  "fd#%d: sent oversized packet (%d>%d); terminating connection...",
-                 user, (size_t)(p->rbuf->len), (USER_BUF_SIZE-1));
+                 user, (size_t)(p->rbuf->len), (MAX_PKT_LEN-1));
             /*
              * note: this pops up to sdoinput() which calls
              * disconnect() when we return -2. it's a bit

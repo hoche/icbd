@@ -14,8 +14,23 @@
                             * block until there's activity.
                             */
 
-#define USER_BUF_SIZE	257    /* max msg size + length byte + 1 (for null) */
-#define	MSG_BUF_SIZE	BUFSIZ	/* for general purpose message buffer */
+/* Our packets are in the following format:
+ * <unsigned length byte><cmd byte><data><NULL>
+ *
+ * The length does not include the length byte itself but does
+ * include the trailing NULL.
+ *
+ * Thus, the maximum we *ever* send is 256 bytes; the length byte
+ * plus 255 bytes of packet contents.
+ */
+#define MAX_PKT_LEN 256
+
+/* This is the maximum data in a packet, not including the length
+ * byte or the command byte, but including the trailing NULL.
+ */
+#define MAX_PKT_DATA (MAX_PKT_LEN - 2)
+
+#define	MSG_BUF_SIZE	BUFSIZ	/* general purpose buffer for logging */
 #define WARN		1
 #define FATAL		2
 
@@ -120,4 +135,10 @@
    listen on all interfaces you have or depend on the -b flag */
 /* #define BIND_HOSTNAME "default.icb.net" */
 
+/* Allow messages to be UTF-8 ones instead of having the server substitute
+ * "?" for any character that's not in the 127-bit ascii range.
+ *
+ * Nicks and groupnames still are restricted to a limited subset of the
+ * 127-bit ascii characters.
+ */
 #define ALLOW_UTF8_MESSAGES 1

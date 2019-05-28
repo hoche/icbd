@@ -19,6 +19,7 @@
 #include "send.h"
 
 /* basic dispatch routine */
+extern char packetbuffer[];
 
 int s_auto(int n, int f)
 {
@@ -28,7 +29,7 @@ int s_auto(int n, int f)
     char p1[256];
 
     if (f > 0)
-        split(pp);
+        split(packetbuffer);
 
     cp = getword(fields[f]);
 

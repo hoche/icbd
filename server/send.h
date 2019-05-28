@@ -1,5 +1,11 @@
 #pragma once
 
+/* send an error message to the client */
+void senderror(int to, const char *error_string);
+
+/* send personal message to a client */
+void sendperson(int from, int to, const char *message_string);
+
 /* send normal open group message to the client */
 void sendopen(int from, int to, const char *txt);
 
@@ -8,9 +14,6 @@ void sendexit(int to);
 
 /* send a ping */
 void sendping(int to, const char *who);
-
-/* send an error message to the client */
-void senderror(int to, const char *error_string);
 
 /* send a status message to the client */
 void sendstatus(int to, const char *class_string, const char *message_string);
@@ -21,8 +24,11 @@ void send_cmdend(int to, const char *output_string);
 /* send simple command output message to the client */
 void sends_cmdout(int to, const char *output_string);
 
-/* send personal message to a client */
-void sendperson(int from, int to, const char *message_string);
+/* send a personal message to a user, using a custom nick. This is
+ * mostly used for relaying stored messages from users who aren't
+ * logged on at the moment.
+ */
+void send_person_stored(int to, const char* fromNick, const char *output_string);
 
 /* send beep message to a client */
 void sendbeep(int from, int to);

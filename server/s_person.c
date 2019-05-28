@@ -25,7 +25,7 @@
 int s_personal(int n, int argc)
 {
     int dest;
-    char tbuf[USER_BUF_SIZE-2];
+    char tbuf[MAX_PKT_DATA];
 
     if (argc != 2)
     {
@@ -59,7 +59,7 @@ int s_personal(int n, int argc)
 
         if (u_tab[n].echoback == 2) 
         {
-            snprintf(tbuf, USER_BUF_SIZE - 2, "<*to: %s*> %s", 
+            snprintf(tbuf, MAX_PKT_DATA, "<*to: %s*> %s", 
                      u_tab[dest].nickname,
                      (args == (char *)NULL) ? "" : args);
 
@@ -104,18 +104,18 @@ void away_handle (int src, int dest)
             u_tab[dest].lastaway = src;
             u_tab[dest].lastawaytime = time(NULL);
             /* sendperson(dest, src, u_tab[dest].awaymsg); */
-            snprintf (mbuf, USER_BUF_SIZE - 2, u_tab[dest].awaymsg,
+            snprintf(mbuf, MAX_PKT_DATA, u_tab[dest].awaymsg,
                       u_tab[dest].nickname);
             sendstatus(src, "Away", mbuf);
             if (u_tab[dest].echoback == 2) 
             {
                 struct tm *t;
-                char tbuf[USER_BUF_SIZE-2];
+                char tbuf[MAX_PKT_DATA];
 
                 gettime ();
                 t = localtime (&curtime);
 
-                snprintf(tbuf, USER_BUF_SIZE-2, "<*to: %s*> [=@%d:%02d%s=] %s", 
+                snprintf(tbuf, MAX_PKT_DATA, "<*to: %s*> [=@%d:%02d%s=] %s", 
                          u_tab[src].nickname,
                          (t->tm_hour > 12) ? (t->tm_hour - 12) :
                          (t->tm_hour == 0) ? 12 : t->tm_hour,
@@ -123,7 +123,7 @@ void away_handle (int src, int dest)
                          t->tm_hour > 11 ? "pm" : "am",
                          u_tab[dest].awaymsg);
 
-                snprintf (mbuf, USER_BUF_SIZE - 2, tbuf, u_tab[dest].nickname);
+                snprintf(mbuf, MAX_PKT_DATA, tbuf, u_tab[dest].nickname);
                 sends_cmdout(dest, mbuf);
             }
         }

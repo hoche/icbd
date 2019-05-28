@@ -8,7 +8,7 @@
 void filternickname(char *txt);
 
 /* replace illegal characters in a regular line of text */
-void filtertext(char *s);
+void filtertext(const char *src, char *dest, size_t len);
 
 /* replace illegal characters from a groupname */
 void filtergroupname(char *txt);

@@ -25,7 +25,6 @@ extern char *fields[MAX_FIELDS];	/* split fields */
 	
 /* defined in globals.c */
 extern char *pp;		/* packet pointer */
-extern char *pbuf;		/* packet buffer pointer */
 extern char thishost[MAXHOSTNAMELEN+1];	/* our hostname */
 extern char *mbuf;
 extern time_t curtime;		/* current time */

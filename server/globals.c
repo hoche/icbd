@@ -24,14 +24,11 @@ GROUP_ITEM g_tab[MAX_GROUPS]; /* only one group for now */
 
 /* non-global definitions */
 char messagebuffer[MSG_BUF_SIZE];		/* generic large buffer */
-char packetbuffer[USER_BUF_SIZE];		/* packet buffer */
 
 /* global defs */
 long TimeToDie = -1.0;
 int ShutdownNotify = 0;
 int restart = 0;
-char *pp = packetbuffer;	/* packet pointer */
-char *pbuf = &packetbuffer[1];	/* packet buffer pointer */
 char *mbuf = messagebuffer;	/* message buffer */
 char thishost[MAXHOSTNAMELEN+1];/* our hostname */
 time_t curtime;			/* current time */

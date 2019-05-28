@@ -6,8 +6,8 @@
  *
  * We allow utf-8 in messages (if enabled), but we still only allow a
  * subset of characters for nick and group names. The main reason for
- * this is that we've always been case-insensitive for those.
- * 
+ * this is that we've always been case-insensitive for those (and
+ * elsewhere we do a bunch of case-insensitive comparisons).
  */
 
 #include "config.h"
@@ -45,31 +45,88 @@ void filternickname(char *txt)
 }
 
 #if ALLOW_UTF8_MESSAGES
-void filtertext(char *text)
+/* Filters things to len chars.
+ * Anything longer get truncated.
+ * if you have a multibyte char that would go beyond that, it gets stripped
+ * out and the string is truncated prior to that byte.
+ * Added by hoche, 5/28/19
+ */
+void filtertext(const char *src, char *dest, size_t len)
 {
-    uint32_t state = UTF8_ACCEPT;
-    size_t len = strlen(text);
+    uint32_t codepoint;
+    uint32_t prevState = UTF8_ACCEPT;
+    uint32_t curState = UTF8_ACCEPT;
+    int offset = 0;
+    const char *s = src;
 
-    /* still do the old-style scan, prohibiiting things below 0x20.  */
-    char *s = text;
-    for (;*s != '\0'; s++)
-        if (*s >= 0x00 && *s < 0x20)
-            *s = '?';
+    //printCodePoints(src);
 
-    if (validate_utf8(&state, text, len) == UTF8_REJECT) {
-        snprintf(s, len, "%.*s", (int)len, "?????????????????????????????????????");
+    memset(dest, 0, len);
+
+    for (prevState = curState = UTF8_ACCEPT; *s; prevState = curState, ++s) {
+
+        // check to see if there's enough room remaining
+        if ((s - src) >= len) {
+            break;
+        }
+
+        // now check the next char
+        switch (decode(&curState, &codepoint, *s)) {
+            case UTF8_ACCEPT:
+                // A properly encoded character has been found.
+                //printf("===> U+%04X\n", codepoint);
+                if (codepoint >= 0x20 && codepoint <= 0x7F) {
+                    // reg'lar old ascii
+                    dest[offset++] = *s;
+                } else if (codepoint >= 0x80 && codepoint <= 0x7FF) {
+                    dest[offset++] = *(s-1);
+                    dest[offset++] = *s;
+                } else if (codepoint >= 0x800 && codepoint <= 0xFFFF) {
+                    dest[offset++] = *(s-2);
+                    dest[offset++] = *(s-1);
+                    dest[offset++] = *s;
+                } else if (codepoint >= 0x10000 && codepoint <= 0x10FFFF) {
+                    dest[offset++] = *(s-3);
+                    dest[offset++] = *(s-2);
+                    dest[offset++] = *(s-1);
+                    dest[offset++] = *s;
+                }
+                break;
+
+            case UTF8_REJECT:
+                // The byte is invalid, replace it and restart as if
+                // it were the start of a new string.
+                //printf("===> U+FFFD (Bad UTF-8 sequence)\n");
+                dest[offset++] = '?';
+                curState = UTF8_ACCEPT;
+                if (prevState != UTF8_ACCEPT) {
+                    s--;
+                }
+                break;
+
+            default:
+                ;
+        }
     }
+
+    //printf("-------\n");
+    //printCodePoints(dest);
+    //printf("-------\n");
 }
 #else
 /* replace illegal characters in a regular line of text. Assumes
  * the line is null-terminated.
  */
-void filtertext(char *text)
+void filtertext(const char *s, char *dest, size_t len)
 {
-    char *s = text;
-    for (;*s != '\0'; s++)
-        if (!(*s >= 0x20 && *s < 0x7E))
+    for (;*s != '\0'; s++) {
+        if (!(*s >= 0x20 && *s < 0x7E)) {
             *s = '?';
+        }
+    }
+
+    strncpy(dest, s, len);
+    dest[len] = '\0';
 }
 #endif
 
