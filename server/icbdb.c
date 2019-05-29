@@ -23,7 +23,6 @@
 
 static DBM    *db = NULL;
 static char    databuf[DBLKSIZ];
-static int     intbuf;
 
 static int    open_count = 0;
 
@@ -144,8 +143,7 @@ icbdb_get (const char *category, const char *attribute, icbdb_type type,
                     break;
 
                 case ICBDB_INT:
-                    intbuf = atoi(databuf);
-                    *(int*)value = intbuf;
+                    *(int*)value = atoi(databuf);
                     break;
             }
         }
