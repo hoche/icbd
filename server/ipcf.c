@@ -323,8 +323,7 @@ int s_lost_user(int n)         /* n = fd of that user */
     char t_grp[MAX_GROUPLEN+1];
     char t_name[MAX_NICKLEN+1];
     char t_fid[512];
-    int how_many;
-    int len, i, j;
+    int i, j;
     char one[255], two[255], three[255];
     int  newmod, was_registered, is_killed;
     long TheTime;
@@ -363,16 +362,12 @@ int s_lost_user(int n)         /* n = fd of that user */
 #ifdef MAX_IDLE
     UserTime = u_tab[n].t_recv;
 #endif
-    len = strlen(u_tab[n].group);
-    how_many = (MAX_GROUPLEN > len) ? len:MAX_GROUPLEN;
-    memset(t_grp, 0, MAX_GROUPLEN+1);
-    strncpy(t_grp,u_tab[n].group, how_many);
 
-    len = strlen(u_tab[n].nickname);
-    how_many = (MAX_NICKLEN > len) ? len:MAX_NICKLEN;
+    memset(t_grp, 0, MAX_GROUPLEN+1);
+    strncpy(t_grp, u_tab[n].group, MAX_GROUPLEN);
 
     memset(t_name, 0, MAX_NICKLEN+1);
-    strncpy(t_name,u_tab[n].nickname, how_many);
+    strncpy(t_name, u_tab[n].nickname, MAX_NICKLEN);
 
     sprintf(t_fid,"%s (%s@%s)", u_tab[n].nickname, u_tab[n].loginid,
             u_tab[n].nodeid);
@@ -390,7 +385,11 @@ int s_lost_user(int n)         /* n = fd of that user */
                  nlmatch(one, *u_tab[j].s_notifies)) &&
                 (g_tab[find_group(u_tab[n].group)].visibility != 
                  SUPERSECRET)) {
-                sprintf (two, "%s (%s) has just signed off", 
+                /* ignore warning about 'one' being possibly truncated
+                 * when copying into 'two'.
+                 */
+                #pragma GCC diagnostic ignored "-Wformat-truncation"
+                snprintf (two, 255, "%s (%s) has just signed off", 
                          u_tab[n].nickname, one);
                 sendstatus(j, "Notify-Off", two);
             }
