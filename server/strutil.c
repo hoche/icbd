@@ -59,6 +59,7 @@ void filtertext(const char *src, char *dest, size_t len)
     int offset = 0;
     const char *s = src;
 
+    // DEBUG ONLY
     //printCodePoints(src);
 
     memset(dest, 0, len);
@@ -96,7 +97,13 @@ void filtertext(const char *src, char *dest, size_t len)
             case UTF8_REJECT:
                 // The byte is invalid, replace it and restart as if
                 // it were the start of a new string.
+
                 //printf("===> U+FFFD (Bad UTF-8 sequence)\n");
+
+                // Note: the UTF-8 standard recommends replacing each
+                // full error codepoint with U+FFFD, but instead we 
+                // replace each error byte with '?'. We do this for backwards
+                // compatibility with old icb clients.
                 dest[offset++] = '?';
                 curState = UTF8_ACCEPT;
                 if (prevState != UTF8_ACCEPT) {
@@ -108,10 +115,6 @@ void filtertext(const char *src, char *dest, size_t len)
                 ;
         }
     }
-
-    //printf("-------\n");
-    //printCodePoints(dest);
-    //printf("-------\n");
 }
 #else
 /* replace illegal characters in a regular line of text. Assumes

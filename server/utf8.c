@@ -43,6 +43,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "mdb.h"
+
 #include "utf8.h"
 
 static const uint8_t utf8d[] = {
@@ -108,11 +110,16 @@ printCodePoints(uint8_t* s) {
     uint32_t codepoint;
     uint32_t state = 0;
 
-    for (; *s; ++s)
-        if (!decode(&state, &codepoint, *s))
-            printf("U+%04X\n", codepoint);
+    for (; *s; ++s) {
+        if (!decode(&state, &codepoint, *s)) {
+            vmdb(MSG_DEBUG, "U+%04X\n", codepoint);
+            //printf("U+%04X\n", codepoint);
+        }
+    }
 
-    if (state != UTF8_ACCEPT)
-        printf("The string is not well-formed\n");
+    if (state != UTF8_ACCEPT) {
+        vmdb(MSG_DEBUG, "The string is not well-formed\n");
+        //printf("The string is not well-formed\n");
+    }
 
 }
