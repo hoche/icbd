@@ -1044,8 +1044,6 @@ int set_name(int n, int group, char *name)
 {
     char * cp;
     int i;
-    int len;
-    int how_many;
     char n_g_n[MAX_GROUPLEN + 1];
 
     /* make sure they gave us a name to change to */
@@ -1054,11 +1052,8 @@ int set_name(int n, int group, char *name)
         return -1;
     }
 
-    /* use only as much as needed */
-    len = strlen(name);
-    how_many = (MAX_GROUPLEN > len) ? len:MAX_GROUPLEN;
     memset(n_g_n, 0, MAX_GROUPLEN + 1);
-    strncpy(n_g_n, name, how_many);
+    strncpy(n_g_n, name, MAX_GROUPLEN);
 
     if (!strcmp(n_g_n, "1")) {
         senderror (n, "Cannot change name to group 1.");
