@@ -163,7 +163,7 @@ int nickdelete(int forWhom, char *password, DBM *openDb)
 int nickwritemsg(int forWhom, char *user, char *message, DBM *openDb)
 {
     char           key[80];
-    char           line[255], timebuf[255], msgfilterbuf[4096];
+    char           line[255], timebuf[128], msgfilterbuf[4096];
     int            count, i;
     char           *value;
 
@@ -205,8 +205,8 @@ int nickwritemsg(int forWhom, char *user, char *message, DBM *openDb)
     }
 
     gettime();
-    strftime(timebuf, 255, "%e-%h-%Y %H:%M %Z", localtime(&curtime));
-    sprintf(line, "Message left at %s:", timebuf);
+    strftime(timebuf, 128, "%e-%h-%Y %H:%M %Z", localtime(&curtime));
+    snprintf(line, 255, "Message left at %s:", timebuf);
 
     filtertext(message, msgfilterbuf, 4096 - 1 );
 
@@ -288,10 +288,12 @@ int nickreadmsg(int forWhom, DBM *openDb)
             icbdb_delete (nick, key);
 
             sprintf(key,"from%d", i);
-            if (icbdb_get (nick, key, ICBDB_STRING, &value))
-                strncpy(from, value, sizeof (from));
-            else
+            if (icbdb_get (nick, key, ICBDB_STRING, &value)) {
+                strncpy(from, value, MAX_NICKLEN);
+                from[MAX_NICKLEN] = '\0';
+            } else {
                 strcpy(from, "Server");
+            }
             icbdb_delete (nick, key);
 
             sprintf(key,"message%d", i);
@@ -544,7 +546,7 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
 {
     char           line[255];
     char           temp[255];
-    char           nickstr[255];
+    char           nickstr[MAX_NICKLEN+1];
     char           *value;
     int            retval;
     int            count = 0;
@@ -568,7 +570,7 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
 
     if (icbdb_get (theNick, "nick", ICBDB_STRING, &value))
     {
-        strncpy(nickstr, value, sizeof (nickstr));
+        strncpy(nickstr, value, MAX_NICKLEN);
     }
 
     if (icbdb_get (theNick, "home", ICBDB_STRING, &value))
@@ -577,7 +579,7 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
         if (forWhom >= 0)
         {
             memset(line, 0, sizeof (line));
-            sprintf(line, "Nickname:     %s", nickstr);
+            snprintf(line, 255, "Nickname:     %s", nickstr);
             while (strlen(line) < 36)
                 strcat(line, " ");
             strcat(line, "Address:   ");
@@ -634,7 +636,7 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
 
             if (icbdb_get (theNick, "addr", ICBDB_STRING, &value))
             {
-                strncpy(line, value, sizeof (line));
+                strncpy(line, value, sizeof(line)-1);
                 sends_cmdout(forWhom, "Street Address:");
                 s = line;
                 strcpy(temp, "  ");
@@ -655,7 +657,7 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
 
             if (icbdb_get (theNick, "text", ICBDB_STRING, &value))
             {
-                strncpy(line, value, sizeof (line));
+                strncpy(line, value, sizeof(line)-1);
                 s = line;
                 /* traverse s and try to break on a word */
                 p = s;
