@@ -81,7 +81,7 @@ static const uint8_t utf8d[] = {
  * examples below for more information on usage and error handling, and the
  * section on implementation details for how the decoder is constructed.
  */
-uint32_t inline
+uint32_t
 decode(uint32_t* state, uint32_t* codep, uint8_t byte) {
     uint32_t type = utf8d[byte];
 
