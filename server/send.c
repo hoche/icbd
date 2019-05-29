@@ -44,7 +44,7 @@ void sendperson(int from, int to, const char *message)
 {
 
     char nickbuf[MAX_NICKLEN+1];
-    char msgbuf[MAX_PKT_DATA];
+    char msgbuf[MAX_PKT_DATA-MAX_NICKLEN-1];
 
     filtertext(u_tab[from].nickname, nickbuf, MAX_NICKLEN+1);
     filtertext(message, msgbuf, MAX_PKT_DATA-MAX_NICKLEN-1);
@@ -72,7 +72,7 @@ void sendperson(int from, int to, const char *message)
 void sendopen(int from, int to, const char *message)
 {
     char nickbuf[MAX_NICKLEN+1];
-    char msgbuf[MAX_PKT_DATA];
+    char msgbuf[MAX_PKT_DATA-MAX_NICKLEN-1];
 
     filtertext(u_tab[from].nickname, nickbuf, MAX_NICKLEN+1);
     filtertext(message, msgbuf, MAX_PKT_DATA-MAX_NICKLEN-1);
@@ -105,7 +105,7 @@ void sendstatus(int to, const char *status, const char *message)
 {
 #define MAX_STATUS_LEN 20
     char statusbuf[MAX_STATUS_LEN+1];
-    char msgbuf[MAX_PKT_DATA];
+    char msgbuf[MAX_PKT_DATA-MAX_STATUS_LEN-1];
 
     filtertext(status, statusbuf, MAX_STATUS_LEN+1);
     filtertext(message, msgbuf, MAX_PKT_DATA-MAX_STATUS_LEN-1);
@@ -118,7 +118,7 @@ void sendstatus(int to, const char *status, const char *message)
 /* send "end of command" to the client */
 void send_cmdend(int to, const char *message)
 {
-    char msgbuf[MAX_PKT_DATA];
+    char msgbuf[MAX_PKT_DATA-4];
 
     filtertext(message, msgbuf, MAX_PKT_DATA-4);
     snprintf(&packetbuffer[1], MAX_PKT_LEN-1, "%c%s\001\001%s", 
@@ -129,7 +129,7 @@ void send_cmdend(int to, const char *message)
 /* send simple command output message to the client */
 void sends_cmdout(int to, const char *message)
 {
-    char msgbuf[MAX_PKT_DATA];
+    char msgbuf[MAX_PKT_DATA-3];
 
     filtertext(message, msgbuf, MAX_PKT_DATA-3);
     snprintf(&packetbuffer[1], MAX_PKT_LEN-1, "%c%s\001%s", 
@@ -144,7 +144,7 @@ void sends_cmdout(int to, const char *message)
 void send_person_stored(int to, const char* fromNick, const char *message)
 {
     char nickbuf[MAX_NICKLEN+1];
-    char msgbuf[MAX_PKT_DATA];
+    char msgbuf[MAX_PKT_DATA-MAX_NICKLEN-1];
 
     filtertext(fromNick, nickbuf, MAX_NICKLEN+1);
     filtertext(message, msgbuf, MAX_PKT_DATA-MAX_NICKLEN-1);
@@ -231,7 +231,7 @@ void sendimport(int to, const char *status, const char *message)
 {
 #define MAX_STATUS_LEN 20
     char statusbuf[MAX_STATUS_LEN+1];
-    char msgbuf[MAX_PKT_DATA];
+    char msgbuf[MAX_PKT_DATA-MAX_STATUS_LEN-1];
 
     filtertext(status, statusbuf, MAX_STATUS_LEN+1);
     filtertext(message, msgbuf, MAX_PKT_DATA-MAX_STATUS_LEN-1);
