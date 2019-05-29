@@ -684,7 +684,11 @@ int loginmsg(int n, char *pkt)
                     (g_tab[find_group(u_tab[n].group)].visibility !=
                      SUPERSECRET))
                 {
-                    sprintf (two, "%s (%s) has just signed on",
+                    /* ignore gripe that 'one' may be truncated when copying
+                     * to 'three'.
+                     */
+                    #pragma GCC diagnostic ignored "-Wformat-truncation"
+                    snprintf(two, 255, "%s (%s) has just signed on",
                              u_tab[n].nickname, one);
                     sendstatus(j, "Notify-On", two);
                 }
