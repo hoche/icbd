@@ -1,0 +1,29 @@
+# For linux systems with systemd.
+#
+# Usually you put this in /etc/systemd/system
+# 
+# Start the icbd with "systemctl start icbd"
+# Stop the icbd with "systemctl stop icbd"
+#
+# Enable it at startup with "systemctl enable icbd"
+# Disable it at startup with "systemctl disable icbd"
+#
+#
+[Unit]
+Description=ICB is an archaic text-only chat system
+Documentation=http://www.icb.net/
+After=network-online.target
+
+[Service]
+User=nobody
+Group=nobody
+LimitNOFILE=65536
+WorkingDirectory=/usr/local/lib/icbd
+ExecStart=/usr/local/bin/icbd
+KillMode=control-group
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+Alias=icbd.service
+

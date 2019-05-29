@@ -1,9 +1,13 @@
 #!/bin/sh
 
 ###
-## @(#) icbdstart		falcon@icb.net
+## @(#) icbd.sh
 ##
 ## start up icbd. typically run from system startup rc scripts as root
+## 
+## Originally written for sunos, then freebsd.
+##
+## For linux with systemd, use the icbd.server script
 ###
 
 ###
@@ -25,11 +29,36 @@ USER="nobody"
 DIR="/usr/local/lib/icbd"
 ARGS=""
 
-#
-# start up icbd
-#
-if [ -x "$DIR/icbd" ]
-then
-    echo -n " icbd"
-    su $USER -c "(unlimit descriptors; cd $DIR; ./icbd $ARGS)"
-fi
+
+NAME="icbd"
+PROG="/usr/local/bin/icbd"
+PIDFILE="${DIR}/icbd.pid"
+
+
+CMD=${1:-start}
+
+case ${CMD} in
+start)
+    if [ -x ${PROG} ]; then
+        if [ -x "${DIR}/icbd" ]
+            echo "Starting ${NAME}."
+            su ${USER} -c "(unlimit descriptors; cd ${DIR}; ${PROG} ${ARGS})"
+        fi
+    fi
+    ;;
+stop)
+    if [ -x ${PROG} -a -f ${PIDFILE} ]; then
+        echo "Stopping ${NAME}."
+        kill `cat ${PIDFILE}`
+    fi
+    ;;
+restart)
+    ( $0 stop )
+    sleep 5
+    $0 start
+    ;;
+*)
+    echo "usage: $0 start|stop|restart"
+esac
+exit 0
+
