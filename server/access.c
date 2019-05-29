@@ -219,7 +219,7 @@ int nickwritemsg(int forWhom, char *user, char *message, DBM *openDb)
     sprintf(key, "message%d", count);
     icbdb_set (user, key, ICBDB_STRING, msgfilterbuf);
 
-    icbdb_set (user, "nummsg", ICBDB_INT, (void *) count);
+    icbdb_set (user, "nummsg", ICBDB_INT, &count);
 
     sendstatus(forWhom, "Message", "Text saved to file");
     if ((i = find_user(user)) > 0) {
@@ -246,8 +246,8 @@ int nickckmsg(int forWhom, DBM *openDb)
     nick = u_tab[forWhom].nickname;
 
     if (!icbdb_get (nick, "nummsg", ICBDB_INT, &retval)) {
-        icbdb_set (nick, "nummsg", ICBDB_INT, 0);
         retval = 0;
+        icbdb_set (nick, "nummsg", ICBDB_INT, &retval);
     }
 
     return(retval);
@@ -269,16 +269,16 @@ int nickreadmsg(int forWhom, DBM *openDb)
 
     icbdb_open ();
 
-    if (!icbdb_get (nick, "nummsg", ICBDB_INT, &count)) {
-        icbdb_set (nick, "nummsg", ICBDB_INT, 0);
+    if (!icbdb_get (nick, "nummsg", ICBDB_INT, &count))
+    {
         senderror(forWhom, "No messages");
     }
-    else 
+    else
     {
-        icbdb_set (nick, "nummsg", ICBDB_INT, 0);
-
         if (count == 0)
+        {
             senderror(forWhom, "No messages");
+        }
         else for (i = 1; i <= count; i++) 
         {
             sprintf(key, "header%d", i);
@@ -301,6 +301,9 @@ int nickreadmsg(int forWhom, DBM *openDb)
             icbdb_delete (nick, key);
         }
     }
+
+    count = 0;
+    icbdb_set (nick, "nummsg", ICBDB_INT, &count);
 
     icbdb_close ();
     return 0;

@@ -23,6 +23,7 @@
 
 static DBM    *db = NULL;
 static char    databuf[DBLKSIZ];
+static int     intbuf;
 
 static int    open_count = 0;
 
@@ -106,6 +107,9 @@ icbdb_make_key (const char *category, const char *attribute, datum *key)
     key->dsize = strlen (keybuf);
 }
 
+/* Note: this returns pointers to internal static buffers.
+ * Use with caution.
+ */
 int
 icbdb_get (const char *category, const char *attribute, icbdb_type type,
            void *value)
@@ -128,18 +132,22 @@ icbdb_get (const char *category, const char *attribute, icbdb_type type,
     {
         vmdb (MSG_DEBUG, "icbdb_get: %s.%s: '%.*s'", category, attribute,
               data.dsize, data.dptr);
-        bcopy (data.dptr, databuf, data.dsize);
-        databuf[data.dsize] = '\0';
 
-        switch (type)
-        {
-            case ICBDB_STRING:
-                if (value != NULL) *((char **) value) = databuf;
-                break;
+        if (value != NULL) {
+            bcopy (data.dptr, databuf, data.dsize);
+            databuf[data.dsize] = '\0';
 
-            case ICBDB_INT:
-                if (value != NULL) *((int *) value) = atoi (databuf);
-                break;
+            switch (type)
+            {
+                case ICBDB_STRING:
+                    *((char**) value) = databuf;
+                    break;
+
+                case ICBDB_INT:
+                    intbuf = atoi(databuf);
+                    *(int*)value = intbuf;
+                    break;
+            }
         }
 
         result = 1;
@@ -163,11 +171,11 @@ icbdb_set (const char *category, const char *attribute, icbdb_type type,
     switch (type)
     {
         case ICBDB_STRING:
-            data.dptr = (char *) value;
+            data.dptr = (char *)value;
             break;
 
         case ICBDB_INT:
-            snprintf (databuf, sizeof (databuf), "%d", (int) value);
+            snprintf (databuf, sizeof (databuf), "%d", *(int*)value);
             data.dptr = databuf;
             break;
     }
@@ -305,8 +313,8 @@ icbdb_list_find (const char *category, const char *attribute, icbdb_type type, v
                                                    type, &compare);
 
                     vmdb (MSG_DEBUG, "icbdb_list_find: comparing %d with %d",
-                          compare, (int) value);
-                    if (!empty && compare == (int) value)
+                          compare, *(int*)value);
+                    if (!empty && compare == *(int*)value)
                     {
                         found = 1;
                     }
@@ -375,7 +383,7 @@ icbdb_list_add (const char *category, const char *attribute, icbdb_type type, vo
     if (first_empty > max_index)
     {
         icbdb_list_set_index (category, attribute, ICBDB_LIST_INDEX_MAX,
-                              ICBDB_INT, (void *) first_empty);
+                              ICBDB_INT, (void *)&first_empty);
     }
 
     ICBDB_DONE(1);
@@ -414,7 +422,7 @@ icbdb_list_delete (const char *category, const char *attribute, icbdb_type type,
         {
             vmdb (MSG_DEBUG, "icbdb_list_delete: setting max to %d", last_valid);
             icbdb_list_set_index (category, attribute, ICBDB_LIST_INDEX_MAX,
-                                  ICBDB_INT, (void *) last_valid);
+                                  ICBDB_INT, (void *)&last_valid);
         }
     }
 
