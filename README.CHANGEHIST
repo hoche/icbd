@@ -1,3 +1,12 @@
+______________________________________________________________________________
+As of 1.2d, this file is out of date and is only saved here for historical
+reasons.
+
+-hoche
+hoche@grok.com
+______________________________________________________________________________
+
+
 This file documents all (known) changes made. The majority of the
 changes logged herein are by me, simply because it wasn't under
 CVS control during that time.  Some very old change information is
@@ -8,7 +17,7 @@ in the CVS tree.
 --jon r. luini (jon@luini.com)
 
 ______________________________________________________________________________
-Version 1.2c (still unreleased)
+Version 1.2c
 ______________________________________________________________________________
 
 * Tom Spindler spent some time reviewing the code and submitted a variety

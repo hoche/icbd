@@ -10,7 +10,7 @@ DATADIR      = @datadir@
 LIBDIR       = @top_srcdir@
 
 CC           = @CC@
-CFLAGS       = @CFLAGS@
+CFLAGS       = @CFLAGS@ -fPIC
 CPPFLAGS     = @CPPFLAGS@ @SSL_H_DIR@ -I@srcdir@ -I@top_srcdir@
 
 MAKEDEPEND   = @MAKEDEPEND@
