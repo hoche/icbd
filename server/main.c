@@ -38,8 +38,17 @@
 
 #include "murgil/murgil.h"
 #include "murgil/globals.h"
+
 #ifdef HAVE_SSL
-#include "murgil/sslconf.h"
+#    include <openssl/crypto.h>
+#    include <openssl/x509.h>
+#    include <openssl/pem.h>
+#    include <openssl/ssl.h>
+#    include <openssl/err.h>
+#if (SSLEAY_VERSION_NUMBER >= 0x0907000L)
+#    include <openssl/conf.h>
+#endif
+#    include "murgil/sslconf.h"
 #endif
 
 void trapsignals(void)
@@ -55,6 +64,22 @@ void trapsignals(void)
     signal(SIGUSR1, icbdump);
     signal(SIGUSR2, icbload);
 }
+
+#ifdef HAVE_SSL
+int init_openssl_library(void)
+{
+    #if OPENSSL_VERSION_NUMBER < 0x10100000L
+    SSL_library_init();
+    #else
+    OPENSSL_init_ssl(0, NULL);
+    #endif
+
+    SSL_load_error_strings();
+    /* OPENSSL_config(NULL); */
+
+    return(1);
+}
+#endif
 
 int main(int argc, char* argv[])
 {
@@ -163,6 +188,7 @@ int main(int argc, char* argv[])
     forkflag++;
 #ifdef HAVE_SSL
 #warning "ssl is on"
+    init_openssl_library();
     sslport = DEFAULT_SSLPORT;
 #endif
 #warning "log level is set to 5"
