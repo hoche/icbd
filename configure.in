@@ -158,11 +158,26 @@ AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(gethostname gettimeofday select socket strdup strerror)
 AC_CHECK_FUNCS(snprintf)
 
-if test x"$ssl" != x"no" ; then
-	ICB_AC_PATH_SSL
-	if test x"$no_ssl" = x ; then
-		AC_DEFINE_UNQUOTED([HAVE_SSL], 1, [Define to 1 if you want to use SSL.])
-	fi
+dnl Locate SSL libs.
+if test x"$ssl" = x"yes" ; then
+  dnl Order matters!
+  if test "$PORTNAME" != "win32"; then
+     AC_CHECK_LIB(crypto, CRYPTO_new_ex_data, [], [AC_MSG_ERROR([library 'crypto' is required for OpenSSL])])
+     FOUND_SSL_LIB="no"
+     AC_CHECK_LIB(ssl, OPENSSL_init_ssl, [FOUND_SSL_LIB="yes"])
+     AC_CHECK_LIB(ssl, SSL_library_init, [FOUND_SSL_LIB="yes"])
+     AS_IF([test "x$FOUND_SSL_LIB" = xno], [AC_MSG_ERROR([library 'ssl' is required for OpenSSL])])
+  else
+     AC_SEARCH_LIBS(CRYPTO_new_ex_data, eay32 crypto, [], [AC_MSG_ERROR([library 'eay32' or 'crypto' is required for OpenSSL])])
+     FOUND_SSL_LIB="no"
+     AC_SEARCH_LIBS(OPENSSL_init_ssl, ssleay32 ssl, [FOUND_SSL_LIB="yes"])
+     AC_SEARCH_LIBS(SSL_library_init, ssleay32 ssl, [FOUND_SSL_LIB="yes"])
+     AS_IF([test "x$FOUND_SSL_LIB" = xno], [AC_MSG_ERROR([library 'ssleay32' or 'ssl' is required for OpenSSL])])
+  fi
+fi
+
+if test x"$FOUND_SSL_LIB" = x"yes" ; then
+    AC_DEFINE([HAVE_SSL], [], [Define to enable SSL])
 fi
 
 if test x"$admin_pwd" = x ; then

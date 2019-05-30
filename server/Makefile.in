@@ -11,14 +11,13 @@ LIBDIR       = @top_srcdir@
 
 CC           = @CC@
 CFLAGS       = @CFLAGS@ -fPIC
-CPPFLAGS     = @CPPFLAGS@ @SSL_H_DIR@ -I@srcdir@ -I@top_srcdir@
+CPPFLAGS     = @CPPFLAGS@ -I@srcdir@ -I@top_srcdir@
 
 MAKEDEPEND   = @MAKEDEPEND@
 MDFLAGS      = $(CPPFLAGS)
 
-SSL_LIBS     = @SSL_LIB@
 MURGIL       = ../lmurgil.a
-LIBS         = $(MURGIL) $(SSL_LIBS) @LIBS@
+LIBS         = $(MURGIL) @LIBS@
 
 
 OBJ = \
