@@ -77,6 +77,8 @@ int init_openssl_library(void)
     SSL_load_error_strings();
     /* OPENSSL_config(NULL); */
 
+    OpenSSL_add_ssl_algorithms();
+
     return(1);
 }
 #endif

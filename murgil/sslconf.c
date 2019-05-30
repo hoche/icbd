@@ -18,10 +18,11 @@ int create_ssl_context(char *pem, SSL_CTX **ctx)
     SSL_CTX *context;
     RSA *rsa;
 
-    SSL_load_error_strings();
-    SSL_library_init();
-
-    context = SSL_CTX_new(SSLv23_server_method());
+#if HAVE_TLS_SERVER_METHOD
+    context = SSL_CTX_new(TLS_server_method());
+#else
+    context = SSL_CTX_new(TLSv1_1_server_method());
+#endif
 
     SSL_CTX_set_verify(context, SSL_VERIFY_NONE, NULL);
 
