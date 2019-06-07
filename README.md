@@ -16,6 +16,12 @@ All of the changes from the time Jon Luini took it over (approx 1995)
 up to the time it was imported into github (v1.2c) are noted in the file
 README.CHANGEHIST.
 
+Since then:
+  * UTF-8 support has been added for messages (but not usernames or groupnames).
+  * The configure system has been updated.
+  * "brick" has been added (feature request)
+  * SSL support has been added (but still has some bugs).
+
 Building and installation instructions can be found in README.INSTALL.
 
 README.autoconf has information about using autoconf to create the
