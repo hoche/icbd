@@ -15,14 +15,22 @@
 int create_ssl_context(char *pem, SSL_CTX **ctx)
 {
     int result;
+    const SSL_METHOD *method;
     SSL_CTX *context;
     RSA *rsa;
 
 #if HAVE_TLS_SERVER_METHOD
-    context = SSL_CTX_new(TLS_server_method());
+    method = LS_server_method();
 #else
-    context = SSL_CTX_new(TLSv1_1_server_method());
+    method = TLSv1_1_server_method();
 #endif
+
+    context = SSL_CTX_new(method);
+    if (!context) {
+        vmdb(MSG_ERR, "Unable to create SSL context.");
+        ERR_print_errors_cb(sslmdb, NULL);
+        return -1;
+    }
 
     SSL_CTX_set_verify(context, SSL_VERIFY_NONE, NULL);
 
