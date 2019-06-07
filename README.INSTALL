@@ -101,6 +101,13 @@ icbd binary and all support scripts run looking for all related
 files in the local directory.  This means that you must run them
 from the directory that your prod files reside in. 
 
+If you're planning on using SSL, you'll need to create the server's
+certificate. This is a PEM file that has to be called "icbd.pem"
+and live in the same directory as the run directory (the same
+one containing your user database and so on). An example of how
+to create this with openssl can be found as "mkcert.sh" in the
+support directory.
+
 Before you start the server for the first time, you'll want to run
 the ``mkdb'' script to initialize the database with the special
 'Server' nickname. You did edit that in step II above, right?
@@ -118,5 +125,5 @@ Systems with heavy traffic may want to symlink this file to /dev/null.
 Get a client (many are listed at http://www.icb.net/) and test a
 connection to your server. If you don't mind, drop an email to
 falcon@icb.net and let him know you successfully are running a server
-and I'll be happy to add an entry in .icb.net for you to use.
+and he can add an entry in the icb.net domain for you to use.
 

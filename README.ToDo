@@ -1,4 +1,4 @@
-hoche's TODO List (updated 5/21/19):
+hoche's TODO List (updated 6/5/19):
 
     configuration
     ---------------
@@ -21,7 +21,8 @@ hoche's TODO List (updated 5/21/19):
     * add mempool for message buffers
     * add queued writing
     * add timed event queue for interrupting select()
-    * test/fix SSL support
+    * test/fix SSL support - done
+        This won't work on restarts.
     * add configfile reader
     * fix fd dump of sockets
 
@@ -29,7 +30,7 @@ hoche's TODO List (updated 5/21/19):
     ---------------------------------------------
     * add in the ipv6 support written ages ago
     * add in the brick support written ages ago
-    * support utf-8
+    * support utf-8 - done
 
     test harness
     ----------------------------------------------
