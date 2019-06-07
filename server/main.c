@@ -95,18 +95,14 @@ int main(int argc, char* argv[])
     char *bindhost = (char *) NULL;
     struct rlimit rlp;
     int quiet_restart = 0;
-    int port;
+    int port = DEFAULT_PORT;
 #ifdef HAVE_SSL
-    char *pem;
+    int sslport = 0;
+    char *pem = ICBPEMFILE;
 #endif
 
     icbd_log = -1; /* unopened logfile */
     log_level = 0; /* no messages */
-    port = DEFAULT_PORT;
-#ifdef HAVE_SSL
-    sslport = 0;
-    pem = ICBPEMFILE;
-#endif
 
     /* save off args that we need in /restart */
     restart_argc = argc+2;    /* room for the -R and NULL args */
@@ -125,7 +121,7 @@ int main(int argc, char* argv[])
 
     setbuf(stdout, (char *) 0);
 
-    while ((c = getopt(argc, argv, "cl:p:s:fRqb:")) != EOF) {
+    while ((c = getopt(argc, argv, "cl:p:s::fRqb:")) != EOF) {
 
         switch (c) {
 
@@ -159,7 +155,8 @@ int main(int argc, char* argv[])
 
             case 's':
 #ifdef HAVE_SSL
-                sslport = atoi(optarg);
+                if (optarg) 
+                    sslport = atoi(optarg);
                 if (sslport == 0)
                     sslport = DEFAULT_SSLPORT;
 #else
@@ -167,18 +164,25 @@ int main(int argc, char* argv[])
 #endif
                 break;
 
-
             case '?':
             default:
-                puts("usage: icbd [-b host] [-p port] [-cRfq]");
+                puts("usage: icbd [-b host] [-p port] [-s [port]] [-cRfq]");
                 puts("-c     wipe args from command line");
                 puts("-R     restart mode");
                 puts("-q     quiet mode (for restart)");
                 puts("-l N     log level (none=0, err=1, warn=2, info=3, debug=4, verbose=5)");
                 puts("-f     don't fork");
-                puts("-p port     listen port (default is 7326)");
-                puts("-s port     ssl listen port (default is 7327)");
+                puts("-p port     listen port (the default is 7326)");
+                puts("-s [port]   use SSL. port is optional (the default is 7327)");
                 puts("-b host     bind socket to \"host\"");
+                puts("");
+                puts("Note: SSL must be compiled in to use it. This version "
+#ifdef HAVE_SSL
+                     "supports it."
+#else
+                     "does not support it."
+#endif
+                );
                 exit(-1);
                 break;
         }
@@ -186,18 +190,15 @@ int main(int argc, char* argv[])
 
 
 #ifdef DEBUG
-#warning "no-fork flag is set"
     forkflag++;
-#ifdef HAVE_SSL
-#warning "ssl is on"
-    init_openssl_library();
-    sslport = DEFAULT_SSLPORT;
-#endif
-#warning "log level is set to 5"
     log_level = 5;
 #endif
 
-
+#ifdef HAVE_SSL
+    if (sslport) {
+        init_openssl_library();
+    }
+#endif
 
 
 #ifdef RLIMIT_NOFILE
