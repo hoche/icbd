@@ -74,3 +74,19 @@ void vmdb (int level, const char *fmt, ...)
     }
 #endif /* HAVE_STDARG_H */
 }
+
+
+/* This is really for the use of openssl's ERR_print_errors_cb() call
+ * but anything can use it.
+ */
+int sslmdb(const char * str, size_t len, void *u)
+{
+    char tmp[BUFSIZ+1];
+    memset(tmp, 0, BUFSIZ+1);
+
+    if (len > BUFSIZ) len = BUFSIZ;
+    memcpy(tmp, str, len);
+
+    mdb(MSG_ERR, tmp);
+    return 0;
+}

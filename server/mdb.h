@@ -21,4 +21,5 @@ extern int log_level;
 
 void mdb(int level, const char *message);
 void vmdb(int level, const char *fmt, ...);
+int sslmdb(const char * str, size_t len, void *u);
 
