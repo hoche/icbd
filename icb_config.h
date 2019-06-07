@@ -142,3 +142,9 @@
  * 127-bit ascii characters.
  */
 #define ALLOW_UTF8_MESSAGES 1
+
+#ifdef BRICK
+#define STARTING_BRICKS 5
+#define MAX_BRICKS      20 
+#endif
+

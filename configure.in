@@ -11,7 +11,7 @@ AC_INIT
 AC_CONFIG_SRCDIR([server/main.c])
 AC_LANG(C)
 AC_CONFIG_HEADER(config.h)
-AH_TOP([#include "icb_config.h"])
+AH_BOTTOM([#include "icb_config.h"])
 
 AC_ARG_ENABLE(debugging,
 [  --enable-debugging      Outputs extra debugging information at all
@@ -22,10 +22,14 @@ AC_ARG_ENABLE(debugging,
                           This might provide some speed benefits.],
     AC_DEFINE_UNQUOTED([DEBUG], 1, [Define to 1 to enable debugging output.]))
 
-AC_ARG_WITH(ssl,
-[  --with-ssl              Enable SSL using OpenSSL. (Experimental)],
-    ssl="$with_ssl", ssl="no")
+AC_ARG_ENABLE(ssl,
+[  --enable-ssl             Enable SSL using OpenSSL. (Experimental)],
+    ssl="$enable_ssl", ssl="no")
 
+AC_ARG_ENABLE(brick,
+[  --disable-brick         Turns off the brick feature.],
+    brick="$enable_brick", brick="yes")
+    
 AC_ARG_WITH(max_users,
 [  --with-max-users=<num>  Maximum number of users.],
     max_users="$with_max_users")
@@ -174,6 +178,10 @@ if test x"$ssl" = x"yes" ; then
         AC_SEARCH_LIBS(SSL_library_init, ssleay32 ssl, [], [FOUND_SSL_LIB="yes"])
         AS_IF([test "x$FOUND_SSL_LIB" = xno], [AC_MSG_ERROR([library 'ssleay32' or 'ssl' is required for OpenSSL])])
     fi
+fi
+
+if test x"$brick" = x"yes" ; then
+    AC_DEFINE_UNQUOTED([BRICK], 1, [Define to 1 to enable bricks.])
 fi
 
 if test x"$FOUND_SSL_LIB" = x"yes" ; then

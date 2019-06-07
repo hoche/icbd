@@ -1,9 +1,10 @@
 /* config.h.in.  Generated from configure.in by autoheader.  */
 
-#include "icb_config.h"
-
 /* Sets the admin password. */
 #undef ADMIN_PWD
+
+/* Define to 1 to enable bricks. */
+#undef BRICK
 
 /* Define to 1 to enable debugging output. */
 #undef DEBUG
@@ -139,3 +140,5 @@
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef size_t
+
+#include "icb_config.h"

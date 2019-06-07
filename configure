@@ -684,7 +684,8 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_debugging
-with_ssl
+enable_ssl
+enable_brick
 with_max_users
 with_admin_pwd
 '
@@ -1311,11 +1312,12 @@ Optional Features:
                           which toggles debbuging output at runtime.
   --disable-debugging     Disallows debugging code to be built in.
                           This might provide some speed benefits.
+  --enable-ssl             Enable SSL using OpenSSL. (Experimental)
+  --disable-brick         Turns off the brick feature.
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-ssl              Enable SSL using OpenSSL. (Experimental)
   --with-max-users=<num>  Maximum number of users.
   --with-admin-pwd=<pwd>  REQUIRED. Password for the admin user. To
                           become the admin user, you will need to log in
@@ -2188,12 +2190,19 @@ _ACEOF
 fi
 
 
-
-# Check whether --with-ssl was given.
-if test "${with_ssl+set}" = set; then :
-  withval=$with_ssl; ssl="$with_ssl"
+# Check whether --enable-ssl was given.
+if test "${enable_ssl+set}" = set; then :
+  enableval=$enable_ssl; ssl="$enable_ssl"
 else
   ssl="no"
+fi
+
+
+# Check whether --enable-brick was given.
+if test "${enable_brick+set}" = set; then :
+  enableval=$enable_brick; brick="$enable_brick"
+else
+  brick="yes"
 fi
 
 
@@ -4717,6 +4726,14 @@ fi
   as_fn_error $? "library 'ssleay32' or 'ssl' is required for OpenSSL" "$LINENO" 5
 fi
     fi
+fi
+
+if test x"$brick" = x"yes" ; then
+
+cat >>confdefs.h <<_ACEOF
+#define BRICK 1
+_ACEOF
+
 fi
 
 if test x"$FOUND_SSL_LIB" = x"yes" ; then
