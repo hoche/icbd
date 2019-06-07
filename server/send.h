@@ -35,8 +35,9 @@ void sendbeep(int from, int to);
 
 /* send a connect message
  * n  =  fd of their socket 
+ * secure = SSL connection
  */ 
-void s_new_user(int n);
+void s_new_user(int n, int secure);
 
 /* construct loginok message */
 void send_loginok(int to);

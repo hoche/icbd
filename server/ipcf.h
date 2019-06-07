@@ -10,5 +10,5 @@ void s_didpoll(int n);
 void c_userchar(void);
 void s_lost_user(int n); 		/* n = fd of that user */
 void s_packet(int x, char *pkt);
-void s_new_user(int n);
+void s_new_user(int n, int secure);
 

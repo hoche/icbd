@@ -36,10 +36,11 @@ void clear_user_item(int n)
     u_tab[n].echoback = 0;
     u_tab[n].nobeep = 0;
     u_tab[n].perms = PERM_NULL;
-    u_tab[n].t_on = (long) 0;
-    u_tab[n].t_sent= (long) 0;
-    u_tab[n].t_recv = (long) 0;
-    u_tab[n].t_group = (long) 0;
+    u_tab[n].t_on = (time_t) 0;
+    u_tab[n].t_sent= (time_t) 0;
+    u_tab[n].t_recv = (time_t) 0;
+    u_tab[n].t_group = (time_t) 0;
+    u_tab[n].secure = 0;
 #ifdef BRICK
     u_tab[n].bricks = STARTING_BRICKS;
 #endif
@@ -97,6 +98,7 @@ void fill_user_entry(int n,
     u_tab[n].t_notify = 0;
     u_tab[n].nobeep = nobeep;
     u_tab[n].perms = perms;
+    /* u_tab[n].secure = false; */ /* This is set when we do the initial s_new_user() */
 #ifdef BRICK
     u_tab[n].bricks = STARTING_BRICKS;
 #endif

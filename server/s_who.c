@@ -78,7 +78,7 @@ void pgm_long(int n, int which)
     int num_users;
     char cp[5];
     char status[8];
-    int nr = 0, aw = 0;
+    int nr = 0, aw = 0, sec=0;
     int user_list[MAX_REAL_USERS];
     int i, j;
     int users = 0;
@@ -125,19 +125,29 @@ void pgm_long(int n, int which)
 
         nr = (strlen(u_tab[user].realname) == 0);
         aw = (strlen(u_tab[user].awaymsg) > 0);
+        sec = u_tab[user].secure;
 
-        if (nr || aw)
+        if (nr || aw || sec)
         {
             status[0] = '(';
             status[1] = '\0';
             if (nr)
                 strcat(status, "nr");
 
-            if (nr && aw)
-                strcat(status, ",");
+            if (aw) {
+                if (nr)
+                    strcat(status, ",");
 
-            if (aw)
                 strcat(status, "aw");
+            }
+
+            if (sec) {
+                if (nr || aw)
+                    strcat(status, ",");
+
+                strcat(status, "ssl");
+            }
+                
             strcat(status, ")");
         }
         else

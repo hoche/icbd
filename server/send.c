@@ -186,7 +186,7 @@ void autoBeep(int to)
 }
 
 /* n  =  fd of their socket */
-void s_new_user(int n)
+void s_new_user(int n, int secure)
 {
     char *cp;
 
@@ -198,12 +198,12 @@ void s_new_user(int n)
     cp = getremotename(n);
 
     if (cp == NULL) {
-        vmdb(MSG_INFO, mbuf, "[CONNECT] %d", n);
+        vmdb(MSG_INFO, mbuf, "[CONNECT%s] %d", (secure?" (SSL)":""), n);
         return;
     }
 
     if (strlen(cp) == 0) {
-        vmdb(MSG_INFO, mbuf, "[CONNECT] %d", n);
+        vmdb(MSG_INFO, mbuf, "[CONNECT%s] %d", (secure?" (SSL)":""), n);
         return;
     }
 
@@ -214,8 +214,9 @@ void s_new_user(int n)
 #endif    /* SHORT_HOSTNAME && FQDN */
 
     snprintf(u_tab[n].nodeid, MAX_NODELEN+1, "%s", cp);
+    u_tab[n].secure = secure;
 
-    vmdb(MSG_INFO, mbuf, "[CONNECT] %d: %s", n, cp);
+    vmdb(MSG_INFO, mbuf, "[CONNECT%s] %d: %s", (secure?" (SSL)":""), n, cp);
 }
 
 void send_loginok(int to)

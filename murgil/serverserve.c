@@ -66,7 +66,7 @@ void handle_fd_activity(void)
     /* look for a new user on our listen socket */
     if (FD_ISSET(port_fd, &rfdr)) {
         if ((n = _newconnect(port_fd, 0 )) > 0) {
-            s_new_user(n); /* let server init the user */
+            s_new_user(n, 0); /* let server init the user */
         }
         FD_CLR(port_fd, &rfdr);
     }
@@ -75,7 +75,7 @@ void handle_fd_activity(void)
     /* look for a new user on our SSL listen socket */
     if (FD_ISSET(sslport_fd, &rfdr)) {
         if ((n = _newconnect(sslport_fd, 1 )) > 0) {
-            s_new_user(n); /* let server init the user */
+            s_new_user(n, 1); /* let server init the user */
         }
         FD_CLR(sslport_fd, &rfdr);
     }
@@ -91,7 +91,7 @@ void handle_fd_activity(void)
              * shunt off to _newconnect again */
             if (cbufs[x].started_ssl_accept) {
                 if ((n = _newconnect(x, 1 )) > 0) {
-                    s_new_user(n); /* let server init the user */
+                    s_new_user(n, 1); /* let server init the user */
                 }
                 break;
             }
@@ -110,7 +110,7 @@ void handle_fd_activity(void)
              * shunt off to _newconnect again */
             if (cbufs[x].started_ssl_accept) {
                 if ((n = _newconnect(x, 1 )) > 0) {
-                    s_new_user(n); /* let server init the user */
+                    s_new_user(n, 1); /* let server init the user */
                 }
                 break;
             }
