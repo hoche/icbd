@@ -77,6 +77,7 @@ const char *command_table[] =
     "noaway",
     "log",
     "stats",
+    "brick",
     (char *) 0
 };
 

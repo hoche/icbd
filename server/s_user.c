@@ -691,3 +691,72 @@ int s_away(int n, int argc)
     return 0;
 }
 
+#if BRICK
+/*
+ * From Scott Reynold's hacked ICB.
+ */
+int
+s_brick(int n, int argc)
+{
+	char    target[MAX_NICKLEN + 1];
+	char	line[MAX_INPUTSTR];
+	int     t;
+	int		bricks;
+
+	if (argc == 2) {
+		strncpy(target, fields[1], MAX_NICKLEN+1);
+		target[sizeof(target) - 1] = '\0';
+		filternickname(target);
+		t = find_user(target);
+	} else {
+		target[0] = '\0';
+		t = (-1);
+	}
+
+	bricks = u_tab[n].bricks;
+	if (t < 0 && strcmp(target, "") == 0) {
+		if (bricks > 0) {
+			snprintf(line, MAX_INPUTSTR, "You have %d brick%s remaining.",
+					bricks, bricks == 1 ? "" : "s");
+		} else if (bricks < 0) {
+			snprintf(line, MAX_INPUTSTR, "You owe %d bricks.", (-bricks));
+		} else {
+			snprintf(line, MAX_INPUTSTR, "You have no bricks remaining.");
+		}
+		sendstatus(n, "Message", line);
+		return 0;
+	}
+
+	// decrement a brick from the sender
+	bricks = --u_tab[n].bricks;
+	if (bricks < (-5)) {
+		senderror(n, "You are out of bricks.  Good bye.");
+		snprintf(line, MAX_INPUTSTR, "out of bricks; dropped %s (%d)",
+				u_tab[n].nickname, n);
+		s_status_group(1, 1, n, "DROP", line);
+		S_kill[n]++;
+	} else if (bricks < (-4)) {
+		snprintf(line, MAX_INPUTSTR, "%s has fallen, and can't get up.",
+				u_tab[n].nickname);
+		s_status_group(1, 1, n, "FYI", line);
+		senderror(n, "You are out of bricks.  Please desist.");
+	} else if (bricks < 0) {
+		senderror(n, "You are out of bricks.");
+	} else if (t < 0 || strcasecmp(target, "server") == 0) {
+		s_status_group(1, 1, n, "FYI",
+				"A brick flies off into the ether.");
+	} else {
+		// add the brick to the target
+		if (u_tab[t].bricks < MAX_BRICKS && t != n) {
+			u_tab[t].bricks++;
+		}
+		snprintf(line, MAX_INPUTSTR, "%s has been bricked.", target);
+		s_status_group(1, 1, n, "FYI", line);
+		if (strcasecmp(u_tab[n].group, u_tab[t].group) != 0) {
+			s_status_group(1, 1, t, "FYI", line);
+		}
+	}
+	return 0;
+}
+#endif /* BRICK */
+

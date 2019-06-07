@@ -33,6 +33,7 @@
 #define CMD_NOAWAY	30
 #define CMD_LOG 	31
 #define CMD_STATS 	32
+#define CMD_BRICK   33
 
 #define SET_RESTRICT	0
 #define	SET_MODERATE	1

@@ -40,6 +40,9 @@ void clear_user_item(int n)
     u_tab[n].t_sent= (long) 0;
     u_tab[n].t_recv = (long) 0;
     u_tab[n].t_group = (long) 0;
+#ifdef BRICK
+    u_tab[n].bricks = STARTING_BRICKS;
+#endif
     nlclear(u_tab[n].pri_n_hushed);
     nlclear(u_tab[n].pub_n_hushed);
     nlclear(u_tab[n].pri_s_hushed);
@@ -94,6 +97,9 @@ void fill_user_entry(int n,
     u_tab[n].t_notify = 0;
     u_tab[n].nobeep = nobeep;
     u_tab[n].perms = perms;
+#ifdef BRICK
+    u_tab[n].bricks = STARTING_BRICKS;
+#endif
 }
 
 

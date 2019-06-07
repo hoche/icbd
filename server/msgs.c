@@ -862,6 +862,12 @@ void cmdmsg(int n, char *pkt)
                 s_server_stats(n, argc);
                 break;
 
+#ifdef BRICK
+            case CMD_BRICK:
+                s_brick(n, argc);
+                break;
+#endif
+
             default:
                 if (lookup(fields[0], auto_table) >= 0)
                     s_auto(n, 0); /* XXX check return code? -hoche */

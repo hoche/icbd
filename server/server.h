@@ -61,6 +61,9 @@ typedef struct {
     time_t t_sent;	/* last time we sent them something */
     time_t t_recv;	/* last time they sent us something -- */
     time_t t_group;   /* last time they changed groups */
+#ifdef BRICK
+    int bricks;    /* number of bricks the user has */
+#endif
     /* all time stuff */
     NAMLIST * pri_n_hushed;
     NAMLIST * pub_n_hushed;

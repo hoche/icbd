@@ -13,6 +13,7 @@ int s_beep(int n, int argc);
 int s_nobeep(int n, int argc);
 int s_away(int n, int argc);
 int s_noaway(int n, int argc);
+int s_brick(int n, int argc);
 int s_cancel(int n, int argc);
 int s_change(int n, int argc);
 int s_invite(int n, int argc);
