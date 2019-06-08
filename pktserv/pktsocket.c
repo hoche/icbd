@@ -140,7 +140,7 @@ int pktsocket_accept(cbuf_t *listen_cbuf)
  */
 int pktsocket_read(cbuf_t *cbuf)
 {
-    register ssize_t result;
+    ssize_t result;
     size_t remain;
 
     /* try to read the header unless we've already done that */

@@ -27,7 +27,7 @@ CHAT_SOCKET	        DISCONNECTED     (managed by	     ACCEPTED
                     ACCEPTED         pktsocket_init()    IDLE
                                                          WANT_DISCONNECT
 
-                    IDLE             readable()          WANT_READ
+                    IDLE             readable flag       WANT_READ
                                                          WANT_WRITE
                                                          RETRY_SSL_READ
                                                          RETRY_SSL_WRITE

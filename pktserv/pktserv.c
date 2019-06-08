@@ -65,7 +65,7 @@ pktserv_cb_t g_pktserv_cb = {0};
 static void
 handle_idle(void)
 {
-    register int i;
+    int i;
 
     if (g_pktserv_cb.idle) {
         g_pktserv_cb.idle(0);
@@ -171,7 +171,7 @@ handle_raw_disconnect(cbuf_t *cbuf)
 int
 add_pollfd(int fd)
 {
-    register int i;
+    int i;
 
     /* check to see if we already have an pollfd for this fd */
     for (i = g_pollsetsize; i; i--) {
@@ -209,7 +209,7 @@ add_pollfd(int fd)
 void 
 delete_pollfd(int fd)
 {
-    register int i;
+    int i;
     for (i = 0; i < g_pollsetsize; i++) {
         if ( g_pollset[i].fd == fd ) {
             memmove(&g_pollset[i], 
@@ -227,8 +227,8 @@ delete_pollfd(int fd)
 static void
 pollfd_state_machine(struct pollfd* pollfd)
 {
-    register int writeable;
-    register int readable;
+    int writeable;
+    int readable;
     cbuf_t *cbuf;
 
     cbuf = &cbufs[pollfd->fd];
@@ -268,21 +268,25 @@ pollfd_state_machine(struct pollfd* pollfd)
                 break;
 
             case WANT_SSL_READ:     /* need to retry the SSL read */
-                if (readable || writeable)
-                    pktsocket_read(cbuf);
+                pktsocket_read(cbuf);
                 break;
 
             case WANT_SSL_WRITE:    /* need to retry the SSL write */
-                if (readable || writeable)
-                    pktsocket_write(cbuf);
+                pktsocket_write(cbuf);
                 break;
 
-            case WANT_WRITE:        /* we have pending writes */
+            case WANT_WRITE:        /* we have pending writes. This can be a new SSL write. */
                 if (writeable)
                     pktsocket_write(cbuf);
                 break;
 
-            case WANT_READ:      /* in the middle of a read */
+            case IDLE:              /* not doing anything. got some network data */
+                if (readable) {
+                    cbuf->state = WANT_READ;
+                }
+                // fallthrough
+
+            case WANT_READ:         /* in the middle of a read. read more network data. */
                 if (readable) {
                     int ok2read = 1;
                     if (g_pktserv_cb.ok2read) {
@@ -313,8 +317,7 @@ pollfd_state_machine(struct pollfd* pollfd)
                 break;
 
             case WANT_DISCONNECT:      /* need to disconnect the user */
-                vmdb(MSG_WARN, 
-                     "sendpacket: fd%d, disconnecting user\n", cbuf->fd);
+                vmdb(MSG_WARN, "%s: fd%d, disconnecting user\n", __FUNCTION__, cbuf->fd);
                 /* let main program know client went bye-bye */
                 if (g_pktserv_cb.lost_client)
                     g_pktserv_cb.lost_client(cbuf->fd);
@@ -339,24 +342,10 @@ pollfd_state_machine(struct pollfd* pollfd)
 static void
 handle_pollfds(void)
 {
-    register int i;
+    int i;
     for (i = 0; i < g_pollsetsize; i++)
         pollfd_state_machine(&g_pollset[i]);
 }
-
-static void
-handle_sslfds(void)
-{
-/* XXX implement me */
-#if 0
-    foreach cbufs() {
-        cbuf = &cbufs[pollfd->fd];
-        if (cbuf->is_ssl) {
-        }
-    }
-#endif
-}
-
 
 
 /**************************************************************
@@ -431,10 +420,12 @@ pktserv_run(void)
                 vmdb(MSG_ERR, "poll: %s", strerror(errno));
         }
 
-        if (ret > 0)
-            handle_pollfds();
-
-        handle_sslfds();
+        /* we check every fd, regardless of whether it was flagged
+         * by poll(). This way we catch network activity, SSL
+         * activity, and things like disconnect requests from
+         * the upper layer.
+         */
+        handle_pollfds();
 
         if (ret == 0 || loopcount%10==0 ) {
             loopcount = 0;
@@ -540,6 +531,7 @@ int pktserv_send(int s, char *pkt, size_t len)
     cbuf_t *cbuf;
     msgbuf_t *msgbuf;
 
+    /* XXX check this to be sure this socket makes sense */
     cbuf = &(cbufs[s]);
 
     vmdb(MSG_VERBOSE, "sendpacket: len=%d, pktlen=%d, pkt=\"%s\"", 
@@ -582,7 +574,12 @@ int pktserv_send(int s, char *pkt, size_t len)
 
 int pktserv_disconnect(int s) 
 {
-    /* XXX implement me! */
+    cbuf_t *cbuf;
+
+    /* XXX check this to be sure this socket makes sense */
+    cbuf = &(cbufs[s]);
+
+    cbuf->state = WANT_DISCONNECT;
     return 0;
 }
 

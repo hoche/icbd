@@ -78,7 +78,7 @@ _free_msgbuf(msgbuf_t *msgbuf)
 void
 cbufs_reset(void)
 {
-    register int i;
+    int i;
 
     for (i = 0; i < MAX_USERS; i++) {
         cbufs[i].newmsg = 1;
