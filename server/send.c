@@ -22,7 +22,7 @@
 #include "mdb.h"
 #include "send.h"
 
-#include "murgil/murgil.h" /* for sendpacket() */
+#include "pktserv/pktserv.h" /* for pktserv_send() */
 
 extern char * getremotename(int socketfd);
 
@@ -335,7 +335,7 @@ int doSend(int from,int to)
         return -1;
 
     packetbuffer[0] = (unsigned char)len;
-    if ((ret = sendpacket(to, packetbuffer, len + 1 )) < 0) {
+    if ((ret = pktserv_send(to, packetbuffer, len + 1 )) < 0) {
         vmdb(MSG_ERR, "doSend: %d: %s (%d)", to, strerror(errno), ret);
         if (ret == -2) {
             /* bad news! */

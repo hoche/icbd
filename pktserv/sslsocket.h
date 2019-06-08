@@ -1,0 +1,29 @@
+/*
+ * sslsocket.h
+ *
+ * wrappers around standard SSL network connection calls, using
+ * cbuf_t's.
+ *
+ * These shouldn't be called directly and instead should be called
+ * from the functions in pktsocket.c.
+ *
+ * Author: Michel Hoche-Mong, hoche@grok.com
+ * Copyright (c) 2001-2019 Michel Hoche-Mong
+ * All rights reserved.
+ *
+ */
+
+#pragma once
+
+#include "config.h"
+
+#include <sys/types.h>
+
+#include "pktserv_internal.h"
+#include "pktbuffers.h"
+
+
+int sslsocket_accept(cbuf_t *cbuf);
+int sslsocket_read(cbuf_t *cbuf, void* buf, size_t len);
+int sslsocket_write(cbuf_t *cbuf, void* buf, size_t len);
+

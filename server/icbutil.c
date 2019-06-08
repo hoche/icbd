@@ -16,16 +16,13 @@
 
 #include "server.h"
 #include "externs.h"
-#include "mdb.h"
 #include "namelist.h"
 #include "users.h"
-#include "murgil/murgil.h" /* for disconnectuser() */
-#include "murgil/globals.h"
+#include "pktserv/pktserv.h" /* for pktserv_disconnect() */
+#include "mdb.h"
 
 
 #define mask(s) (1 << ((s)-1))
-
-static int fdbits = howmany(FD_SETSIZE, NFDBITS);
 
 const char *dumpfile = "icbd.dump";
 
@@ -76,7 +73,7 @@ void icbexit(int sig)
     mdb(MSG_ALL, "Someone told us to exit!");
     for (user=0; user < MAX_REAL_USERS; user++) {
         if (u_tab[user].login > LOGIN_FALSE) {
-            disconnectuser(user);
+            pktserv_disconnect(user);
         }
     }
     exit(0);
@@ -99,26 +96,7 @@ void icbdump(int sig)
         return;
     }
 
-    for (i = 0; i < fdbits; i++)
-#ifdef HAVE_XOPEN_FDS_BITS
-        fprintf(dump, "%ld\n", rfdset.__fds_bits[i]);
-#else
-    fprintf(dump, "%ld\n", (long) rfdset.fds_bits[i]);
-#endif
-
-    for (i = 0; i < fdbits; i++)
-#ifdef HAVE_XOPEN_FDS_BITS
-        fprintf(dump, "%ld\n", ignorefdset.__fds_bits[i]);
-#else
-    fprintf(dump, "%ld\n", (long) ignorefdset.fds_bits[i]);
-#endif
-
-    fprintf(dump, "%d\n", port_fd);
-#ifdef HAVE_SSL
-    fprintf(dump, "%d\n", sslport);
-    fprintf(dump, "%d\n", sslport_fd);
-#endif
-    fprintf(dump, "%d\n", highestfd);
+    pktserv_dumpsockets(dump);
 
     for (i = 0; i < MAX_USERS; i++)
         fprintf (dump, "%d\n", S_kill[i]);
@@ -270,30 +248,7 @@ void icbload(int sig)
     init_groups();
     clear_users();
 
-    for (i = 0; i < fdbits; i++) {
-        fscanf(dump, "%ld\n", &k);
-#ifdef HAVE_XOPEN_FDS_BITS
-        rfdset.__fds_bits[i] = k;
-#else
-        rfdset.fds_bits[i] = k;
-#endif
-    }
-
-    for (i = 0; i < fdbits; i++) {
-        fscanf(dump, "%ld\n", &k);
-#ifdef HAVE_XOPEN_FDS_BITS
-        ignorefdset.__fds_bits[i] = k;
-#else
-        ignorefdset.fds_bits[i] = k;
-#endif
-    }
-
-    fscanf(dump, "%d\n", &port_fd);
-#ifdef HAVE_SSL
-    fscanf(dump, "%d\n", &sslport);
-    fscanf(dump, "%d\n", &sslport_fd);
-#endif
-    fscanf(dump, "%d\n", &highestfd);
+    pktserv_loadsockets(dump);
 
     for (i = 0; i < MAX_USERS; i++) {
         fscanf(dump, "%ld\n", &k);

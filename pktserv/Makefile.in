@@ -1,0 +1,66 @@
+#
+# Makefile for lpktserv.a
+#
+# Author: Michel Hoche-Mong, hoche@grok.com
+# Copyright (c) 2000-2019 Michel Hoche-Mong.
+# All rights reserved.
+#
+# Released under the GPL license.
+#
+
+prefix       = @prefix@
+exec_prefix  = @exec_prefix@
+datarootdir  = @datarootdir@
+BINDIR       = @bindir@
+MANDIR       = @mandir@
+DATADIR      = @datadir@
+
+LIBDIR       = @top_srcdir@
+
+CC           = @CC@
+CFLAGS       = @CFLAGS@ -fPIC -DPKTSERV_INTERNAL
+CPPFLAGS     = @CPPFLAGS@ -I@srcdir@ -I@top_srcdir@ -I@top_srcdir@/server
+
+MAKEDEPEND   = @MAKEDEPEND@
+MDFLAGS      = $(CPPFLAGS)
+
+SSL_LIBS     = @SSL_LIB@
+LIBS         = @LIBS@
+
+OBJ = \
+	pktbuffers.o \
+	pktserv.o \
+	pktsocket.o \
+	sslconf.o \
+	sslsocket.o \
+	getrname.o \
+	makeport.o
+
+TARGET       = libpktserv.a
+
+all: $(LIBDIR)/$(TARGET)
+
+$(LIBDIR)/$(TARGET): $(OBJ)
+	@RM@ -f $(LIBDIR)/$(TARGET)
+	@AR@ -q $(LIBDIR)/$(TARGET) $(OBJ)
+	@RANLIB@ $(LIBDIR)/$(TARGET)
+
+tags:
+	@CTAGS@ -w *[ch]
+
+splint:
+	splint -f ../.splintrc $(CPPFLAGS) *.[ch]
+
+clean:
+	@RM@ -f *.o core tags
+
+depend:
+	@MAKEDEPEND@ $(DEPENDFLAGS) $(SRC)
+
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+.c.o:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<
+
+# DO NOT DELETE THIS LINE --makedepend uses it.

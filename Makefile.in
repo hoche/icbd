@@ -24,14 +24,14 @@ SH           = /bin/sh
 CPPFLAGS     = @CPPFLAGS@
 
 #	Directories to do a make in.
-DIRS 		= murgil server 
+DIRS 		= pktserv server 
 MANDIRS		= 
 
 #	Files to be removed from top level with "make clean".
-TOPCLEAN	= lmurgil.a core
+TOPCLEAN	= lpktserv.a core
 
 #	Files that configure creates
-CONFIG_CLEAN	= Makefile murgil/Makefile server/Makefile config.h config.log config.cache config.status autom4te.cache
+CONFIG_CLEAN	= Makefile pktserv/Makefile server/Makefile config.h config.log config.cache config.status autom4te.cache
 
 #	Files to be tarred up with "make dist".
 DISTFILES	= COPYING \
@@ -47,7 +47,7 @@ DISTFILES	= COPYING \
 		  config.h.in \
 		  configure.in \
 		  configure \
-		  murgil \
+		  pktserv \
 		  server \
 		  prod \
 		  support

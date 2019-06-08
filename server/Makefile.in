@@ -16,8 +16,8 @@ CPPFLAGS     = @CPPFLAGS@ -I@srcdir@ -I@top_srcdir@
 MAKEDEPEND   = @MAKEDEPEND@
 MDFLAGS      = $(CPPFLAGS)
 
-MURGIL       = ../lmurgil.a
-LIBS         = $(MURGIL) @LIBS@
+PKTSERV      = ../libpktserv.a
+LIBS         = $(PKTSERV) @LIBS@
 
 
 OBJ = \
@@ -56,7 +56,7 @@ OBJ = \
 
 all: icbd
 
-icbd: $(OBJ) $(MURGIL)
+icbd: $(OBJ) $(PKTSERV)
 	@CC@ $(CFLAGS) -o icbd $(OBJ) $(LIBS)
 
 # this is a hack

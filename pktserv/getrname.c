@@ -3,9 +3,9 @@
  *
  * Utility functions to look up and verify hostnames.
  *
- * Original Author: Carrick Sean Casey? Jon Luini? Daffy Duck?
+ * Original Author: Carrick Sean Casey?
  *
- * $Id: getrname.c,v 1.8 2001/08/04 08:43:07 hoche Exp $
+ * This is gonna get rewritten to support IPv6.
  *
  */
 
@@ -27,7 +27,7 @@
 #include <resolv.h>
 #include <string.h>
 
-#include "server/mdb.h"
+#include "mdb.h"
 
 
 struct hostent *double_reverse_check(struct in_addr in)
@@ -75,10 +75,10 @@ struct hostent *double_reverse_check(struct in_addr in)
     return ( (struct hostent *)NULL );
 }
 
-#define REMOTE_NAME_LEN 255
+
 char *getremotename(int socketfd)
 {
-    static char rname[REMOTE_NAME_LEN];
+    static char rname[256];
     struct hostent *host;
     struct sockaddr_in rs;
     socklen_t rs_size = sizeof(rs);
@@ -94,7 +94,7 @@ char *getremotename(int socketfd)
 #endif
 #endif
 
-    memset(rname, 0, REMOTE_NAME_LEN);
+    memset(rname, 0, 256);
 
     /* get address of remote user */
     if (getpeername(socketfd, (struct sockaddr *)&rs, &rs_size) < 0) {
@@ -104,13 +104,13 @@ char *getremotename(int socketfd)
 
 #if 0
     /* XXX
-     * This is what we'll need to do for ipv6, but we need to sort out the
-     * double-reverse lookup version of it first.
-     * -hoche 5/23/19
-     */
+     *      * This is what we'll need to do for ipv6, but we need to sort out the
+     *           * double-reverse lookup version of it first.
+     *                * -hoche 5/23/19
+     *                     */
     if (getnameinfo((struct sockaddr *)&rs, rs_size, rname, REMOTE_NAME_LEN, NULL, 0, NI_NAMEREQD)) {
         rname[0]='\0';
-#endif 
+#endif
 
 
 #ifdef NO_DOUBLE_RES_LOOKUPS
@@ -119,7 +119,7 @@ char *getremotename(int socketfd)
 #else
     if ( (host = double_reverse_check (rs.sin_addr)) == (struct hostent *)NULL )
         vmdb(MSG_INFO, "%s fails double reverse", inet_ntoa(rs.sin_addr));
-#endif	/* NO_DOUBLE_RES_LOOKUPS */
+#endif    /* NO_DOUBLE_RES_LOOKUPS */
 
     /* get hostname from table */
     if (host == NULL) 

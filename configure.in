@@ -199,5 +199,5 @@ fi
 AC_MSG_RESULT([Setting ADMIN_PWD to "$admin_pwd"])
 AC_DEFINE_UNQUOTED([ADMIN_PWD], "$admin_pwd", [Sets the admin password.])
 
-AC_CONFIG_FILES([server/Makefile murgil/Makefile Makefile])
+AC_CONFIG_FILES([server/Makefile Makefile pktserv/Makefile])
 AC_OUTPUT

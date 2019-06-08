@@ -1,0 +1,41 @@
+Socket Type        Starting State    Transition          Ending State
+-----------
+
+LISTEN_SOCKET       IDLE             readable()          IDLE
+                                                         WANT_ACCEPT
+                                                         BLOCKED
+                                                         
+                    BLOCKED          pktsocket_accept()  IDLE
+                                                         WANT_ACCEPT
+                                                         BLOCKED
+
+                    WANT_ACCEPT      pktsocket_accept()  IDLE
+                                                         WANT_ACCEPT
+                                                         BLOCKED
+                                                          
+                       
+
+CHAT_SOCKET	        DISCONNECTED     (managed by	     ACCEPTED
+                                     LISTEN_SOCKET)      WANT_SSL_ACCEPT
+
+                    WANT_SSL_ACCEPT  sslsocket_accept()  ACCEPTED
+                                                         RETRY_SSL_ACCEPT
+                                                         RETRY_SSL_READ
+                                                         RETRY_SSL_WRITE
+                                                         WANT_DISCONNECT
+
+                    ACCEPTED         pktsocket_init()    IDLE
+                                                         WANT_DISCONNECT
+
+                    IDLE             readable()          WANT_READ
+                                                         WANT_WRITE
+                                                         RETRY_SSL_READ
+                                                         RETRY_SSL_WRITE
+                                                         WANT_DISCONNECT
+
+                    WANT_READ        pktsocket_read()    RETRY_SSL_READ
+                                                         RETRY_SSL_WRITE
+                                                         COMPLETE_PACKET 
+                                                         WANT_HEADER
+
+                    WANT_HEADER      pktsocket_read()

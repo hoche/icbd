@@ -6,12 +6,11 @@
 #include "config.h"
 
 #include "server.h"
+#include "pktserv/pktserv.h" /* for pktserv_disconnect() */
 #include "externs.h"
 #include "send.h"
 #include "msgs.h"
 #include "mdb.h"
-
-#include "murgil/murgil.h"
 
 /* dispatch()
  *
@@ -30,7 +29,7 @@ void dispatch(int n, char *pkt)
         if(n >= MAX_REAL_USERS) {
             senderror(n, "ICB is full.");
             sendexit(n);
-            disconnectuser(n);
+            pktserv_disconnect(n);
         }
         if(loginmsg(n, ++pkt) < 0) {
             /* login failed.  dump them */

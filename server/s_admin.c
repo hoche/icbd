@@ -19,8 +19,7 @@
 #include "icbutil.h"
 #include "strutil.h"
 #include "mdb.h"
-
-#include "murgil/murgil.h"  /* for disconnectuser()  */
+#include "pktserv/pktserv.h"  /* for pkserv_disconnect() */
 
 extern int log_level;
 
@@ -67,7 +66,7 @@ int s_drop(int n, int argc)
         if (TheVictim < 0) {
             senderror(n, "User not found.");
         } else if (check_auth(n))
-            disconnectuser(TheVictim);
+            pktserv_disconnect(TheVictim);
         else if (valuser(u_tab[TheVictim].nickname,
                          getword(get_tail(fields[1])), NULL) == 0) 
         {

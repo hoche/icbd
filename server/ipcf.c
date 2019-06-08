@@ -20,8 +20,7 @@
 #include "users.h"
 #include "s_commands.h"
 #include "s_stats.h"    /* for server_stats */
-
-#include "murgil/murgil.h" /* for disconnectuser */
+#include "pktserv/pktserv.h" /* for pktserv_disconnect() */
 
 void c_packet(char *pkt)
 {
@@ -81,7 +80,7 @@ void s_didpoll(int n)
                     sprintf(mbuf, "[KILL] killing %d (%d)", i, S_kill[i]);
                     mdb(MSG_INFO, mbuf);
                     server_stats.drops++;
-                    disconnectuser(i);
+                    pktserv_disconnect(i);
                 }
             }
         }
@@ -199,7 +198,7 @@ void s_didpoll(int n)
                     mdb(MSG_INFO, mbuf);
                     sendstatus(i, "Drop", 
                                "Your connection has been idled out.");
-                    disconnectuser(i);
+                    pktserv_disconnect(i);
                 }
                 else if ((TheTime - u_tab[i].t_recv) > (MAX_IDLE - IDLE_WARN))
                 {

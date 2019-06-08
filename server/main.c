@@ -29,6 +29,8 @@
 #include "groups.h"
 #include "protocol.h"
 #include "mdb.h"
+#include "msgs.h"
+#include "ipcf.h"
 #include "icbutil.h"
 #include "unix.h"
 #include "users.h"
@@ -36,20 +38,7 @@
 #include "send.h"
 #include "s_stats.h"    /* for server_stats */
 
-#include "murgil/murgil.h"
-#include "murgil/globals.h"
-
-#ifdef HAVE_SSL
-#    include <openssl/crypto.h>
-#    include <openssl/x509.h>
-#    include <openssl/pem.h>
-#    include <openssl/ssl.h>
-#    include <openssl/err.h>
-#if (SSLEAY_VERSION_NUMBER >= 0x0907000L)
-#    include <openssl/conf.h>
-#endif
-#    include "murgil/sslconf.h"
-#endif
+#include "pktserv/pktserv.h"
 
 void trapsignals(void)
 {
@@ -65,23 +54,6 @@ void trapsignals(void)
     signal(SIGUSR2, icbload);
 }
 
-#ifdef HAVE_SSL
-int init_openssl_library(void)
-{
-    #if OPENSSL_VERSION_NUMBER < 0x10100000L
-    SSL_library_init();
-    #else
-    OPENSSL_init_ssl(0, NULL);
-    #endif
-
-    SSL_load_error_strings();
-    /* OPENSSL_config(NULL); */
-
-    OpenSSL_add_ssl_algorithms();
-
-    return(1);
-}
-#endif
 
 int main(int argc, char* argv[])
 {
@@ -194,12 +166,6 @@ int main(int argc, char* argv[])
     log_level = 5;
 #endif
 
-#ifdef HAVE_SSL
-    if (sslport) {
-        init_openssl_library();
-    }
-#endif
-
 
 #ifdef RLIMIT_NOFILE
     getrlimit(RLIMIT_NOFILE, &rlp);
@@ -214,6 +180,15 @@ int main(int argc, char* argv[])
     memset (thishost, '\0', sizeof (thishost));
     memset (&server_stats.start_time, '\0', sizeof (server_stats));
     time (&server_stats.start_time);
+
+    /* initialize the network engine */
+    pktserv_cb_t cb = {0};
+    cb.idle = s_didpoll;
+    cb.dispatch = s_packet;
+    cb.new_client = s_new_user;
+    cb.lost_client = s_lost_user;
+    cb.ok2read = ok2read;
+    pktserv_init(NULL, &cb);
 
     if (restart == 0)
     {
@@ -259,21 +234,21 @@ int main(int argc, char* argv[])
                 strncpy (thishost, bindhost, MAXHOSTNAMELEN);
         }
 
-        if ((port_fd = makeport(bindhost, port)) < 0)
+        if (pktserv_addport(bindhost, port, 0) < 0)
         {
-            vmdb (MSG_ERR, "makeport failed: %s", strerror(errno));
+            vmdb (MSG_ERR, "pktserv_addport failed: %s", strerror(errno));
             exit (-1);
         }
 
 #ifdef HAVE_SSL
         if (sslport) {
-            if (create_ssl_context(pem, &ctx) != 0) {
+            if (init_ssl(pem) != 0) {
                 mdb(MSG_ERR, "couldn't create SSL context. Do you have a valid PEM file?");
                 exit (-1);
             }
             vmdb(MSG_INFO, "Using SSL PEM file %s.", pem);
-            if ((sslport_fd = makeport(bindhost, sslport)) < 0) {
-                vmdb(MSG_ERR, "makeport failed: %s", strerror(errno));
+            if ((pktserv_addport(bindhost, sslport, 1)) < 0) {
+                vmdb (MSG_ERR, "pktserv_addport failed: %s", strerror(errno));
                 exit (-1);
             }
             vmdb(MSG_INFO, "Using SSL port %d.", sslport);
@@ -313,9 +288,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        extern int port_fd;
         extern char *getlocalname(int socketfd);
-        char    *th = (char *)NULL;
 
         if (log_level >= 0)
             icbopenlogs(0);
@@ -335,9 +308,6 @@ int main(int argc, char* argv[])
         trapsignals(); 
         mdb(MSG_ALL, "[RESTART] Reloading server data");
         icbload(0);
-
-        if ( (th = getlocalname (port_fd)) != (char *) NULL )
-            strncpy(thishost, th, MAXHOSTNAMELEN);
 
         for (i = 0; i < MAX_USERS; i++)
             if (u_tab[i].login > LOGIN_FALSE)
@@ -377,7 +347,7 @@ int main(int argc, char* argv[])
     }
 
     /* start the serve loop */
-    serverserve();
+    pktserv_run();
 
     /* all's well that ends */
     return 0;
