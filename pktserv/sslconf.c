@@ -50,7 +50,10 @@ int init_ssl(char *pem)
 {
     int result;
     const SSL_METHOD *method;
-    RSA *rsa;
+    BIGNUM *bne = NULL;
+    RSA *rsa = NULL;
+    int bits = 2048;
+    unsigned long e = RSA_F4;
 
     init_openssl_library();
 
@@ -88,16 +91,27 @@ int init_ssl(char *pem)
     }
 
     result = SSL_CTX_check_private_key(ctx);
-
     if (!result) {
         vmdb(MSG_ERR, "SSL key mismatch in %s.", pem);
         return -1;
     }
 
-    rsa = RSA_generate_key(512, RSA_F4, NULL, NULL);
+    bne = BN_new();
+    result = BN_set_word(bne, e);
+    if (!result) {
+        vmdb(MSG_ERR, "Couldn't create BIGNUM.");
+        return -1;
+    }
+
+    rsa = RSA_new();
+    result = RSA_generate_key_ex(rsa, bits, bne, NULL);
+    if (!result) {
+        vmdb(MSG_ERR, "Couldn't generate RSA key.");
+        return -1;
+    }
 
     if (!SSL_CTX_set_tmp_rsa(ctx, rsa)) {
-        vmdb(MSG_ERR, "Couldn't create a temporary RSA key.", pem);
+        vmdb(MSG_ERR, "Couldn't assign temporary RSA key to SSL context.");
         return -1;
     }
 
