@@ -44,19 +44,13 @@ $(LIBDIR)/$(TARGET): $(OBJ)
 	@AR@ -q $(LIBDIR)/$(TARGET) $(OBJ)
 	@RANLIB@ $(LIBDIR)/$(TARGET)
 
-tags:
-	@CTAGS@ -w *[ch]
+cppcheck:
+	cppcheck $(CPPFLAGS) --enable=warning .
 
 clean:
 	@RM@ -f *.o core tags
-
-depend:
-	@MAKEDEPEND@ $(DEPENDFLAGS) $(SRC)
-
 
 .SUFFIXES:
 .SUFFIXES: .c .o
 .c.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<
-
-# DO NOT DELETE THIS LINE --makedepend uses it.
