@@ -27,7 +27,7 @@
 #include <resolv.h>
 #include <string.h>
 
-#include "mdb.h"
+#include "server/mdb.h"
 
 
 struct hostent *double_reverse_check(struct in_addr in)

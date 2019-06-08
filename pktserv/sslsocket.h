@@ -15,13 +15,7 @@
 
 #pragma once
 
-#include "config.h"
-
-#include <sys/types.h>
-
-#include "pktserv_internal.h"
 #include "pktbuffers.h"
-
 
 int sslsocket_accept(cbuf_t *cbuf);
 int sslsocket_read(cbuf_t *cbuf, void* buf, size_t len);

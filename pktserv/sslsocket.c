@@ -23,7 +23,7 @@
 #include <sys/types.h>
 
 #include "pktserv_internal.h"
-#include "../server/mdb.h"  /* for mdb() */
+#include "server/mdb.h"
 
 
 #ifndef HAVE_SSL
@@ -178,11 +178,11 @@ int sslsocket_read(cbuf_t *cbuf, void *buf, size_t nbytes)
          * write more or try a read.
          */
         if (cbuf->wlist_size) {
-            cbuf->state == WANT_SSL_WRITE;
+            cbuf->state = WANT_SSL_WRITE;
         } else if (SSL_pending(cbuf->ssl_con)>0) {
-            cbuf->state == WANT_SSL_READ;
+            cbuf->state = WANT_SSL_READ;
         } else {
-            cbuf->state == IDLE;
+            cbuf->state = IDLE;
         }
         return result;
     }
@@ -191,13 +191,12 @@ int sslsocket_read(cbuf_t *cbuf, void *buf, size_t nbytes)
     switch (ssl_error) {
         case SSL_ERROR_WANT_READ:
             vmdb(MSG_INFO, "sslsocket_read: fd%d: SSL_ERROR_WANT_READ", cbuf->fd);
-            cbuf->want_ssl_read = 1;
+            cbuf->state = WANT_SSL_READ;
             return 0;
 
         case SSL_ERROR_WANT_WRITE:
             vmdb(MSG_INFO, "sslsocket_read: fd%d: SSL_ERROR_WANT_WRITE", cbuf->fd);
-            cbuf->want_ssl_read = 1;
-            FD_SET(cbuf->fd, &wfdset); /* try again later with the full amount */
+            cbuf->state = WANT_SSL_WRITE;
             return 0;
 
         case SSL_ERROR_ZERO_RETURN:
@@ -261,11 +260,11 @@ int sslsocket_write(cbuf_t *cbuf, void *buf, size_t nbytes)
          * write more or try a read.
          */
         if (cbuf->wlist_size) {
-            cbuf->state == WANT_SSL_WRITE;
+            cbuf->state = WANT_SSL_WRITE;
         } else if (SSL_pending(cbuf->ssl_con)>0) {
-            cbuf->state == WANT_SSL_READ;
+            cbuf->state = WANT_SSL_READ;
         } else {
-            cbuf->state == IDLE;
+            cbuf->state = IDLE;
         }
         return result;
     }
@@ -274,13 +273,12 @@ int sslsocket_write(cbuf_t *cbuf, void *buf, size_t nbytes)
     switch (ssl_error) {
         case SSL_ERROR_WANT_READ:
             vmdb(MSG_INFO, "sslsocket_write: fd%d: SSL_ERROR_WANT_READ", cbuf->fd);
-            cbuf->want_ssl_write = 1;
-            FD_SET(cbuf->fd, &rfdset); /* try again later with the full amount */
+            cbuf->state = WANT_SSL_READ;
             return 0;
 
         case SSL_ERROR_WANT_WRITE:
             vmdb(MSG_INFO, "sslsocket_write: fd%d: SSL_ERROR_WANT_WRITE", cbuf->fd);
-            cbuf->want_ssl_write = 1;
+            cbuf->state = WANT_SSL_WRITE;
             return 0;
 
         case SSL_ERROR_ZERO_RETURN:

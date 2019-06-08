@@ -24,6 +24,11 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #else
@@ -31,7 +36,7 @@
 #endif
 
 #include "bsdqueue.h"
-#include "mdb.h"
+#include "server/mdb.h"
 
 #include "pktserv_internal.h"
 #include "pktbuffers.h"
@@ -440,8 +445,87 @@ pktserv_run(void)
 
 int pktserv_addport(char *host_name, int port_number, int is_ssl)
 {
-    /* XXX Add me! */
-    return 0;
+    struct sockaddr_in saddr;
+    int one = 1;
+    int s;
+    int flags;
+
+    memset(&saddr, 0, sizeof(saddr));
+
+    /*
+    * if host_name is NULL or empty, we bind to any address, otherwise
+    * we bind to just the one listed 
+     */
+    if ( (char *)NULL != host_name && '\0' != host_name[0] ) {
+        struct hostent *hp;
+
+        if ((hp = gethostbyname(host_name)) == (struct hostent *) 0) {
+            vmdb(MSG_ERR, "%s: gethostbyname()", __FUNCTION__ );
+            return(-1);
+        }
+
+        memcpy (&saddr.sin_addr, hp->h_addr_list[0], hp->h_length);
+    } else {
+        saddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    }
+
+    /* insert host_name into address */
+    saddr.sin_family = AF_INET;
+    saddr.sin_port = htons(port_number);
+
+    /* create a socket */
+    if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        vmdb(MSG_ERR, "%s: socket()", __FUNCTION__ );
+        return(-1);
+    }
+
+    /* bind it to the inet address */
+    if (bind(s, (struct sockaddr *) &saddr, sizeof(saddr)) < 0) {
+        vmdb(MSG_ERR, "%s: bind()", __FUNCTION__ );
+        return(-1);
+    }
+
+    /* start listening for connections */
+    listen(s, 5);
+
+    /* force occasional connection check */
+    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) < 0) {
+        vmdb(MSG_ERR, "%s: setsockopt(SO_REUSEADDR)", __FUNCTION__ );
+        /* return(-1);*/
+    }
+
+    /* make it non-blocking */
+    if (fcntl(s, F_SETFL, O_NONBLOCK) < 0) {
+        vmdb(MSG_ERR, "%s: fcntl(O_NONBLOCK)", __FUNCTION__ );
+        return(-1);
+    }
+
+    /* Don't close on exec */
+    flags = fcntl(s, F_GETFD, 0);
+    flags = flags & ~ FD_CLOEXEC;
+    if (fcntl(s, F_SETFD, flags) < 0) {
+        vmdb(MSG_ERR, "%s: fcntl(FD_CLOEXEC)", __FUNCTION__ );
+        exit (-1);
+    }
+
+    /* set the send buffer size */
+    one = 24576;
+    if (setsockopt(s, SOL_SOCKET, SO_SNDBUF, (char *)&one, sizeof(one)) < 0) {
+        vmdb(MSG_ERR, "%s: setsockopt(SO_SNDBUF)", __FUNCTION__ );
+    }
+
+    /* set this socket's state to be a non-blocked, unignored listen socket */
+    cbufs[s].disp = OK;
+    if (is_ssl) {
+        cbufs[s].state = LISTEN_SOCKET_SSL;
+    } else {
+        cbufs[s].state = LISTEN_SOCKET;
+    }
+
+    /* allow us to handle problems gracefully */
+    signal(SIGPIPE, SIG_IGN);
+
+    return s;
 }
 
 /* Send a packet to a client. adds a packet to a client's list of packets that

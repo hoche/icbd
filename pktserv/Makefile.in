@@ -33,8 +33,7 @@ OBJ = \
 	pktsocket.o \
 	sslconf.o \
 	sslsocket.o \
-	getrname.o \
-	makeport.o
+	getrname.o
 
 TARGET       = libpktserv.a
 

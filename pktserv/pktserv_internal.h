@@ -1,10 +1,10 @@
 /*
- * globals.h
+ * pktserv_internal.h
  *
- * globals for SSL-enabled select-based server.
+ * internal globals for SSL-enabled poll-based network server.
  *
  * Author: Michel Hoche-Mong, hoche@grok.com
- * Copyright (c) 2000, 2001, Michel Hoche-Mong.
+ * Copyright (c) 2000-2019, Michel Hoche-Mong.
  * All rights reserved.
  *
  * Based on code originally created by Carrick Sean Casey, as well

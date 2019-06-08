@@ -22,7 +22,7 @@
 #include <openssl/conf.h>
 #endif
 
-#include "../server/mdb.h"  /* for mdb() */
+#include "server/mdb.h"
 
 SSL_CTX *ctx = NULL;
 

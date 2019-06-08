@@ -29,7 +29,7 @@
 #endif
 
 #include "bsdqueue.h"
-#include "mdb.h"
+#include "server/mdb.h"
 
 #include "pktserv_internal.h"
 #include "pktbuffers.h"
