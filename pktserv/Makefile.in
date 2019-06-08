@@ -47,9 +47,6 @@ $(LIBDIR)/$(TARGET): $(OBJ)
 tags:
 	@CTAGS@ -w *[ch]
 
-splint:
-	splint -f ../.splintrc $(CPPFLAGS) *.[ch]
-
 clean:
 	@RM@ -f *.o core tags
 

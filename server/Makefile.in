@@ -59,10 +59,6 @@ all: icbd
 icbd: $(OBJ) $(PKTSERV)
 	@CC@ $(CFLAGS) -o icbd $(OBJ) $(LIBS)
 
-# this is a hack
-splint:
-	splint -f ../.splintrc $(CPPFLAGS) *.[ch]
-
 cppcheck:
 	cppcheck $(CPPFLAGS) --enable=warning .
 

@@ -70,11 +70,6 @@ clean:
 		cd $${dir}; ${MAKE} clean); done
 	-rm -f $(TOPCLEAN)
 
-splint:		$(PREREQS)
-	@for dir in ${DIRS}; do \
-		(echo Making in $${dir}; \
-		 cd $${dir}; ${MAKE} ${MFLAGS} -${MAKEFLAGS} splint); done
-
 cppcheck:		$(PREREQS)
 	@for dir in ${DIRS}; do \
 		(echo Making in $${dir}; \
