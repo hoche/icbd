@@ -89,7 +89,9 @@ cbufs_reset(void)
 int
 cbufs_init(void)
 {
-    cbufs = (cbuf_t*)calloc(sizeof(cbuf_t), MAX_USERS);
+    if (cbufs == NULL) {
+        cbufs = (cbuf_t*)calloc(sizeof(cbuf_t), MAX_USERS);
+    }
     if (!cbufs)
         return -1;
     cbufs_reset();

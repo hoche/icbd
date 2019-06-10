@@ -174,14 +174,14 @@ add_pollfd(int fd)
     int i;
 
     /* check to see if we already have an pollfd for this fd */
-    for (i = g_pollsetsize; i; i--) {
+    for (i = 0; i < g_pollsetsize; i++) {
         if ( g_pollset[i].fd == fd ) {
             break;
         }
     }
 
     /* if there's no pre-existing pollfd for it, add it */
-    if (i < 0) {
+    if (i == g_pollsetsize) {
         if (g_pollsetsize == g_pollsetmax) {
             struct pollfd *newset;
             newset = realloc(g_pollset, sizeof(struct pollfd) * g_pollsetmax * 2);
@@ -191,8 +191,7 @@ add_pollfd(int fd)
             g_pollsetmax *= 2;
             g_pollset = newset;
         }
-        i = ++g_pollsetsize;
-        g_pollset[i].fd = fd;
+        g_pollset[g_pollsetsize++].fd = fd;
     }
 
     /* reset the event mask */
@@ -359,6 +358,8 @@ int pktserv_init(char *config, pktserv_cb_t *cb)
        read_config(config);
      */
 
+    cbufs_init();
+
     /* XXX set up default dispatch functions */
 
     if (cb->idle) {
@@ -396,23 +397,17 @@ pktserv_run(void)
     long loopcount = 0;
     int poll_timeout;
 
-    cbufs_init();
-
-    add_pollfd(port_fd);
-
-#ifdef HAVE_SSL
-    add_pollfd(sslport_fd);
-#endif
-
     if (POLL_TIMEOUT < 0) 
         poll_timeout = 0;
     else
         poll_timeout = POLL_TIMEOUT * 1000;
 
+    poll_timeout = -1; // block indefinitely
+
     for (;;) {
         loopcount++;
 
-        ret = poll(g_pollset, g_pollsetsize, poll_timeout);
+        ret = poll(g_pollset, g_pollsetsize, poll_timeout); // millisec
         if (ret < 0) {
             if (errno == EINTR)
                 ret = 0;
@@ -512,6 +507,10 @@ int pktserv_addport(char *host_name, int port_number, int is_ssl)
     } else {
         cbufs[s].state = LISTEN_SOCKET;
     }
+
+    cbufs[s].fd = s;
+
+    add_pollfd(s);
 
     /* allow us to handle problems gracefully */
     signal(SIGPIPE, SIG_IGN);
