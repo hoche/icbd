@@ -66,7 +66,7 @@ _msgbuf_alloc(msgbuf_t *msgbuf, size_t sz)
 }
 
 void
-_free_msgbuf(msgbuf_t *msgbuf)
+_msgbuf_free(msgbuf_t *msgbuf)
 {
     if (msgbuf->data) {
         memset(msgbuf->data, 0, msgbuf->sz);
@@ -98,3 +98,23 @@ cbufs_init(void)
     return 0;
 }
 
+#define socketStateStrCase(x) case x: return #x; break;
+const char* socketStateStr(SocketState state)
+{
+    switch (state) {
+        socketStateStrCase(DISCONNECTED);
+        socketStateStrCase(ACCEPTED);
+        socketStateStrCase(IDLE);
+        socketStateStrCase(WANT_SSL_ACCEPT);
+        socketStateStrCase(WANT_SSL_READ);
+        socketStateStrCase(WANT_SSL_WRITE);
+        socketStateStrCase(WANT_READ);
+        socketStateStrCase(WANT_WRITE);
+        socketStateStrCase(WANT_DISCONNECT);
+        socketStateStrCase(WANT_RAW_DISCONNECT);
+        socketStateStrCase(COMPLETE_PACKET);
+        socketStateStrCase(LISTEN_SOCKET);
+        socketStateStrCase(LISTEN_SOCKET_SSL);
+    }
+    return "UNKNOWN";
+};

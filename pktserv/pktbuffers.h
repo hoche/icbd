@@ -39,7 +39,6 @@ typedef enum {
     WANT_SSL_ACCEPT,     /* need to retry ssl_accept() */
     WANT_SSL_READ,       /* need to retry ssl_read() */
     WANT_SSL_WRITE,      /* need to retry ssl_write() */
-    WANT_HEADER,         /* ready for the header of a new packet */
     WANT_READ,           /* in the middle of reading a packet */
     WANT_WRITE,          /* have one or more unsent packets */
     WANT_DISCONNECT,     /* pending disconnect - server needs to be notified */
@@ -84,7 +83,8 @@ typedef struct cbuf_st {
 
 
 msgbuf_t *_msgbuf_alloc(msgbuf_t *msgbuf, size_t sz);
-void _free_msgbuf(msgbuf_t *msgbuf);
+void _msgbuf_free(msgbuf_t *msgbuf);
 void cbufs_reset(void);
 int cbufs_init(void);
 
+const char* socketStateStr(SocketState state);
