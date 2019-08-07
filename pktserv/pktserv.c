@@ -44,6 +44,8 @@
 #include "pktsocket.h"
 #include "sslsocket.h"
 
+#define DEBUG
+
 cbuf_t *cbufs;    /* array of user packet buffers */
 
 int port_fd;    /* plaintext listen port */
@@ -173,7 +175,7 @@ add_pollfd(int fd)
 {
     int i;
 
-    /* check to see if we already have an pollfd for this fd */
+    /* check to see if we already have a pollfd for this fd */
     for (i = 0; i < g_pollsetsize; i++) {
         if ( g_pollset[i].fd == fd ) {
             break;
@@ -182,7 +184,16 @@ add_pollfd(int fd)
 
     /* if there's no pre-existing pollfd for it, add it */
     if (i == g_pollsetsize) {
-        if (g_pollsetsize == g_pollsetmax) {
+        /* first time through? Allocate the pollset. */
+        if (g_pollsetmax == 0) {
+            struct pollfd *newset;
+            newset = malloc(sizeof(struct pollfd) * 16);
+            if (!newset)
+                return -1; 
+
+            g_pollsetmax = 16;
+            g_pollset = newset;
+        } else if (g_pollsetsize == g_pollsetmax) {
             struct pollfd *newset;
             newset = realloc(g_pollset, sizeof(struct pollfd) * g_pollsetmax * 2);
             if (!newset)
@@ -243,6 +254,9 @@ pollfd_state_machine(struct pollfd* pollfd)
 
     readable = pollfd->revents & POLLIN;
     writeable = pollfd->revents & POLLOUT;
+    if (readable || writeable) {
+        cbuf->disp = OK;
+    }
 
     /* 
      * run through as many states as we can, and only stop when
@@ -256,7 +270,7 @@ pollfd_state_machine(struct pollfd* pollfd)
                 return;
 
             case ACCEPTED:          /* freshly accepted client. inform the upper level */
-                cbuf->state = WANT_HEADER;
+                cbuf->state = WANT_READ;
                 if (g_pktserv_cb.new_client)
                     g_pktserv_cb.new_client(cbuf->fd, cbuf->is_ssl);
                 break;
@@ -275,8 +289,13 @@ pollfd_state_machine(struct pollfd* pollfd)
                 break;
 
             case WANT_WRITE:        /* we have pending writes. This can be a new SSL write. */
-                if (writeable)
+                if (writeable) {
                     pktsocket_write(cbuf);
+                }
+                if (readable && cbuf->state == WANT_READ) {
+                    /* pktsocket_write() may have set this to BLOCKED */
+                    cbuf->disp = OK;
+                }
                 break;
 
             case IDLE:              /* not doing anything. got some network data */
@@ -295,25 +314,16 @@ pollfd_state_machine(struct pollfd* pollfd)
                         pktsocket_read(cbuf);
                         if (cbuf->state == COMPLETE_PACKET && g_pktserv_cb.dispatch) {
                             g_pktserv_cb.dispatch(cbuf->fd, cbuf->rbuf->data);
+                            _msgbuf_free(cbuf->rbuf);
+                            cbuf->rbuf = NULL;
                         }
                     }
                 }
-                break;
-
-            case WANT_HEADER:      /* XXX This isn't right. Fix me. */
-                if (readable) {
-                    int ok2read = 1;
-                    if (g_pktserv_cb.ok2read) {
-                        ok2read = g_pktserv_cb.ok2read(cbuf->fd);
-                    }
-                    if (ok2read) {
-                        pktsocket_read(cbuf);
-                        if (cbuf->state == COMPLETE_PACKET && g_pktserv_cb.dispatch) {
-                            g_pktserv_cb.dispatch(cbuf->fd, cbuf->rbuf->data);
-                        }
-                    }
+                if (!TAILQ_EMPTY(&(cbuf->wlist))) {
+                    /* cycle back to want write if there's stuff left */
+                    cbuf->state = WANT_WRITE;
                 }
-                break;
+                return;
 
             case WANT_DISCONNECT:      /* need to disconnect the user */
                 vmdb(MSG_WARN, "%s: fd%d, disconnecting user\n", __FUNCTION__, cbuf->fd);
@@ -338,11 +348,18 @@ pollfd_state_machine(struct pollfd* pollfd)
 /* 
  * run all the elements in the pollfd set through the statemachine
  */
-static void
+void
 handle_pollfds(void)
 {
     int i;
-    for (i = 0; i < g_pollsetsize; i++)
+    int pollsetsize = g_pollsetsize; /* save this because we can resize it in the state machine */
+#ifdef DEBUG
+    for (i = 0; i < pollsetsize; i++) {
+        vmdb(MSG_DEBUG, "%s: {fd=%d, events=%d, revents=%d}", __FUNCTION__,
+            g_pollset[i].fd, g_pollset[i].events, g_pollset[i].revents);
+    }
+#endif
+    for (i = 0; i < pollsetsize; i++)
         pollfd_state_machine(&g_pollset[i]);
 }
 
@@ -402,7 +419,9 @@ pktserv_run(void)
     else
         poll_timeout = POLL_TIMEOUT * 1000;
 
-    poll_timeout = -1; // block indefinitely
+#ifdef DEBUG
+    poll_timeout = -1; /* block indefinitely */
+#endif
 
     for (;;) {
         loopcount++;
@@ -412,17 +431,14 @@ pktserv_run(void)
             if (errno == EINTR)
                 ret = 0;
             else
-                vmdb(MSG_ERR, "poll: %s", strerror(errno));
+                vmdb(MSG_ERR, "%s: %s", __FUNCTION__, strerror(errno));
         }
 
-        /* we check every fd, regardless of whether it was flagged
-         * by poll(). This way we catch network activity, SSL
-         * activity, and things like disconnect requests from
-         * the upper layer.
-         */
-        handle_pollfds();
+        if (ret > 0) {
+            handle_pollfds();
+        }
 
-        if (ret == 0 || loopcount%10==0 ) {
+        if (ret >= 0 || loopcount%10==0 ) {
             loopcount = 0;
             handle_idle();
         }
@@ -508,8 +524,10 @@ int pktserv_addport(char *host_name, int port_number, int is_ssl)
         cbufs[s].state = LISTEN_SOCKET;
     }
 
+    vmdb(MSG_ERR, "%s: setting cbufs[%d].fd to %d", __FUNCTION__, s, s);
     cbufs[s].fd = s;
 
+    /* XXX error check this */
     add_pollfd(s);
 
     /* allow us to handle problems gracefully */
@@ -533,13 +551,18 @@ int pktserv_send(int s, char *pkt, size_t len)
     /* XXX check this to be sure this socket makes sense */
     cbuf = &(cbufs[s]);
 
+    if (cbuf->state == WANT_DISCONNECT || cbuf->state == WANT_RAW_DISCONNECT) {
+        vmdb(MSG_ERR, "%s() called on socket in DISCONNECT state", __FUNCTION__);
+    }
+
+    cbuf->state = WANT_WRITE;
+
     vmdb(MSG_VERBOSE, "sendpacket: len=%d, pktlen=%d, pkt=\"%s\"", 
          len, (unsigned char)*pkt, pkt+1);
 
     /* if we already have an unwritten message, bomb out */
     if (cbuf->wlist_size >= MAX_SENDPACKET_QUEUE) {
-        vmdb(MSG_ERR, 
-             "sendpacket: fd%d already has %d pending writes.", cbuf->wlist_size);
+        vmdb(MSG_ERR, "%s: fd%d already has %d pending writes.", __FUNCTION__, cbuf->wlist_size);
         return -1;
     }
 
@@ -562,8 +585,7 @@ int pktserv_send(int s, char *pkt, size_t len)
     cbuf->state = WANT_WRITE;
 
     if (pktsocket_write(cbuf) < 0) {
-        vmdb(MSG_WARN, 
-             "sendpacket: fd%d, error sending packet.", s);
+        vmdb(MSG_WARN, "%s: fd%d, error sending packet.", __FUNCTION__, s);
         cbuf->state = WANT_DISCONNECT;
         return -1;
     }
