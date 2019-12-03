@@ -1,5 +1,9 @@
 # icbd - The ICB Server
 
+_**NOTE: As of 1 Dec 2019, the current version on HEAD (with pktserv
+instead of murgil) is known to be broken. Fixes are pending. The last
+known-working version is 1.2d.**_ 
+
 ICB (Internet Citizen's Band) is a renaming of Sean Casey's original
 ForumNet (or fn) program. Much of the code here-in is Sean's, though
 considerable bug-fixing and extensions have been made over the
