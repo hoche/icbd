@@ -299,6 +299,7 @@ def with_server(
     *,
     enable_tls: bool,
     startup_timeout_s: float = 2.5,
+    post_probe_settle_s: float = 0.35,
 ) -> tuple[ServerRun, int, Optional[int]]:
     clear_port = find_free_port()
     ssl_port = find_free_port() if enable_tls else None
@@ -325,9 +326,10 @@ def with_server(
 
     # Brief pause to let the server process the probe connection's disconnect
     # before we connect the real test client. This avoids a race condition on
-    # some platforms (notably macOS) where the server hasn't finished cleaning
-    # up the probe FD when the test client connects.
-    time.sleep(0.10)
+    # some platforms (notably macOS CI) where the server has accepted the probe
+    # but hasn't yet completed disconnect cleanup when the login client arrives.
+    if post_probe_settle_s > 0:
+        time.sleep(post_probe_settle_s)
 
     return server, clear_port, ssl_port
 
