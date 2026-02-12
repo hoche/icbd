@@ -2,10 +2,7 @@ hoche's TODO List (updated 6/5/19):
 
     configuration
     ---------------
-    * go through all the "configure" ifdefs in config.h.in and add the
-	    appropriate thing to the code
-    * fix the dist target
-    * add an install-sh
+    * ~~convert to CMake~~
     * get rid of unused/obsolete #ifdefs, via ifnames
     * allow specifying where gdbm/ndbm headers and lib are
 
@@ -13,6 +10,7 @@ hoche's TODO List (updated 6/5/19):
     ---------------
     * rewrite icbdb api so instead of passing ints as void*'s, it
         passes the address of the item.
+    * temporarily add capability of using gdbm
     * ditch dbm and use sqlite as it's more ubiquitous these days
 
     socket server (murgil) rewrite and SSL support
@@ -30,7 +28,7 @@ hoche's TODO List (updated 6/5/19):
     ---------------------------------------------
     * add in the ipv6 support written ages ago
     * add in the brick support written ages ago
-    * support utf-8 - done
+    * ~~support utf-8~~
 
     test harness
     ----------------------------------------------

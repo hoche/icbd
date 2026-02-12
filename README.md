@@ -26,6 +26,6 @@ Since then:
 
 Building and installation instructions can be found in README.INSTALL.
 
-README.ToDo is a ToDo list for the developers.
+TODO.md is a ToDo list for the developers.
 
 General ICB resources are maintained at http://www.icb.net/
