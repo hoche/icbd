@@ -35,6 +35,50 @@ target_include_directories(icbd_unit_wildmat PRIVATE
 )
 add_test(NAME icbd.unit.wildmat COMMAND icbd_unit_wildmat)
 
+add_executable(icbd_unit_strutil
+  "${ICBD_TESTS_DIR}/unit/test_strutil.c"
+  "${CMAKE_SOURCE_DIR}/server/strutil.c"
+  "${CMAKE_SOURCE_DIR}/server/utf8.c"
+)
+target_include_directories(icbd_unit_strutil PRIVATE
+  "${GENERATED_DIR}"
+  "${CMAKE_SOURCE_DIR}"
+)
+add_test(NAME icbd.unit.strutil COMMAND icbd_unit_strutil)
+
+add_executable(icbd_unit_namelist
+  "${ICBD_TESTS_DIR}/unit/test_namelist.c"
+  "${CMAKE_SOURCE_DIR}/server/namelist.c"
+  "${CMAKE_SOURCE_DIR}/server/strlist.c"
+  "${CMAKE_SOURCE_DIR}/server/wildmat.c"
+)
+target_include_directories(icbd_unit_namelist PRIVATE
+  "${GENERATED_DIR}"
+  "${CMAKE_SOURCE_DIR}"
+)
+add_test(NAME icbd.unit.namelist COMMAND icbd_unit_namelist)
+
+add_executable(icbd_unit_strlist
+  "${ICBD_TESTS_DIR}/unit/test_strlist.c"
+  "${CMAKE_SOURCE_DIR}/server/strlist.c"
+  "${CMAKE_SOURCE_DIR}/server/wildmat.c"
+)
+target_include_directories(icbd_unit_strlist PRIVATE
+  "${GENERATED_DIR}"
+  "${CMAKE_SOURCE_DIR}"
+)
+add_test(NAME icbd.unit.strlist COMMAND icbd_unit_strlist)
+
+add_executable(icbd_unit_utf8
+  "${ICBD_TESTS_DIR}/unit/test_utf8.c"
+  "${CMAKE_SOURCE_DIR}/server/utf8.c"
+)
+target_include_directories(icbd_unit_utf8 PRIVATE
+  "${GENERATED_DIR}"
+  "${CMAKE_SOURCE_DIR}"
+)
+add_test(NAME icbd.unit.utf8 COMMAND icbd_unit_utf8)
+
 # ------------------------------
 # Integration tests (Python3)
 # ------------------------------
@@ -68,6 +112,51 @@ if(Python3_Interpreter_FOUND)
       "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
   )
 
+  add_test(
+    NAME icbd.integration.groups.clear
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${ICBD_TESTS_DIR}/integration/test_groups.py"
+      "--icbd" "$<TARGET_FILE:icbd>"
+      "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
+  )
+
+  add_test(
+    NAME icbd.integration.away.clear
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${ICBD_TESTS_DIR}/integration/test_away.py"
+      "--icbd" "$<TARGET_FILE:icbd>"
+      "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
+  )
+
+  add_test(
+    NAME icbd.integration.hush_notify.clear
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${ICBD_TESTS_DIR}/integration/test_hush_notify.py"
+      "--icbd" "$<TARGET_FILE:icbd>"
+      "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
+  )
+
+  add_test(
+    NAME icbd.integration.echoback_beep_name.clear
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${ICBD_TESTS_DIR}/integration/test_echoback_beep_name.py"
+      "--icbd" "$<TARGET_FILE:icbd>"
+      "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
+  )
+
+  add_test(
+    NAME icbd.integration.errors.clear
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${ICBD_TESTS_DIR}/integration/test_errors.py"
+      "--icbd" "$<TARGET_FILE:icbd>"
+      "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
+  )
+
   if(HAVE_SSL)
     add_test(
       NAME icbd.integration.commands.tls
@@ -88,8 +177,57 @@ if(Python3_Interpreter_FOUND)
         "--icbd" "$<TARGET_FILE:icbd>"
         "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
     )
+
+    add_test(
+      NAME icbd.integration.groups.tls
+      COMMAND
+        "${Python3_EXECUTABLE}"
+        "${ICBD_TESTS_DIR}/integration/test_groups.py"
+        "--tls"
+        "--icbd" "$<TARGET_FILE:icbd>"
+        "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
+    )
+
+    add_test(
+      NAME icbd.integration.away.tls
+      COMMAND
+        "${Python3_EXECUTABLE}"
+        "${ICBD_TESTS_DIR}/integration/test_away.py"
+        "--tls"
+        "--icbd" "$<TARGET_FILE:icbd>"
+        "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
+    )
+
+    add_test(
+      NAME icbd.integration.hush_notify.tls
+      COMMAND
+        "${Python3_EXECUTABLE}"
+        "${ICBD_TESTS_DIR}/integration/test_hush_notify.py"
+        "--tls"
+        "--icbd" "$<TARGET_FILE:icbd>"
+        "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
+    )
+
+    add_test(
+      NAME icbd.integration.echoback_beep_name.tls
+      COMMAND
+        "${Python3_EXECUTABLE}"
+        "${ICBD_TESTS_DIR}/integration/test_echoback_beep_name.py"
+        "--tls"
+        "--icbd" "$<TARGET_FILE:icbd>"
+        "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
+    )
+
+    add_test(
+      NAME icbd.integration.errors.tls
+      COMMAND
+        "${Python3_EXECUTABLE}"
+        "${ICBD_TESTS_DIR}/integration/test_errors.py"
+        "--tls"
+        "--icbd" "$<TARGET_FILE:icbd>"
+        "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
+    )
   endif()
 else()
   message(STATUS "Python3 interpreter not found; integration tests will be skipped.")
 endif()
-
