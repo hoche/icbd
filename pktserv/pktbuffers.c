@@ -108,6 +108,7 @@ const char* socketStateStr(SocketState state)
         socketStateStrCase(WANT_SSL_ACCEPT);
         socketStateStrCase(WANT_SSL_READ);
         socketStateStrCase(WANT_SSL_WRITE);
+        socketStateStrCase(WANT_HEADER);
         socketStateStrCase(WANT_READ);
         socketStateStrCase(WANT_WRITE);
         socketStateStrCase(WANT_DISCONNECT);
