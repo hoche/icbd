@@ -243,12 +243,28 @@ pollfd_state_machine(struct pollfd* pollfd)
     int readable;
     cbuf_t *cbuf;
 
+    /* Check bounds: file descriptor must be < MAX_USERS to use as array index */
+    if (pollfd->fd >= MAX_USERS) {
+        vmdb(MSG_ERR, "pollfd_state_machine: file descriptor %d >= MAX_USERS (%d), ignoring", pollfd->fd, MAX_USERS);
+        return;
+    }
+
     cbuf = &cbufs[pollfd->fd];
 
     /* if we have an exception, disconnect 'em */
     if ( (pollfd->revents & POLLERR) ||
          (pollfd->revents & POLLHUP) ||
          (pollfd->revents & POLLNVAL)) {
+        /*
+         * A remote close often surfaces as POLLHUP without a prior read that
+         * transitions to WANT_DISCONNECT. Notify upper layers here so login/
+         * group bookkeeping (e.g. sign-off messages) still runs.
+         */
+        if (g_pktserv_cb.lost_client &&
+            cbuf->state != LISTEN_SOCKET &&
+            cbuf->state != LISTEN_SOCKET_SSL) {
+            g_pktserv_cb.lost_client(cbuf->fd);
+        }
         handle_disconnect(cbuf);
         return;
     }
@@ -563,6 +579,13 @@ int pktserv_addport(char *host_name, int port_number, int is_ssl)
         vmdb(MSG_ERR, "%s: setsockopt(SO_SNDBUF)", __FUNCTION__);
     }
 
+    /* Check bounds: file descriptor must be < MAX_USERS to use as array index */
+    if (s >= MAX_USERS) {
+        vmdb(MSG_ERR, "%s: file descriptor %d >= MAX_USERS (%d), cannot add listen port", __FUNCTION__, s, MAX_USERS);
+        close(s);
+        return -1;
+    }
+
     /* set this socket's state to be a non-blocked, unignored listen socket */
     cbufs[s].disp = OK;
     if (is_ssl) {
@@ -571,7 +594,7 @@ int pktserv_addport(char *host_name, int port_number, int is_ssl)
         cbufs[s].state = LISTEN_SOCKET;
     }
 
-    vmdb(MSG_ERR, "%s: setting cbufs[%d].fd to %d", __FUNCTION__, s, s);
+    vmdb(MSG_INFO, "%s: setting cbufs[%d].fd to %d", __FUNCTION__, s, s);
     cbufs[s].fd = s;
 
     /* XXX error check this */
