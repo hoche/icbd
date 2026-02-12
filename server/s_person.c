@@ -104,8 +104,7 @@ void away_handle (int src, int dest)
             u_tab[dest].lastaway = src;
             u_tab[dest].lastawaytime = time(NULL);
             /* sendperson(dest, src, u_tab[dest].awaymsg); */
-            snprintf(mbuf, MAX_PKT_DATA, u_tab[dest].awaymsg,
-                      u_tab[dest].nickname);
+            snprintf(mbuf, MAX_PKT_DATA, "%s", u_tab[dest].awaymsg);
             sendstatus(src, "Away", mbuf);
             if (u_tab[dest].echoback == 2) 
             {
