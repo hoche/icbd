@@ -19,9 +19,11 @@ jobs:
           - os: ubuntu-24.04
             name: Linux (Ubuntu 24.04 x64)
             install: sudo apt-get update && sudo apt-get install -y libgdbm-dev cmake python3
+            cmake_extra: ""
           - os: ubuntu-22.04
             name: Linux (Ubuntu 22.04 x64)
             install: sudo apt-get update && sudo apt-get install -y libgdbm-dev cmake python3
+            cmake_extra: ""
 
           # ---- Linux ARM64 ----
           # Note: ARM runners are free for public repos.
@@ -29,22 +31,27 @@ jobs:
           - os: ubuntu-24.04-arm
             name: Linux (Ubuntu 24.04 ARM64)
             install: sudo apt-get update && sudo apt-get install -y libgdbm-dev cmake python3
+            cmake_extra: ""
           - os: ubuntu-22.04-arm
             name: Linux (Ubuntu 22.04 ARM64)
             install: sudo apt-get update && sudo apt-get install -y libgdbm-dev cmake python3
+            cmake_extra: ""
 
           # ---- macOS Apple Silicon (ARM64) ----
           - os: macos-15
             name: macOS 15 (Apple Silicon)
-            install: brew install gdbm cmake python3
+            install: brew install gdbm cmake python3 || true
+            cmake_extra: "-DCMAKE_PREFIX_PATH=$(brew --prefix) -DCMAKE_C_FLAGS=-I$(brew --prefix gdbm)/include -DCMAKE_EXE_LINKER_FLAGS=-L$(brew --prefix gdbm)/lib"
           - os: macos-14
             name: macOS 14 (Apple Silicon)
-            install: brew install gdbm cmake python3
+            install: brew install gdbm cmake python3 || true
+            cmake_extra: "-DCMAKE_PREFIX_PATH=$(brew --prefix) -DCMAKE_C_FLAGS=-I$(brew --prefix gdbm)/include -DCMAKE_EXE_LINKER_FLAGS=-L$(brew --prefix gdbm)/lib"
 
           # ---- macOS Intel (x64) ----
-          - os: macos-13
-            name: macOS 13 (Intel x64)
-            install: brew install gdbm cmake python3
+          - os: macos-15-intel
+            name: macOS 15 (Intel x64)
+            install: brew install gdbm cmake python3 || true
+            cmake_extra: "-DCMAKE_PREFIX_PATH=$(brew --prefix) -DCMAKE_C_FLAGS=-I$(brew --prefix gdbm)/include -DCMAKE_EXE_LINKER_FLAGS=-L$(brew --prefix gdbm)/lib"
 
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
@@ -57,7 +64,7 @@ jobs:
         run: ${{ matrix.install }}
 
       - name: Configure
-        run: cmake -S . -B build -DADMIN_PWD=ci_test_pwd
+        run: cmake -S . -B build -DADMIN_PWD=ci_test_pwd ${{ matrix.cmake_extra }}
 
       - name: Build
         run: cmake --build build
@@ -67,19 +74,19 @@ jobs:
         run: ctest --output-on-failure
 
   # ---------------------------------------------------------------
-  # FreeBSD builds using vmactions/freebsd-vm (runs inside a VM
-  # on an Ubuntu host runner)
+  # FreeBSD builds using cross-platform-actions (runs a FreeBSD VM
+  # on an Ubuntu host runner via QEMU/Xhyve)
   # ---------------------------------------------------------------
   build-freebsd:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - freebsd-version: "14.2"
+          - version: "14.2"
             name: FreeBSD 14.2
-          - freebsd-version: "14.1"
+          - version: "14.1"
             name: FreeBSD 14.1
-          - freebsd-version: "13.4"
+          - version: "13.4"
             name: FreeBSD 13.4
 
     name: ${{ matrix.name }}
@@ -90,14 +97,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build & test in FreeBSD VM
-        uses: vmactions/freebsd-vm@v1
+        uses: cross-platform-actions/action@v0.25.0
         with:
-          release: ${{ matrix.freebsd-version }}
-          usesh: true
-          prepare: |
-            pkg install -y cmake gdbm python3
+          operating_system: freebsd
+          version: ${{ matrix.version }}
           run: |
+            sudo pkg install -y cmake gdbm python3
             cmake -S . -B build -DADMIN_PWD=ci_test_pwd
             cmake --build build
-            cd build
-            ctest --output-on-failure
+            cd build && ctest --output-on-failure
