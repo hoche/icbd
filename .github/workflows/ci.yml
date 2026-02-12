@@ -1,135 +1,201 @@
-name: CI
+name: CI Build and Test
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  # ---------------------------------------------------------------
-  # Native Linux and macOS builds using GitHub-hosted runners
-  # ---------------------------------------------------------------
-  build-native:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # ---- Linux x64 ----
-          - os: ubuntu-24.04
-            name: Linux (Ubuntu 24.04 x64)
-          - os: ubuntu-22.04
-            name: Linux (Ubuntu 22.04 x64)
-
-          # ---- Linux ARM64 ----
-          # Note: ARM runners are free for public repos.
-          # If your repo is private, these may require a paid plan.
-          - os: ubuntu-24.04-arm
-            name: Linux (Ubuntu 24.04 ARM64)
-          - os: ubuntu-22.04-arm
-            name: Linux (Ubuntu 22.04 ARM64)
-
-          # ---- macOS Apple Silicon (ARM64) ----
-          - os: macos-15
-            name: macOS 15 (Apple Silicon)
-          - os: macos-14
-            name: macOS 14 (Apple Silicon)
-
-          # ---- macOS Intel (x64) ----
-          - os: macos-15-intel
-            name: macOS 15 (Intel x64)
-
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install dependencies (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgdbm-dev cmake python3
-
-      - name: Install dependencies (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install gdbm cmake python3 || true
-
-      - name: Set Homebrew paths (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          GDBM_PREFIX="$(brew --prefix gdbm)"
-          HOMEBREW_PREFIX="$(brew --prefix)"
-          echo "GDBM is at: $GDBM_PREFIX"
-          echo "Homebrew prefix: $HOMEBREW_PREFIX"
-          ls -la "$GDBM_PREFIX/include/" || true
-          ls -la "$GDBM_PREFIX/lib/" || true
-          # CPATH     = compiler include search path (honoured by clang/gcc)
-          # LIBRARY_PATH = linker library search path (honoured by ld)
-          echo "CPATH=${GDBM_PREFIX}/include${CPATH:+:$CPATH}" >> "$GITHUB_ENV"
-          echo "LIBRARY_PATH=${GDBM_PREFIX}/lib${LIBRARY_PATH:+:$LIBRARY_PATH}" >> "$GITHUB_ENV"
-          echo "CMAKE_PREFIX_PATH=${HOMEBREW_PREFIX}" >> "$GITHUB_ENV"
-
-      - name: Configure (Linux)
-        if: runner.os == 'Linux'
-        run: cmake -S . -B build -DADMIN_PWD=ci_test_pwd
-
-      - name: Configure (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          echo "CPATH=$CPATH"
-          echo "LIBRARY_PATH=$LIBRARY_PATH"
-          echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
-          cmake -S . -B build \
-            -DADMIN_PWD=ci_test_pwd \
-            -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
-
-      - name: Build
-        run: cmake --build build
-
-      - name: Run tests
-        working-directory: build
-        run: ctest --output-on-failure
-
-  # ---------------------------------------------------------------
-  # FreeBSD builds using cross-platform-actions (runs a FreeBSD VM
-  # on an Ubuntu host runner via QEMU with KVM acceleration)
-  # ---------------------------------------------------------------
-  build-freebsd:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - version: "14.1"
-            name: FreeBSD 14.1
-          - version: "14.0"
-            name: FreeBSD 14.0
-          - version: "13.3"
-            name: FreeBSD 13.3
-
-    name: ${{ matrix.name }}
+  # Linux builds
+  linux:
+    name: Linux (${{ matrix.compiler }}, ${{ matrix.build_type }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+        build_type: [Debug, Release]
+        include:
+          - compiler: gcc
+            cc: gcc
+            cxx: g++
+          - compiler: clang
+            cc: clang
+            cxx: clang++
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Enable KVM
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake python3 ninja-build libgdbm-dev
+
+    - name: Configure CMake
+      env:
+        CC: ${{ matrix.cc }}
+        CXX: ${{ matrix.cxx }}
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_C_COMPILER=${{ matrix.cc }} \
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+
+    - name: Build
+      run: cmake --build build -j --config ${{ matrix.build_type }}
+
+    - name: Run tests
+      working-directory: build
+      run: ctest --output-on-failure
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-linux-${{ matrix.compiler }}-${{ matrix.build_type }}
+        path: build/test_results.xml
+
+  # macOS Intel builds
+  macos-intel:
+    name: macOS Intel (${{ matrix.build_type }})
+    runs-on: macos-15-intel  # Intel runner
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        brew install cmake ninja gdbm python3
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+    - name: Build
+      run: cmake --build build -j --config ${{ matrix.build_type }}
+
+    - name: Run tests
+      working-directory: build
+      run: ctest --output-on-failure
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-macos-intel-${{ matrix.build_type }}
+        path: build/test_results.xml
+
+  # macOS ARM (Apple Silicon) builds
+  macos-arm:
+    name: macOS ARM (${{ matrix.build_type }})
+    runs-on: macos-latest  # ARM runner
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        brew install cmake ninja gdbm python3
+
+    - name: Configure CMake
+      run: |
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+    - name: Build
+      run: cmake --build build -j --config ${{ matrix.build_type }}
+
+    - name: Run tests
+      working-directory: build
+      run: ctest --output-on-failure
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-macos-arm-${{ matrix.build_type }}
+        path: build/test_results.xml
+
+  # FreeBSD builds (using cross-platform-actions)
+  freebsd:
+    name: FreeBSD (${{ matrix.build_type }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [Debug, Release]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build and test on FreeBSD
+      uses: cross-platform-actions/action@v0.24.0
+      with:
+        operating_system: freebsd
+        version: '14.0'
+        shell: bash
         run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-          ls -la /dev/kvm || true
+          # Install dependencies
+          sudo pkg install -y git cmake ninja gdbm python3
 
-      - name: Build & test in FreeBSD VM
-        uses: cross-platform-actions/action@v0.25.0
-        with:
-          operating_system: freebsd
-          version: ${{ matrix.version }}
-          run: |
-            sudo pkg install -y cmake gdbm python3
-            cmake -S . -B build -DADMIN_PWD=ci_test_pwd
-            cmake --build build
-            cd build && ctest --output-on-failure
+          # Configure
+          cmake -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+          # Build
+          cmake --build build -j --config ${{ matrix.build_type }}
+
+          # Test
+          cd build
+          ctest --output-on-failure
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-freebsd-${{ matrix.build_type }}
+        path: build/test_results.xml
+
+  # Summary job to check all builds passed
+  build-summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [linux, macos-intel, macos-arm, freebsd]
+    if: always()
+
+    steps:
+    - name: Check build results
+      run: |
+        echo "Linux build: ${{ needs.linux.result }}"
+        echo "macOS Intel build: ${{ needs.macos-intel.result }}"
+        echo "macOS ARM build: ${{ needs.macos-arm.result }}"
+        echo "FreeBSD build: ${{ needs.freebsd.result }}"
+
+        if [ "${{ needs.linux.result }}" != "success" ] || \
+           [ "${{ needs.macos-intel.result }}" != "success" ] || \
+           [ "${{ needs.macos-arm.result }}" != "success" ] || \
+           [ "${{ needs.freebsd.result }}" != "success" ]; then
+          echo "One or more builds failed"
+          exit 1
+        fi
+        echo "All builds succeeded!"
+
