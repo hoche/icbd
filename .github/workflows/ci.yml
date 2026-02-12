@@ -43,7 +43,8 @@ jobs:
           -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
           -DCMAKE_C_COMPILER=${{ matrix.cc }} \
-          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} \
+          -DADMIN_PWD=ci_test_pwd
 
     - name: Build
       run: cmake --build build -j --config ${{ matrix.build_type }}
@@ -74,13 +75,23 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew install cmake ninja gdbm python3
+        brew install cmake ninja gdbm python3 || true
+
+    - name: Set Homebrew paths
+      run: |
+        GDBM_PREFIX="$(brew --prefix gdbm)"
+        HOMEBREW_PREFIX="$(brew --prefix)"
+        echo "CPATH=${GDBM_PREFIX}/include${CPATH:+:$CPATH}" >> "$GITHUB_ENV"
+        echo "LIBRARY_PATH=${GDBM_PREFIX}/lib${LIBRARY_PATH:+:$LIBRARY_PATH}" >> "$GITHUB_ENV"
+        echo "HOMEBREW_PREFIX=${HOMEBREW_PREFIX}" >> "$GITHUB_ENV"
 
     - name: Configure CMake
       run: |
         cmake -B build \
           -G Ninja \
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_PREFIX_PATH="$HOMEBREW_PREFIX" \
+          -DADMIN_PWD=ci_test_pwd
 
     - name: Build
       run: cmake --build build -j --config ${{ matrix.build_type }}
@@ -111,13 +122,23 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew install cmake ninja gdbm python3
+        brew install cmake ninja gdbm python3 || true
+
+    - name: Set Homebrew paths
+      run: |
+        GDBM_PREFIX="$(brew --prefix gdbm)"
+        HOMEBREW_PREFIX="$(brew --prefix)"
+        echo "CPATH=${GDBM_PREFIX}/include${CPATH:+:$CPATH}" >> "$GITHUB_ENV"
+        echo "LIBRARY_PATH=${GDBM_PREFIX}/lib${LIBRARY_PATH:+:$LIBRARY_PATH}" >> "$GITHUB_ENV"
+        echo "HOMEBREW_PREFIX=${HOMEBREW_PREFIX}" >> "$GITHUB_ENV"
 
     - name: Configure CMake
       run: |
         cmake -B build \
           -G Ninja \
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+          -DCMAKE_PREFIX_PATH="$HOMEBREW_PREFIX" \
+          -DADMIN_PWD=ci_test_pwd
 
     - name: Build
       run: cmake --build build -j --config ${{ matrix.build_type }}
@@ -159,7 +180,8 @@ jobs:
           # Configure
           cmake -B build \
             -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DADMIN_PWD=ci_test_pwd
 
           # Build
           cmake --build build -j --config ${{ matrix.build_type }}
