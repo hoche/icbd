@@ -97,7 +97,7 @@ void nlclear(NAMLIST *nl)
         return;
     }
 
-    p = nl->p;
+    p = nl->head;
     while (p) {
         tmp = p->next;
         free(p);
