@@ -44,8 +44,6 @@
 #include "pktsocket.h"
 #include "sslsocket.h"
 
-#define DEBUG
-
 cbuf_t *cbufs;    /* array of user packet buffers */
 
 int port_fd;    /* plaintext listen port */
@@ -222,9 +220,13 @@ delete_pollfd(int fd)
     int i;
     for (i = 0; i < g_pollsetsize; i++) {
         if ( g_pollset[i].fd == fd ) {
-            memmove(&g_pollset[i], 
-                    &g_pollset[i+1], 
-                    &g_pollset[g_pollsetsize--] - &g_pollset[i+1]);
+            int move_count = g_pollsetsize - (i + 1);
+            if (move_count > 0) {
+                memmove(&g_pollset[i],
+                        &g_pollset[i+1],
+                        (size_t)move_count * sizeof(struct pollfd));
+            }
+            g_pollsetsize--;
             return;
         }
     }
@@ -270,7 +272,7 @@ pollfd_state_machine(struct pollfd* pollfd)
                 return;
 
             case ACCEPTED:          /* freshly accepted client. inform the upper level */
-                cbuf->state = WANT_READ;
+                cbuf->state = WANT_HEADER;
                 if (g_pktserv_cb.new_client)
                     g_pktserv_cb.new_client(cbuf->fd, cbuf->is_ssl);
                 break;
@@ -292,7 +294,7 @@ pollfd_state_machine(struct pollfd* pollfd)
                 if (writeable) {
                     pktsocket_write(cbuf);
                 }
-                if (readable && cbuf->state == WANT_READ) {
+                if (readable && (cbuf->state == WANT_READ || cbuf->state == WANT_HEADER)) {
                     /* pktsocket_write() may have set this to BLOCKED */
                     cbuf->disp = OK;
                 }
@@ -300,10 +302,11 @@ pollfd_state_machine(struct pollfd* pollfd)
 
             case IDLE:              /* not doing anything. got some network data */
                 if (readable) {
-                    cbuf->state = WANT_READ;
+                    cbuf->state = WANT_HEADER;
                 }
                 // fallthrough
 
+            case WANT_HEADER:       /* need to read a new packet header */
             case WANT_READ:         /* in the middle of a read. read more network data. */
                 if (readable) {
                     int ok2read = 1;
@@ -316,6 +319,8 @@ pollfd_state_machine(struct pollfd* pollfd)
                             g_pktserv_cb.dispatch(cbuf->fd, cbuf->rbuf->data);
                             _msgbuf_free(cbuf->rbuf);
                             cbuf->rbuf = NULL;
+                            /* ready for the next packet */
+                            cbuf->state = WANT_HEADER;
                         }
                     }
                 }

@@ -39,6 +39,7 @@ typedef enum {
     WANT_SSL_ACCEPT,     /* need to retry ssl_accept() */
     WANT_SSL_READ,       /* need to retry ssl_read() */
     WANT_SSL_WRITE,      /* need to retry ssl_write() */
+    WANT_HEADER,         /* ready to read a new packet header */
     WANT_READ,           /* in the middle of reading a packet */
     WANT_WRITE,          /* have one or more unsent packets */
     WANT_DISCONNECT,     /* pending disconnect - server needs to be notified */
