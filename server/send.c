@@ -198,12 +198,12 @@ void s_new_user(int n, int secure)
     cp = getremotename(n);
 
     if (cp == NULL) {
-        vmdb(MSG_INFO, mbuf, "[CONNECT%s] %d", (secure?" (SSL)":""), n);
+        vmdb(MSG_INFO, "[CONNECT%s] %d", (secure?" (SSL)":""), n);
         return;
     }
 
     if (strlen(cp) == 0) {
-        vmdb(MSG_INFO, mbuf, "[CONNECT%s] %d", (secure?" (SSL)":""), n);
+        vmdb(MSG_INFO, "[CONNECT%s] %d", (secure?" (SSL)":""), n);
         return;
     }
 
@@ -216,7 +216,7 @@ void s_new_user(int n, int secure)
     snprintf(u_tab[n].nodeid, MAX_NODELEN+1, "%s", cp);
     u_tab[n].secure = secure;
 
-    vmdb(MSG_INFO, mbuf, "[CONNECT%s] %d: %s", (secure?" (SSL)":""), n, cp);
+    vmdb(MSG_INFO, "[CONNECT%s] %d: %s", (secure?" (SSL)":""), n, cp);
 }
 
 void send_loginok(int to)
