@@ -23,6 +23,7 @@ Since then:
   * The build system has been updated (CMake).
   * "brick" has been added (feature request)
   * TLS support has been added.
+  * ipv6 support has been added.
 
 Building and installation instructions can be found in README.INSTALL.
 
