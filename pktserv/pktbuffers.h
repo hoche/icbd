@@ -13,6 +13,8 @@
 
 #include "config.h"
 
+#include <sys/types.h> /* for u_int on some platforms */
+
 #include "bsdqueue.h"
 
 #ifdef HAVE_SSL
