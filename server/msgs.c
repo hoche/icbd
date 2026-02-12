@@ -465,8 +465,13 @@ int loginmsg(int n, char *pkt)
                         memset(two, 0, 255);
                         while ((i = read(access_file, &c, 1)) > 0)
                         {
+                            size_t len;
                             if (c == '\012') break;
-                            strncat(two, &c, 1);
+                            len = strlen(two);
+                            if (len < sizeof(two) - 1) {
+                                two[len] = c;
+                                two[len + 1] = '\0';
+                            }
                         }
                         sprintf (mbuf, "Reason: %s", two);
                         senderror(n, mbuf);
@@ -481,7 +486,11 @@ int loginmsg(int n, char *pkt)
                 }
                 else
                 {
-                    strncat(three, &c, 1);
+                    size_t len = strlen(three);
+                    if (len < sizeof(three) - 1) {
+                        three[len] = c;
+                        three[len + 1] = '\0';
+                    }
                 }
             }
 

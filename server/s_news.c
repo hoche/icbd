@@ -44,7 +44,13 @@ int s_news(int n, int argc)
                         sends_cmdout(n, tbuf);
                         memset(tbuf, 0, 255);
                     }
-                    else strncat(tbuf, &c, 1);
+                    else {
+                        size_t len = strlen(tbuf);
+                        if (len < sizeof(tbuf) - 1) {
+                            tbuf[len] = c;
+                            tbuf[len + 1] = '\0';
+                        }
+                    }
                 }
                 if (close(news_fd) != 0) {
                     sprintf(mbuf, "News File Close: %s", strerror(errno));
@@ -65,7 +71,13 @@ int s_news(int n, int argc)
                     sends_cmdout(n, tbuf);
                     memset(tbuf, 0, 255);
                 }
-                else strncat(tbuf, &c, 1);
+                else {
+                    size_t len = strlen(tbuf);
+                    if (len < sizeof(tbuf) - 1) {
+                        tbuf[len] = c;
+                        tbuf[len + 1] = '\0';
+                    }
+                }
             }
             sends_cmdout(n, "--------------------------------------");
             if (close(news_fd) != 0) {
