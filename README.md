@@ -29,3 +29,49 @@ Building and installation instructions can be found in README.INSTALL.
 TODO.md is a ToDo list for the developers.
 
 General ICB resources are maintained at http://www.icb.net/
+
+## Build (CMake)
+
+### Dependencies
+
+- **Required**: `gdbm` development headers/library (e.g. `libgdbm-dev`)
+- **Optional (TLS listener)**: OpenSSL development package (e.g. `libssl-dev`)
+- **For integration tests**: Python 3
+
+### Configure + build (non-TLS)
+
+`icbd` requires a compiled-in admin password at configure time:
+
+```bash
+cmake -S . -B build -DADMIN_PWD=change_me
+cmake --build build -j
+```
+
+The server binary will be at `build/server/icbd`.
+
+## Test suite
+
+This repo uses **CTest** (unit tests in C, integration tests in Python that start `icbd` and speak the ICB protocol over TCP).
+
+### Run tests (non-TLS)
+
+```bash
+cmake -S . -B build-test -DADMIN_PWD=test
+cmake --build build-test -j
+ctest --test-dir build-test --output-on-failure
+```
+
+### Run tests (with TLS enabled)
+
+Configure with TLS support and run the suite. TLS integration tests will only be registered when TLS is compiled in.
+
+```bash
+cmake -S . -B build-test-tls -DADMIN_PWD=test -DICBD_ENABLE_SSL=ON
+cmake --build build-test-tls -j
+ctest --test-dir build-test-tls --output-on-failure
+```
+
+Notes:
+
+- Integration tests create a temporary runtime directory and copy `prod/` fixtures into it.
+- TLS integration tests generate a short-lived self-signed `icbd.pem` via `openssl` (so `openssl` must be available in `PATH`).

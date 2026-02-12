@@ -5,6 +5,9 @@ project(icbd C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# ---- Testing ----
+include(CTest)
+
 # ---- User-configurable options ----
 option(ICBD_ENABLE_SSL "Enable TLS listener support via OpenSSL" OFF)
 option(ICBD_BRICK "Enable brick support" OFF)
@@ -167,3 +170,6 @@ set_target_properties(icbd PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/server"
 )
 
+if(BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

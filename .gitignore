@@ -62,3 +62,6 @@ config.log
 # project-specific files
 *.dir
 *.pag
+
+# out-of-tree build directories
+build-test/
