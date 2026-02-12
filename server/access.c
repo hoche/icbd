@@ -375,6 +375,7 @@ int nickchinfo(int forWhom, const char *tag, char *data, unsigned int max, const
 
     icbdb_set (u_tab[forWhom].nickname, tag, ICBDB_STRING, data);
     snprintf(line, sizeof(line), "%.*s set to '%.*s'", NICKCHINFO_MSG_MAX, message, NICKCHINFO_DATA_MAX, data);
+    sends_cmdout(forWhom, line);
 
     return 0;
 }
