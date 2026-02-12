@@ -196,7 +196,10 @@ def start_server(
 ) -> subprocess.Popen:
     cmd = [str(icbd_path), "-f", "-p", str(clear_port), "-l", str(log_level)]
     if ssl_port is not None:
-        cmd += ["-s", str(ssl_port)]
+        # Note: icbd uses getopt() optional-arg parsing for -s (s::), which in
+        # GNU getopt requires the argument be attached (e.g. "-s7327"), not
+        # separated ("-s 7327").
+        cmd += [f"-s{ssl_port}"]
     return subprocess.Popen(
         cmd,
         cwd=str(run_dir),
@@ -256,9 +259,14 @@ def with_server(
     # keep tempdir alive by attaching it
     server._tempdir = td  # type: ignore[attr-defined]
 
-    # Wait for at least the clear port to accept (TLS port will too if enabled).
+    # Wait for at least the clear port to accept.
     s = wait_for_connect("127.0.0.1", clear_port, timeout_s=startup_timeout_s)
     s.close()
+
+    # If TLS is enabled, also wait for the TLS listener to accept.
+    if enable_tls and ssl_port is not None:
+        s2 = wait_for_connect("127.0.0.1", ssl_port, timeout_s=startup_timeout_s)
+        s2.close()
 
     return server, clear_port, ssl_port
 

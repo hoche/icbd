@@ -280,15 +280,17 @@ pollfd_state_machine(struct pollfd* pollfd)
             case WANT_SSL_ACCEPT:   /* need to retry the accept */
                 if (readable || writeable)
                     sslsocket_accept(cbuf);
-                break;
+                return;
 
             case WANT_SSL_READ:     /* need to retry the SSL read */
-                pktsocket_read(cbuf);
-                break;
+                if (readable || writeable)
+                    pktsocket_read(cbuf);
+                return;
 
             case WANT_SSL_WRITE:    /* need to retry the SSL write */
-                pktsocket_write(cbuf);
-                break;
+                if (readable || writeable)
+                    pktsocket_write(cbuf);
+                return;
 
             case WANT_WRITE:        /* we have pending writes. This can be a new SSL write. */
                 if (writeable) {

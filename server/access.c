@@ -354,6 +354,10 @@ int nickchinfo(int forWhom, const char *tag, char *data, unsigned int max, const
 {
     char           line[255];
     char           newstr[255];
+    /* Keep status text bounded to avoid build-time -Wformat-truncation and
+     * to ensure it fits in typical display lines anyway. */
+#define NICKCHINFO_MSG_MAX 80
+#define NICKCHINFO_DATA_MAX 160
 
     if (strlen(u_tab[forWhom].realname) == 0) {
         senderror(forWhom, 
@@ -365,12 +369,12 @@ int nickchinfo(int forWhom, const char *tag, char *data, unsigned int max, const
         memset(newstr, 0, sizeof (newstr));
         strncpy(newstr, data, max);
         data = newstr;
-        sprintf (line, "%s truncated to %u characters", message, max);
+        snprintf(line, sizeof(line), "%.*s truncated to %u characters", NICKCHINFO_MSG_MAX, message, max);
         senderror(forWhom, line);
     }
 
     icbdb_set (u_tab[forWhom].nickname, tag, ICBDB_STRING, data);
-    sprintf (line, "%s set to '%s'", message, data);
+    snprintf(line, sizeof(line), "%.*s set to '%.*s'", NICKCHINFO_MSG_MAX, message, NICKCHINFO_DATA_MAX, data);
 
     return 0;
 }

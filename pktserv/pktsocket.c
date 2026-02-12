@@ -122,8 +122,10 @@ int pktsocket_accept(cbuf_t *listen_cbuf)
     /* set the new socket's state and disposition */
     if (listen_cbuf->state == LISTEN_SOCKET_SSL) {
         cbuf->state = WANT_SSL_ACCEPT;
+        cbuf->is_ssl = 1;
     } else {
         cbuf->state = ACCEPTED;
+        cbuf->is_ssl = 0;
     }
     cbuf->disp = OK;
 

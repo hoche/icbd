@@ -50,17 +50,15 @@ int init_ssl(char *pem)
 {
     int result;
     const SSL_METHOD *method;
-    BIGNUM *bne = NULL;
-    RSA *rsa = NULL;
-    int bits = 2048;
-    unsigned long e = RSA_F4;
 
     init_openssl_library();
 
 #if HAVE_TLS_SERVER_METHOD
     method = TLS_server_method();
 #else
-    method = TLSv1_1_server_method();
+    /* TLS_server_method() is unavailable; use the generic server method and
+     * disable legacy protocols via SSL_CTX_set_options below. */
+    method = SSLv23_server_method();
 #endif
 
     if (ctx != NULL) {
@@ -73,6 +71,39 @@ int init_ssl(char *pem)
         ERR_print_errors_cb(sslmdb, NULL);
         return -1;
     }
+
+    /* Harden defaults */
+    SSL_CTX_set_options(ctx,
+                        SSL_OP_NO_SSLv2 |
+                        SSL_OP_NO_SSLv3 |
+                        SSL_OP_NO_COMPRESSION |
+                        SSL_OP_CIPHER_SERVER_PREFERENCE);
+
+#if HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
+#ifdef TLS1_2_VERSION
+    if (!SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION)) {
+        vmdb(MSG_WARN, "Could not set minimum TLS version to 1.2");
+    }
+#endif
+#else
+    /* Best-effort legacy hardening when set_min_proto_version is unavailable */
+    SSL_CTX_set_options(ctx,
+                        SSL_OP_NO_TLSv1 |
+                        SSL_OP_NO_TLSv1_1);
+#endif
+
+    /* TLS 1.2 and below cipher list */
+    if (!SSL_CTX_set_cipher_list(ctx, "HIGH:!aNULL:!eNULL:!MD5:!RC4:!3DES:!DES:!EXP:!PSK:!SRP")) {
+        vmdb(MSG_WARN, "Could not set TLS cipher list; using library defaults");
+        ERR_print_errors_cb(sslmdb, NULL);
+    }
+
+#if HAVE_SSL_CTX_SET_CIPHERSUITES
+    /* TLS 1.3 cipher suites (OpenSSL 1.1.1+) */
+    if (!SSL_CTX_set_ciphersuites(ctx, "TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256")) {
+        vmdb(MSG_WARN, "Could not set TLS 1.3 cipher suites; using library defaults");
+    }
+#endif
 
     SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
 
@@ -91,25 +122,6 @@ int init_ssl(char *pem)
     result = SSL_CTX_check_private_key(ctx);
     if (!result) {
         vmdb(MSG_ERR, "SSL key mismatch in %s.", pem);
-        return -1;
-    }
-
-    bne = BN_new();
-    result = BN_set_word(bne, e);
-    if (!result) {
-        vmdb(MSG_ERR, "Couldn't create BIGNUM.");
-        return -1;
-    }
-
-    rsa = RSA_new();
-    result = RSA_generate_key_ex(rsa, bits, bne, NULL);
-    if (!result) {
-        vmdb(MSG_ERR, "Couldn't generate RSA key.");
-        return -1;
-    }
-
-    if (!SSL_CTX_set_tmp_rsa(ctx, rsa)) {
-        vmdb(MSG_ERR, "Couldn't assign temporary RSA key to SSL context.");
         return -1;
     }
 

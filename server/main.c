@@ -127,8 +127,17 @@ int main(int argc, char* argv[])
 
             case 's':
 #ifdef HAVE_SSL
-                if (optarg) 
+                /*
+                 * -s takes an OPTIONAL argument in our getopt string ("s::").
+                 * With GNU getopt, the optional argument must be attached (e.g. "-s7327").
+                 * Users often type "-s 7327"; support that too by looking at argv[optind].
+                 */
+                if (optarg) {
                     sslport = atoi(optarg);
+                } else if (optind < argc && argv[optind] && argv[optind][0] != '-') {
+                    sslport = atoi(argv[optind]);
+                    optind++; /* consume the port argument */
+                }
                 if (sslport == 0)
                     sslport = DEFAULT_SSLPORT;
 #else

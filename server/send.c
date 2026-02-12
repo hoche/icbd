@@ -52,7 +52,7 @@ void sendperson(int from, int to, const char *message)
     char one[255], two[MAX_NICKLEN+1];
     snprintf(one, 255, "%s@%s", u_tab[from].loginid, u_tab[from].nodeid);
     ucaseit(one);
-    snprintf(two, MAX_NICKLEN, "%s", u_tab[from].nickname);
+    snprintf(two, sizeof(two), "%s", u_tab[from].nickname);
     ucaseit(two);
 
     if ((!nlmatch(one, *u_tab[to].pri_s_hushed)) &&

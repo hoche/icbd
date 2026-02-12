@@ -51,6 +51,7 @@ def run(enable_tls: bool) -> None:
     ap.add_argument("--icbd", required=True)
     ap.add_argument("--fixtures", required=True)
     ap.add_argument("--io-timeout-s", type=float, default=2.0)
+    ap.add_argument("--tls", action="store_true", help="Connect to the TLS listener (requires TLS-enabled build)")
     args = ap.parse_args()
 
     icbd_path = Path(args.icbd)
@@ -116,7 +117,15 @@ def run(enable_tls: bool) -> None:
             time.sleep(0.10)
             a.send_cmd("w", ".")
             pkts2 = a.drain_for(0.60)
-            if not any(pkt_is_cmdout_co_contains("Group: TST (m")(p) for p in pkts2):
+            # Note: group header uses %-8s for group name, so there may be padding spaces
+            # between "TST" and the options string.
+            if not any(
+                (p.ptype == "i"
+                 and (b"co" in (p.fields()[:1] or [b""]))
+                 and b"Group: TST" in p.payload_no_nul()
+                 and b" (m" in p.payload_no_nul())
+                for p in pkts2
+            ):
                 raise AssertionError("expected group header to show moderated control '(m' after 'status m'")
         finally:
             a.close()
@@ -126,7 +135,7 @@ def run(enable_tls: bool) -> None:
 
 
 def main() -> int:
-    # CTest passes --tls as present/absent via args; keep it simple:
+    # CTest passes --tls as present/absent.
     enable_tls = "--tls" in __import__("sys").argv
     run(enable_tls=enable_tls)
     return 0

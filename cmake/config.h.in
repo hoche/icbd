@@ -32,6 +32,8 @@
 /* SSL support */
 #cmakedefine HAVE_SSL 1
 #cmakedefine HAVE_TLS_SERVER_METHOD 1
+#cmakedefine HAVE_SSL_CTX_SET_MIN_PROTO_VERSION 1
+#cmakedefine HAVE_SSL_CTX_SET_CIPHERSUITES 1
 
 /* Project configuration constants (ports, packet sizes, etc.) */
 #include "icb_config.h"

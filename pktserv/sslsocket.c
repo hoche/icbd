@@ -79,9 +79,10 @@ int sslsocket_accept(cbuf_t *cbuf)
 {
     int result, ssl_error;
 
-    /* don't try to reinitialize if we're already in the middle of accepting */
-    if (cbuf->state != WANT_SSL_ACCEPT) {
-        if ( (cbuf->ssl_con = SSL_new(ctx)) == NULL) {
+    /* Initialize SSL state once per connection. */
+    if (cbuf->ssl_con == NULL) {
+        cbuf->ssl_con = SSL_new(ctx);
+        if (cbuf->ssl_con == NULL) {
             vmdb(MSG_ERR, "sslsocket_accept: fd%d: couldn't create ssl_con.", cbuf->fd);
             return -1;
         }
@@ -92,6 +93,7 @@ int sslsocket_accept(cbuf_t *cbuf)
     if (result == 1) {
         vmdb(MSG_INFO,
              "fd%d: SSL connection accepted.", cbuf->fd);
+        cbuf->is_ssl = 1;
         cbuf->state = ACCEPTED;
 
         /* XXX -- do X509 validation stuff here */

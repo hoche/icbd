@@ -682,7 +682,7 @@ int s_away(int n, int argc)
              t->tm_min,
              t->tm_hour > 11 ? "pm" : "am",
              fields[1]);
-    snprintf(mbuf, MAX_INPUTSTR, "Away message set to \"%s\"",
+    snprintf(mbuf, MSG_BUF_SIZE, "Away message set to \"%s\"",
              u_tab[n].awaymsg);
     u_tab[n].lastaway = 0;
     u_tab[n].lastawaytime = (time_t)0;

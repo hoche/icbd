@@ -12,6 +12,7 @@ def run(enable_tls: bool) -> None:
     ap.add_argument("--icbd", required=True)
     ap.add_argument("--fixtures", required=True)
     ap.add_argument("--io-timeout-s", type=float, default=2.0)
+    ap.add_argument("--tls", action="store_true", help="Connect to the TLS listener (requires TLS-enabled build)")
     args = ap.parse_args()
 
     icbd_path = Path(args.icbd)

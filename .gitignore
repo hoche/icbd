@@ -64,4 +64,6 @@ config.log
 *.pag
 
 # out-of-tree build directories
+build/
+build-*/
 build-test/
