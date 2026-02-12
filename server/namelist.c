@@ -133,6 +133,7 @@ int nldelete(NAMLIST *nl, char *name)
     }
 
     strunlink(namep, &nl->head, &nl->tail);
+    free(namep);
     nl->p= nl->head;
     if (nl->num > 0) {
         nl->num--;
