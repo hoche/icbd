@@ -15,7 +15,6 @@
 #include "groups.h"
 #include "users.h"
 
-int icbd_log;
 int debug_level;
 
 /* the world */
