@@ -346,6 +346,12 @@ pollfd_state_machine(struct pollfd* pollfd)
                 break;
 
             case DISCONNECTED:
+                /* Nothing left to do – break out of the while loop so
+                 * the main event loop can continue processing other fds.
+                 * Without this, disp stays OK and we spin forever. */
+                cbuf->disp = BLOCKED;
+                break;
+
             default: 
                 break;
         }
