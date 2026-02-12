@@ -72,6 +72,28 @@ void clear_user_item(int n)
     }
 }
 
+static void
+copy_user_field(char *dst, size_t dstsz, const char *src)
+{
+    size_t n;
+
+    if (dstsz == 0) {
+        return;
+    }
+    if (src == NULL) {
+        dst[0] = '\0';
+        return;
+    }
+
+    /*
+     * Some login paths pass pointers into u_tab[n] back into fill_user_entry().
+     * Use memmove so overlapping src/dst is handled safely.
+     */
+    n = strnlen(src, dstsz - 1);
+    memmove(dst, src, n);
+    dst[n] = '\0';
+}
+
 /* fill a particular user entry */
 /* called when a loginmsg is received on that fd */
 void fill_user_entry(int n, 
@@ -86,13 +108,12 @@ void fill_user_entry(int n,
                      int nobeep, 
                      long perms)
 {
-    strncpy(u_tab[n].loginid, loginid, MAX_IDLEN);
-    strncpy(u_tab[n].nodeid, nodeid, MAX_NODELEN);
-    strncpy(u_tab[n].password, password, MAX_PASSWDLEN);
-    strncpy(u_tab[n].nickname, nickname, MAX_NICKLEN);
-    strncpy(u_tab[n].awaymsg, awaymsg, MAX_AWAY_LEN);
-
-    strncpy(u_tab[n].group, group, MAX_GROUPLEN);
+    copy_user_field(u_tab[n].loginid, MAX_IDLEN + 1, loginid);
+    copy_user_field(u_tab[n].nodeid, MAX_NODELEN + 1, nodeid);
+    copy_user_field(u_tab[n].password, MAX_PASSWDLEN + 1, password);
+    copy_user_field(u_tab[n].nickname, MAX_NICKLEN + 1, nickname);
+    copy_user_field(u_tab[n].awaymsg, MAX_AWAY_LEN + 1, awaymsg);
+    copy_user_field(u_tab[n].group, MAX_GROUPLEN + 1, group);
     u_tab[n].login = mylogin;
     u_tab[n].echoback = echoback;
     u_tab[n].t_notify = 0;
