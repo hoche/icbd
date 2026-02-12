@@ -15,7 +15,7 @@
 
 #ifdef PKTSERV_INTERNAL
 
-#include "../config.h"
+#include "config.h"
 
 #include <sys/types.h>
 #include <sys/time.h> /* for struct timeval and struct itimerval */

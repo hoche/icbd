@@ -1,0 +1,4 @@
+/home/hoche/src/icbd/icbd_my_github/build/CMakeFiles/pktserv.dir
+/home/hoche/src/icbd/icbd_my_github/build/CMakeFiles/icbd.dir
+/home/hoche/src/icbd/icbd_my_github/build/CMakeFiles/edit_cache.dir
+/home/hoche/src/icbd/icbd_my_github/build/CMakeFiles/rebuild_cache.dir
