@@ -150,7 +150,7 @@ void send_person_stored(int to, const char* fromNick, const char *message)
     filtertext(message, msgbuf, MAX_PKT_DATA-MAX_NICKLEN-1);
 
     snprintf(&packetbuffer[1], MAX_PKT_LEN-1, "%c%s\001%s",
-            ICB_M_PERSONAL, fromNick, msgbuf);
+            ICB_M_PERSONAL, nickbuf, msgbuf);
     doSend(-1, to);
 }
 
