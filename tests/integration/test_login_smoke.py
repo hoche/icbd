@@ -25,6 +25,9 @@ def main() -> int:
         c = ICBClient.connect("127.0.0.1", clear_port, use_tls=False, timeout_s=args.io_timeout_s)
         try:
             login_and_sync(c, loginid="testid", nick="testnick", group="1", io_timeout_s=args.io_timeout_s)
+        except Exception:
+            server.dump_diagnostics("login_smoke")
+            raise
         finally:
             c.close()
     finally:

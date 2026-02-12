@@ -1,48 +1,44 @@
 #pragma once
 
 /*
- * DBM compatibility layer.
+ * icb_dbm – lightweight, zero-dependency drop-in replacement for ndbm/gdbm.
  *
- * icbd historically used ndbm / gdbm-compat. We also support systems that
- * only have native <gdbm.h> (no ndbm-compat headers) via a small wrapper.
+ * Provides the classic ndbm API (dbm_open / dbm_fetch / dbm_store /
+ * dbm_delete / dbm_close) backed by an in-memory hash table that is
+ * persisted to a single flat file ("<name>.db").
+ *
+ * File format:
+ *   Header (8 bytes):
+ *     magic[4]   = "IDB\x01"
+ *     count[4]   = number of entries (little-endian uint32)
+ *   Repeated <count> times:
+ *     klen[4]    = key length   (little-endian uint32)
+ *     vlen[4]    = value length (little-endian uint32)
+ *     key[klen]  = key bytes
+ *     val[vlen]  = value bytes
+ *
+ * Mutations are buffered in memory and flushed atomically on dbm_close()
+ * (write-to-tmp + rename) so a crash never corrupts the file.
  */
 
-#include "config.h"
+#include <stddef.h>
 
-#if defined(__has_include)
-#  if __has_include(<ndbm.h>)
-#    include <ndbm.h>
-#    define ICBD_HAVE_SYSTEM_DBM 1
-#  elif __has_include(<gdbm/ndbm.h>)
-#    include <gdbm/ndbm.h>
-#    define ICBD_HAVE_SYSTEM_DBM 1
-#  elif __has_include(<gdbm-ndbm.h>)
-#    include <gdbm-ndbm.h>
-#    define ICBD_HAVE_SYSTEM_DBM 1
-#  elif __has_include(<gdbm.h>)
-#    include <gdbm.h>
-#    define ICBD_HAVE_GDBM_API 1
-#  endif
-#endif
+/* ---- datum (matches the classic ndbm / gdbm definition) ---- */
+typedef struct {
+    char *dptr;
+    int   dsize;
+} datum;
 
-#if defined(ICBD_HAVE_GDBM_API)
-/*
- * Native gdbm API is available, but ndbm-compat headers are not.
- * Provide a tiny ndbm-like wrapper implemented in dbm_gdbm.c.
- */
-typedef struct DBM DBM;
+/* ---- opaque DBM handle ---- */
+typedef struct icb_dbm DBM;
 
-#ifndef DBM_REPLACE
+/* ---- store flags ---- */
+#define DBM_INSERT  0
 #define DBM_REPLACE 1
-#endif
 
+/* ---- public API ---- */
 DBM  *dbm_open(const char *file, int flags, int mode);
 void  dbm_close(DBM *db);
 datum dbm_fetch(DBM *db, datum key);
 int   dbm_store(DBM *db, datum key, datum content, int flags);
 int   dbm_delete(DBM *db, datum key);
-
-#elif !defined(ICBD_HAVE_SYSTEM_DBM)
-#error "No DBM backend found. Install ndbm/gdbm-compat headers (e.g. libgdbm-compat-dev) or native gdbm headers (libgdbm-dev)."
-#endif /* dbm backend selection */
-

@@ -79,6 +79,16 @@ target_include_directories(icbd_unit_utf8 PRIVATE
 )
 add_test(NAME icbd.unit.utf8 COMMAND icbd_unit_utf8)
 
+add_executable(icbd_unit_icb_dbm
+  "${ICBD_TESTS_DIR}/unit/test_icb_dbm.c"
+  "${CMAKE_SOURCE_DIR}/server/icb_dbm.c"
+)
+target_include_directories(icbd_unit_icb_dbm PRIVATE
+  "${GENERATED_DIR}"
+  "${CMAKE_SOURCE_DIR}"
+)
+add_test(NAME icbd.unit.icb_dbm COMMAND icbd_unit_icb_dbm)
+
 # ------------------------------
 # Integration tests (Python3)
 # ------------------------------

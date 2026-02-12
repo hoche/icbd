@@ -88,16 +88,7 @@ int main(void) { socklen_t x = 0; (void)x; return 0; }
 # resolv / _res (used in pktserv/getrname.c behind HAVE_LIBRESOLV)
 check_library_exists(resolv _res "" HAVE_LIBRESOLV)
 
-# gdbm (required now that autoconf is gone)
-check_include_file("gdbm.h" HAVE_GDBM_H)
-if(NOT HAVE_GDBM_H)
-  message(FATAL_ERROR "Missing gdbm.h. Install libgdbm-dev.")
-endif()
-check_library_exists(gdbm gdbm_open "" HAVE_LIBGDBM)
-if(NOT HAVE_LIBGDBM)
-  message(FATAL_ERROR "Missing libgdbm. Install libgdbm-dev.")
-endif()
-find_library(GDBM_LIB gdbm REQUIRED)
+# Built-in DBM (icb_dbm) – no external library needed.
 
 # OpenSSL (optional)
 if(ICBD_ENABLE_SSL)
@@ -171,7 +162,7 @@ add_executable(icbd
   server/icbdb.c
   server/icbutil.c
   server/ipcf.c
-  server/dbm_gdbm.c
+  server/icb_dbm.c
   server/lookup.c
   server/main.c
   server/mdb.c
@@ -209,7 +200,7 @@ if(ICBD_WERROR)
   target_compile_options(icbd PRIVATE -Werror)
 endif()
 
-target_link_libraries(icbd PRIVATE pktserv "${GDBM_LIB}")
+target_link_libraries(icbd PRIVATE pktserv)
 if(HAVE_LIBRESOLV)
   target_link_libraries(icbd PRIVATE resolv)
 endif()

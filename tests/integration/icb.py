@@ -239,6 +239,49 @@ class ServerRun:
         self.proc = proc
         self.run_dir = run_dir
 
+    def is_alive(self) -> bool:
+        return self.proc.poll() is None
+
+    def dump_diagnostics(self, label: str = "") -> None:
+        """Print diagnostic info about the server — useful on test failure."""
+        prefix = f"[DIAG {label}] " if label else "[DIAG] "
+        alive = self.is_alive()
+        print(f"{prefix}server pid={self.proc.pid} alive={alive}", flush=True)
+        if not alive:
+            print(f"{prefix}server exit code: {self.proc.returncode}", flush=True)
+
+        # Dump the server log file
+        log_path = self.run_dir / "icbd.log"
+        if log_path.exists():
+            try:
+                log_text = log_path.read_text(errors="replace")
+                if log_text.strip():
+                    print(f"{prefix}=== icbd.log ===", flush=True)
+                    for line in log_text.splitlines()[-50:]:
+                        print(f"{prefix}  {line}", flush=True)
+                    print(f"{prefix}=== end icbd.log ===", flush=True)
+                else:
+                    print(f"{prefix}icbd.log is empty", flush=True)
+            except OSError as e:
+                print(f"{prefix}could not read icbd.log: {e}", flush=True)
+        else:
+            print(f"{prefix}icbd.log not found at {log_path}", flush=True)
+
+        # Drain stdout/stderr (non-blocking)
+        for stream_name, stream in [("stdout", self.proc.stdout), ("stderr", self.proc.stderr)]:
+            if stream is None:
+                continue
+            try:
+                import select as _sel
+                if hasattr(_sel, "select"):
+                    r, _, _ = _sel.select([stream], [], [], 0)
+                    if r:
+                        data = stream.read(4096) if hasattr(stream, "read") else ""
+                        if data:
+                            print(f"{prefix}{stream_name}: {data!r}", flush=True)
+            except Exception:
+                pass
+
     def stop(self) -> None:
         if self.proc.poll() is not None:
             return
@@ -266,7 +309,7 @@ def with_server(
     if enable_tls:
         ensure_test_pem(run_dir)
 
-    proc = start_server(icbd_path, run_dir, clear_port=clear_port, ssl_port=ssl_port, log_level=0)
+    proc = start_server(icbd_path, run_dir, clear_port=clear_port, ssl_port=ssl_port, log_level=3)
     server = ServerRun(proc=proc, run_dir=run_dir)
     # keep tempdir alive by attaching it
     server._tempdir = td  # type: ignore[attr-defined]
@@ -279,6 +322,12 @@ def with_server(
     if enable_tls and ssl_port is not None:
         s2 = wait_for_connect("127.0.0.1", ssl_port, timeout_s=startup_timeout_s)
         s2.close()
+
+    # Brief pause to let the server process the probe connection's disconnect
+    # before we connect the real test client. This avoids a race condition on
+    # some platforms (notably macOS) where the server hasn't finished cleaning
+    # up the probe FD when the test client connects.
+    time.sleep(0.10)
 
     return server, clear_port, ssl_port
 

@@ -32,7 +32,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake python3 ninja-build libgdbm-dev
+        sudo apt-get install -y cmake python3 ninja-build
 
     - name: Configure CMake
       env:
@@ -75,22 +75,13 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew install cmake ninja gdbm python3 || true
-
-    - name: Set Homebrew paths
-      run: |
-        GDBM_PREFIX="$(brew --prefix gdbm)"
-        HOMEBREW_PREFIX="$(brew --prefix)"
-        echo "CPATH=${GDBM_PREFIX}/include${CPATH:+:$CPATH}" >> "$GITHUB_ENV"
-        echo "LIBRARY_PATH=${GDBM_PREFIX}/lib${LIBRARY_PATH:+:$LIBRARY_PATH}" >> "$GITHUB_ENV"
-        echo "HOMEBREW_PREFIX=${HOMEBREW_PREFIX}" >> "$GITHUB_ENV"
+        brew install cmake ninja python3 || true
 
     - name: Configure CMake
       run: |
         cmake -B build \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-          -DCMAKE_PREFIX_PATH="$HOMEBREW_PREFIX" \
           -DADMIN_PWD=ci_test_pwd
 
     - name: Build
@@ -122,22 +113,13 @@ jobs:
 
     - name: Install dependencies
       run: |
-        brew install cmake ninja gdbm python3 || true
-
-    - name: Set Homebrew paths
-      run: |
-        GDBM_PREFIX="$(brew --prefix gdbm)"
-        HOMEBREW_PREFIX="$(brew --prefix)"
-        echo "CPATH=${GDBM_PREFIX}/include${CPATH:+:$CPATH}" >> "$GITHUB_ENV"
-        echo "LIBRARY_PATH=${GDBM_PREFIX}/lib${LIBRARY_PATH:+:$LIBRARY_PATH}" >> "$GITHUB_ENV"
-        echo "HOMEBREW_PREFIX=${HOMEBREW_PREFIX}" >> "$GITHUB_ENV"
+        brew install cmake ninja python3 || true
 
     - name: Configure CMake
       run: |
         cmake -B build \
           -G Ninja \
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-          -DCMAKE_PREFIX_PATH="$HOMEBREW_PREFIX" \
           -DADMIN_PWD=ci_test_pwd
 
     - name: Build
@@ -175,7 +157,7 @@ jobs:
         shell: bash
         run: |
           # Install dependencies
-          sudo pkg install -y git cmake ninja gdbm python3
+          sudo pkg install -y git cmake ninja python3
 
           # Configure
           cmake -B build \
@@ -220,4 +202,3 @@ jobs:
           exit 1
         fi
         echo "All builds succeeded!"
-
