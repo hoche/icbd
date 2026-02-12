@@ -115,43 +115,45 @@ def run(enable_tls: bool) -> None:
             alice.close()
             bob.close()
 
-        time.sleep(1.0)
+        time.sleep(0.3)
 
         # --- Test 6: Graceful disconnect (client just closes) ---
-        alice = ICBClient.connect("127.0.0.1", port, use_tls=enable_tls, timeout_s=T)
-        bob = ICBClient.connect("127.0.0.1", port, use_tls=enable_tls, timeout_s=T)
+        # Use unique nicks (carol/dave) to avoid any race with the server
+        # still cleaning up alice/bob from Test 5 on slow VMs (e.g. FreeBSD).
+        carol = ICBClient.connect("127.0.0.1", port, use_tls=enable_tls, timeout_s=T)
+        dave = ICBClient.connect("127.0.0.1", port, use_tls=enable_tls, timeout_s=T)
         try:
-            login_and_sync(alice, loginid="idE4", nick="alice", group="1", io_timeout_s=T)
-            login_and_sync(bob, loginid="idE5", nick="bob", group="1", io_timeout_s=T)
+            login_and_sync(carol, loginid="idE4", nick="carol", group="1", io_timeout_s=T)
+            login_and_sync(dave, loginid="idE5", nick="dave", group="1", io_timeout_s=T)
 
-            alice.send_cmd("g", "DCN")
-            bob.send_cmd("g", "DCN")
+            carol.send_cmd("g", "DCN")
+            dave.send_cmd("g", "DCN")
             time.sleep(0.2)
-            alice.drain_for(0.2)
-            bob.drain_for(0.2)
+            carol.drain_for(0.2)
+            dave.drain_for(0.2)
 
-            # Alice disconnects
-            alice.close()
+            # Carol disconnects
+            carol.close()
 
-            # Bob should see a sign-off status
-            pkts = bob.drain_for(2.0)
+            # Dave should see a sign-off status
+            pkts = dave.drain_for(2.0)
             got_signoff = any(
                 p.ptype == "d"
                 and len(p.fields()) >= 2
                 and p.fields()[0] == b"Sign-off"
-                and b"alice" in p.fields()[1]
+                and b"carol" in p.fields()[1]
                 for p in pkts
             )
             if not got_signoff:
                 raise AssertionError(
-                    f"bob should see alice sign-off; saw: {[(p.ptype, p.fields()) for p in pkts]}"
+                    f"dave should see carol sign-off; saw: {[(p.ptype, p.fields()) for p in pkts]}"
                 )
         finally:
             try:
-                alice.close()
+                carol.close()
             except Exception:
                 pass
-            bob.close()
+            dave.close()
 
     finally:
         server.stop()
