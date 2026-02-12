@@ -115,7 +115,7 @@ def run(enable_tls: bool) -> None:
             alice.close()
             bob.close()
 
-        time.sleep(0.3)
+        time.sleep(1.0)
 
         # --- Test 6: Graceful disconnect (client just closes) ---
         alice = ICBClient.connect("127.0.0.1", port, use_tls=enable_tls, timeout_s=T)
