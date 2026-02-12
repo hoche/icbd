@@ -22,7 +22,7 @@ Since then:
   * UTF-8 support has been added for messages (but not usernames or groupnames).
   * The build system has been updated (CMake).
   * "brick" has been added (feature request)
-  * SSL support has been added (but still has some bugs).
+  * TLS support has been added.
 
 Building and installation instructions can be found in README.INSTALL.
 

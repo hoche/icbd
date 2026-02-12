@@ -8,26 +8,28 @@ expanded (and actually useful) information here.
 
 Make sure you have gdbm installed on your system (development headers).
 Unpack the source.
-% cmake -S . -B build -DADMIN_PWD=******
-% cmake --build build
 Edit icb_config.h and update anything you desire (MAX_IDLE for example)
 Edit support/mkdb to show correct path to perl and correct admin values.
 Edit prod/motd
+Use CMake to build it.
+Make the database:
 % cd prod
 % ../support/mkdb
+Then run it:
 % ../build/server/icbd
 
 I. UNPACK THE SOURCE
 
 You're reading this, so we assume you unpacked the source already.
-If not, go get it (from ftp://ftp.icb.net/pub/icb/) and unpack it.
-You should have retrieved the source in a .tgz (or .tar.gz) format,
-meaning it's a gzip compressed tar archive. Modern versions of tar
-allow you to unpack it by doing: tar zxvf file.tgz
-though older systems may require: gzip -d < file.tgz | tar xvf -
 
-Upon unpacking the tarfile, you should have found this README.INSTALL
-file in the same directory as the rest of the sources.
+If you retrieved it via a git checkout, all you need to do is cd
+into it.
+
+If you retrieved the source in a .tgz (or .tar.gz) format, meaning
+it's a gzip compressed tar archive, modern versions of tar
+allow you to unpack it by doing: tar -xvzf file.tgz
+though older systems may require: gzip -d < file.tgz | tar xvf -
+Then you need to cd into it.
 
 II. CONFIGURATION
 
@@ -75,12 +77,15 @@ this script from your system startup rc scripts.
 
 III. COMPILATION
 
-You should just be able to type "make" and have it compile. Platforms
-tested are somewhat minimal, though it should work well on any modern
-Unix OS. It has been tested on several variants of Linux (Centos 7,
-Ubuntu 18, Debian 9, Slackware 14), FreeBSD, and Solaris 2. Beyond
-that, all bets are off, but please email me if it works on something
-else so I can update this list.
+Use CMake to create a build directory and build within it:
+
+% cmake -S . -B build -DADMIN_PWD=******
+% cmake --build build
+
+Platforms tested are somewhat minimal, though it should work well on
+any modern Unix OS. It has been tested on several variants of Linux
+FreeBSD, and OSX. Beyond that, all bets are off, but please email
+me if it works on something else so I can update this list.
 
 IV. INSTALLATION
 
@@ -111,7 +116,7 @@ from, you can start up icbd as follows:
 
 % cd prod
 % ../support/mkdb
-% ../server/icbd
+% ../build/icbd
 
 The server will fork itself off and run in the background. It logs
 errors & connections info to icbd.log in the current directory.
