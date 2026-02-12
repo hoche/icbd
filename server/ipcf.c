@@ -289,11 +289,13 @@ void s_didpoll(int n)
                                 }
                             }
                             g_tab[j].mod = newmod;
-                            sprintf (mbuf, "%s is now mod.", u_tab[newmod].nickname);
-                            if (!strcmp (g_tab[j].name, u_tab[i].group))
-                                s_status_group(1, 0, i, "Pass", mbuf);
-                            else
-                                s_status_group(2, 0, j, "Pass", mbuf);
+                            if (newmod >= 0) {
+                                sprintf (mbuf, "%s is now mod.", u_tab[newmod].nickname);
+                                if (!strcmp (g_tab[j].name, u_tab[i].group))
+                                    s_status_group(1, 0, i, "Pass", mbuf);
+                                else
+                                    s_status_group(2, 0, j, "Pass", mbuf);
+                            }
                         }
                     }
 
@@ -452,8 +454,10 @@ int s_lost_user(int n)         /* n = fd of that user */
                             newmod = i;
                     }
                 g_tab[was_mod].mod = newmod;
-                sprintf (mbuf, "%s is now mod.", u_tab[newmod].nickname);
-                s_status_group(2,0,was_mod, "Pass", mbuf);
+                if (newmod >= 0) {
+                    sprintf (mbuf, "%s is now mod.", u_tab[newmod].nickname);
+                    s_status_group(2,0,was_mod, "Pass", mbuf);
+                }
             }
             else {
                 sprintf(mbuf, "Your group moderator signed off. (%d second timeout)", (int) MOD_TIMEOUT);
