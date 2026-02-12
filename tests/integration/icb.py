@@ -90,13 +90,22 @@ class ICBClient:
 
     @staticmethod
     def connect(host: str, port: int, use_tls: bool, timeout_s: float) -> "ICBClient":
-        s = socket.create_connection((host, port), timeout=timeout_s)
-        if use_tls:
-            ctx = ssl.create_default_context()
-            ctx.check_hostname = False
-            ctx.verify_mode = ssl.CERT_NONE
-            s = ctx.wrap_socket(s, server_hostname=host)
-        return ICBClient(s)
+        deadline = time.time() + timeout_s
+        last_err: Optional[BaseException] = None
+        while time.time() < deadline:
+            per_try_timeout = min(0.25, max(0.05, deadline - time.time()))
+            try:
+                s = socket.create_connection((host, port), timeout=per_try_timeout)
+                if use_tls:
+                    ctx = ssl.create_default_context()
+                    ctx.check_hostname = False
+                    ctx.verify_mode = ssl.CERT_NONE
+                    s = ctx.wrap_socket(s, server_hostname=host)
+                return ICBClient(s)
+            except (OSError, ssl.SSLError) as e:
+                last_err = e
+                time.sleep(0.05)
+        raise RuntimeError(f"could not connect to icbd on {host}:{port}: {last_err}")
 
     def close(self) -> None:
         try:
@@ -299,7 +308,6 @@ def with_server(
     *,
     enable_tls: bool,
     startup_timeout_s: float = 2.5,
-    post_probe_settle_s: float = 0.35,
 ) -> tuple[ServerRun, int, Optional[int]]:
     clear_port = find_free_port()
     ssl_port = find_free_port() if enable_tls else None
@@ -315,21 +323,15 @@ def with_server(
     # keep tempdir alive by attaching it
     server._tempdir = td  # type: ignore[attr-defined]
 
-    # Wait for at least the clear port to accept.
-    s = wait_for_connect("127.0.0.1", clear_port, timeout_s=startup_timeout_s)
-    s.close()
-
-    # If TLS is enabled, also wait for the TLS listener to accept.
-    if enable_tls and ssl_port is not None:
-        s2 = wait_for_connect("127.0.0.1", ssl_port, timeout_s=startup_timeout_s)
-        s2.close()
-
-    # Brief pause to let the server process the probe connection's disconnect
-    # before we connect the real test client. This avoids a race condition on
-    # some platforms (notably macOS CI) where the server has accepted the probe
-    # but hasn't yet completed disconnect cleanup when the login client arrives.
-    if post_probe_settle_s > 0:
-        time.sleep(post_probe_settle_s)
+    # Give the process a brief startup window and fail fast if it dies before
+    # any client can attempt a real connection.
+    deadline = time.time() + startup_timeout_s
+    while time.time() < deadline:
+        if proc.poll() is not None:
+            raise RuntimeError(f"icbd exited during startup with code {proc.returncode}")
+        time.sleep(0.05)
+        # Handshake/connect retries are handled by ICBClient.connect().
+        break
 
     return server, clear_port, ssl_port
 
