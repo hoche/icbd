@@ -57,6 +57,21 @@ jobs:
         run: |
           brew install gdbm cmake python3 || true
 
+      - name: Set Homebrew paths (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          GDBM_PREFIX="$(brew --prefix gdbm)"
+          HOMEBREW_PREFIX="$(brew --prefix)"
+          echo "GDBM is at: $GDBM_PREFIX"
+          echo "Homebrew prefix: $HOMEBREW_PREFIX"
+          ls -la "$GDBM_PREFIX/include/" || true
+          ls -la "$GDBM_PREFIX/lib/" || true
+          # CPATH     = compiler include search path (honoured by clang/gcc)
+          # LIBRARY_PATH = linker library search path (honoured by ld)
+          echo "CPATH=${GDBM_PREFIX}/include${CPATH:+:$CPATH}" >> "$GITHUB_ENV"
+          echo "LIBRARY_PATH=${GDBM_PREFIX}/lib${LIBRARY_PATH:+:$LIBRARY_PATH}" >> "$GITHUB_ENV"
+          echo "CMAKE_PREFIX_PATH=${HOMEBREW_PREFIX}" >> "$GITHUB_ENV"
+
       - name: Configure (Linux)
         if: runner.os == 'Linux'
         run: cmake -S . -B build -DADMIN_PWD=ci_test_pwd
@@ -64,13 +79,12 @@ jobs:
       - name: Configure (macOS)
         if: runner.os == 'macOS'
         run: |
-          HOMEBREW_PREFIX="$(brew --prefix)"
-          GDBM_PREFIX="$(brew --prefix gdbm)"
+          echo "CPATH=$CPATH"
+          echo "LIBRARY_PATH=$LIBRARY_PATH"
+          echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH"
           cmake -S . -B build \
             -DADMIN_PWD=ci_test_pwd \
-            -DCMAKE_PREFIX_PATH="$HOMEBREW_PREFIX" \
-            -DCMAKE_INCLUDE_PATH="$GDBM_PREFIX/include" \
-            -DCMAKE_LIBRARY_PATH="$GDBM_PREFIX/lib"
+            -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
 
       - name: Build
         run: cmake --build build
@@ -81,7 +95,7 @@ jobs:
 
   # ---------------------------------------------------------------
   # FreeBSD builds using cross-platform-actions (runs a FreeBSD VM
-  # on an Ubuntu host runner via QEMU)
+  # on an Ubuntu host runner via QEMU with KVM acceleration)
   # ---------------------------------------------------------------
   build-freebsd:
     strategy:
@@ -96,11 +110,18 @@ jobs:
             name: FreeBSD 13.3
 
     name: ${{ matrix.name }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -la /dev/kvm || true
 
       - name: Build & test in FreeBSD VM
         uses: cross-platform-actions/action@v0.25.0
