@@ -57,6 +57,33 @@ long perm2val(char *str)
     return (perm);
 }
 
+/*
+ * get_ipv4_addr - extract an IPv4 address from a sockaddr.
+ *
+ * Handles both plain AF_INET sockaddrs and IPv4-mapped IPv6 addresses
+ * (::ffff:a.b.c.d).  Returns 1 and fills *out on success, 0 on failure
+ * (e.g. a native IPv6 address).
+ */
+static int get_ipv4_addr(const struct sockaddr *sa, struct in_addr *out)
+{
+    if (sa->sa_family == AF_INET) {
+        *out = ((const struct sockaddr_in *)sa)->sin_addr;
+        return 1;
+    }
+
+    if (sa->sa_family == AF_INET6) {
+        const struct sockaddr_in6 *sa6 = (const struct sockaddr_in6 *)sa;
+        /* Check for IPv4-mapped IPv6 address (::ffff:a.b.c.d) */
+        if (IN6_IS_ADDR_V4MAPPED(&sa6->sin6_addr)) {
+            /* The IPv4 address is in the last 4 bytes of the 16-byte addr */
+            memcpy(out, &sa6->sin6_addr.s6_addr[12], 4);
+            return 1;
+        }
+    }
+
+    return 0;  /* native IPv6 – no IPv4 equivalent */
+}
+
 /* get_perms 
  *
  *   n          socket on which they sent the message
@@ -64,12 +91,8 @@ long perm2val(char *str)
  */
 long get_perms (int n, char *login)
 {
-    struct sockaddr_in    rs;
-#if HAVE_SOCKLEN_T
+    struct sockaddr_storage rs;
     socklen_t            rs_size = sizeof(rs);
-#else
-    size_t            rs_size = sizeof(rs);
-#endif
     static FILE        *perms_fp = (FILE *) NULL;
     char        pfilebuf[BUFSIZ];
     long        perm = PERM_NULL;
@@ -131,15 +154,22 @@ long get_perms (int n, char *login)
         }
         else if ( !strcasecmp (type, "mask") )
         {
-            unsigned long addr, mask;
+            /*
+             * "mask" entries use IPv4 address + netmask.  Extract the
+             * client's IPv4 address (works for both AF_INET and
+             * IPv4-mapped IPv6 connections).  Pure IPv6 clients will
+             * not match mask rules.
+             */
+            struct in_addr client_v4;
+            if (get_ipv4_addr((struct sockaddr *)&rs, &client_v4)) {
+                unsigned long addr = inet_addr(arg1);
+                unsigned long mask = inet_addr(arg2);
 
-            addr = inet_addr(arg1);
-            mask = inet_addr(arg2);
-
-            if ( (rs.sin_addr.s_addr & mask) == addr )
-            {
-                perm = perm2val (perms);
-                break;
+                if ( (client_v4.s_addr & mask) == addr )
+                {
+                    perm = perm2val (perms);
+                    break;
+                }
             }
         }
     }

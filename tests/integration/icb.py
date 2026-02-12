@@ -23,6 +23,18 @@ def find_free_port() -> int:
         return s.getsockname()[1]
 
 
+def has_ipv6() -> bool:
+    """Return True if the system supports IPv6 loopback (::1)."""
+    if not socket.has_ipv6:
+        return False
+    try:
+        with socket.socket(socket.AF_INET6, socket.SOCK_STREAM) as s:
+            s.bind(("::1", 0))
+        return True
+    except OSError:
+        return False
+
+
 def _recv_exact(sock: socket.socket, n: int, timeout_s: float) -> bytes:
     sock.settimeout(timeout_s)
     out = bytearray()

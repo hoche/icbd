@@ -157,6 +157,15 @@ if(Python3_Interpreter_FOUND)
       "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
   )
 
+  add_test(
+    NAME icbd.integration.ipv6.clear
+    COMMAND
+      "${Python3_EXECUTABLE}"
+      "${ICBD_TESTS_DIR}/integration/test_ipv6.py"
+      "--icbd" "$<TARGET_FILE:icbd>"
+      "--fixtures" "${CMAKE_SOURCE_DIR}/prod"
+  )
+
   if(HAVE_SSL)
     add_test(
       NAME icbd.integration.commands.tls

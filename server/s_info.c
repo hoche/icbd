@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <string.h>
 
 #include "server.h"
@@ -43,24 +44,28 @@ int s_info(int n, int argc)
         } 
         else 
         {
-            struct sockaddr_in rs;
-#if HAVE_SOCKLEN_T
-            socklen_t rs_size = sizeof (struct sockaddr_in);
-#else
-            size_t rs_size = sizeof (struct sockaddr_in);
-#endif
+            struct sockaddr_storage rs;
+            socklen_t rs_size = sizeof(rs);
+            char addrstr[NI_MAXHOST];
             int aw, idle;
 
             idle = time(NULL) - u_tab[TheirIndex].t_recv;
 
             aw = (strlen(u_tab[TheirIndex].awaymsg) > 0);
-            getpeername (TheirIndex, (struct sockaddr*)&rs, &rs_size);
+            getpeername(TheirIndex, (struct sockaddr*)&rs, &rs_size);
+
+            /* Get numeric IP address string (works for both IPv4 and IPv6) */
+            if (getnameinfo((struct sockaddr *)&rs, rs_size,
+                            addrstr, sizeof(addrstr), NULL, 0,
+                            NI_NUMERICHOST) != 0) {
+                snprintf(addrstr, sizeof(addrstr), "(unknown)");
+            }
 
             sprintf(mbuf, "%-14s %s@%s (%s) %d%s%s",
                     u_tab[TheirIndex].nickname,
                     u_tab[TheirIndex].loginid,
                     u_tab[TheirIndex].nodeid,
-                    inet_ntoa (rs.sin_addr),
+                    addrstr,
                     (idle < 60) ? idle :
                     (idle < 3600) ? (idle / 60) :
                     (idle < 86400) ? (idle / 3600) : (idle/86400),

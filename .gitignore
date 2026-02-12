@@ -67,3 +67,6 @@ config.log
 build/
 build-*/
 build-test/
+
+# python stuff
+*/*/__pycache__

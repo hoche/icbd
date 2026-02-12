@@ -460,49 +460,82 @@ pktserv_run(void)
 
 int pktserv_addport(char *host_name, int port_number, int is_ssl)
 {
-    struct sockaddr_in saddr;
+    struct addrinfo hints, *res, *rp;
+    char port_str[16];
     int one = 1;
-    int s;
+    int s = -1;
     int flags;
 
-    memset(&saddr, 0, sizeof(saddr));
+    snprintf(port_str, sizeof(port_str), "%d", port_number);
 
-    /*
-    * if host_name is NULL or empty, we bind to any address, otherwise
-    * we bind to just the one listed 
-     */
-    if ( (char *)NULL != host_name && '\0' != host_name[0] ) {
-        struct hostent *hp;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;      /* Allow IPv4 or IPv6 */
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;      /* For wildcard bind */
 
-        if ((hp = gethostbyname(host_name)) == (struct hostent *) 0) {
-            vmdb(MSG_ERR, "%s: gethostbyname()", __FUNCTION__ );
-            return(-1);
-        }
-
-        memcpy (&saddr.sin_addr, hp->h_addr_list[0], hp->h_length);
-    } else {
-        saddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    const char *node = NULL;
+    if (host_name != NULL && host_name[0] != '\0') {
+        node = host_name;
     }
 
-    /* insert host_name into address */
-    saddr.sin_family = AF_INET;
-    saddr.sin_port = htons(port_number);
-
-    /* create a socket */
-    if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        vmdb(MSG_ERR, "%s: socket()", __FUNCTION__ );
+    int rv = getaddrinfo(node, port_str, &hints, &res);
+    if (rv != 0) {
+        vmdb(MSG_ERR, "%s: getaddrinfo: %s", __FUNCTION__, gai_strerror(rv));
         return(-1);
     }
 
-    /* allow quick rebind after restart */
-    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) < 0) {
-        vmdb(MSG_ERR, "%s: setsockopt(SO_REUSEADDR)", __FUNCTION__ );
-        /* return(-1);*/
+    /*
+     * Try each returned address until we successfully bind.
+     * Prefer IPv6 with dual-stack (IPV6_V6ONLY=0) so that a single
+     * socket can accept both IPv4 and IPv6 connections.  Not all
+     * systems return IPv6 first from getaddrinfo, so we make two
+     * passes: first try AF_INET6, then AF_INET.
+     */
+    for (int pass = 0; pass < 2 && s < 0; pass++) {
+        int want_family = (pass == 0) ? AF_INET6 : AF_INET;
+        for (rp = res; rp != NULL; rp = rp->ai_next) {
+            if (rp->ai_family != want_family)
+                continue;
+
+            s = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+            if (s < 0)
+                continue;
+
+            /* For IPv6, enable dual-stack so we also accept IPv4
+             * connections via IPv4-mapped IPv6 addresses. */
+            if (rp->ai_family == AF_INET6) {
+                int v6only = 0;
+                if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY,
+                               &v6only, sizeof(v6only)) < 0) {
+                    vmdb(MSG_INFO, "%s: setsockopt(IPV6_V6ONLY=0) failed, "
+                         "trying next address", __FUNCTION__);
+                    close(s);
+                    s = -1;
+                    continue;
+                }
+            }
+
+            /* allow quick rebind after restart */
+            if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
+                           (char *)&one, sizeof(one)) < 0) {
+                vmdb(MSG_ERR, "%s: setsockopt(SO_REUSEADDR)", __FUNCTION__);
+            }
+
+            if (bind(s, rp->ai_addr, rp->ai_addrlen) == 0)
+                break;  /* success */
+
+            vmdb(MSG_INFO, "%s: bind() failed for an address, trying next",
+                 __FUNCTION__);
+            close(s);
+            s = -1;
+        }
     }
 
-    /* bind it to the inet address */
-    if (bind(s, (struct sockaddr *) &saddr, sizeof(saddr)) < 0) {
-        vmdb(MSG_ERR, "%s: bind()", __FUNCTION__ );
+    freeaddrinfo(res);
+
+    if (s < 0) {
+        vmdb(MSG_ERR, "%s: could not bind to any address for port %d",
+             __FUNCTION__, port_number);
         return(-1);
     }
 
@@ -511,7 +544,8 @@ int pktserv_addport(char *host_name, int port_number, int is_ssl)
 
     /* make it non-blocking */
     if (fcntl(s, F_SETFL, O_NONBLOCK) < 0) {
-        vmdb(MSG_ERR, "%s: fcntl(O_NONBLOCK)", __FUNCTION__ );
+        vmdb(MSG_ERR, "%s: fcntl(O_NONBLOCK)", __FUNCTION__);
+        close(s);
         return(-1);
     }
 
@@ -519,14 +553,14 @@ int pktserv_addport(char *host_name, int port_number, int is_ssl)
     flags = fcntl(s, F_GETFD, 0);
     flags = flags & ~ FD_CLOEXEC;
     if (fcntl(s, F_SETFD, flags) < 0) {
-        vmdb(MSG_ERR, "%s: fcntl(FD_CLOEXEC)", __FUNCTION__ );
+        vmdb(MSG_ERR, "%s: fcntl(FD_CLOEXEC)", __FUNCTION__);
         exit (-1);
     }
 
     /* set the send buffer size */
     one = 24576;
     if (setsockopt(s, SOL_SOCKET, SO_SNDBUF, (char *)&one, sizeof(one)) < 0) {
-        vmdb(MSG_ERR, "%s: setsockopt(SO_SNDBUF)", __FUNCTION__ );
+        vmdb(MSG_ERR, "%s: setsockopt(SO_SNDBUF)", __FUNCTION__);
     }
 
     /* set this socket's state to be a non-blocked, unignored listen socket */
