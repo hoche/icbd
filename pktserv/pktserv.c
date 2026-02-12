@@ -488,6 +488,12 @@ int pktserv_addport(char *host_name, int port_number, int is_ssl)
         return(-1);
     }
 
+    /* allow quick rebind after restart */
+    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) < 0) {
+        vmdb(MSG_ERR, "%s: setsockopt(SO_REUSEADDR)", __FUNCTION__ );
+        /* return(-1);*/
+    }
+
     /* bind it to the inet address */
     if (bind(s, (struct sockaddr *) &saddr, sizeof(saddr)) < 0) {
         vmdb(MSG_ERR, "%s: bind()", __FUNCTION__ );
@@ -496,12 +502,6 @@ int pktserv_addport(char *host_name, int port_number, int is_ssl)
 
     /* start listening for connections */
     listen(s, 5);
-
-    /* force occasional connection check */
-    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) < 0) {
-        vmdb(MSG_ERR, "%s: setsockopt(SO_REUSEADDR)", __FUNCTION__ );
-        /* return(-1);*/
-    }
 
     /* make it non-blocking */
     if (fcntl(s, F_SETFL, O_NONBLOCK) < 0) {
@@ -560,6 +560,7 @@ int pktserv_send(int s, char *pkt, size_t len)
 
     if (cbuf->state == WANT_DISCONNECT || cbuf->state == WANT_RAW_DISCONNECT) {
         vmdb(MSG_ERR, "%s() called on socket in DISCONNECT state", __FUNCTION__);
+        return -1;
     }
 
     cbuf->state = WANT_WRITE;
@@ -569,7 +570,7 @@ int pktserv_send(int s, char *pkt, size_t len)
 
     /* if we already have an unwritten message, bomb out */
     if (cbuf->wlist_size >= MAX_SENDPACKET_QUEUE) {
-        vmdb(MSG_ERR, "%s: fd%d already has %d pending writes.", __FUNCTION__, cbuf->wlist_size);
+        vmdb(MSG_ERR, "%s: fd%d already has %d pending writes.", __FUNCTION__, cbuf->fd, cbuf->wlist_size);
         return -1;
     }
 
