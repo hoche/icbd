@@ -78,7 +78,10 @@ void strlinkbefore(STRLIST *s, STRLIST *i, STRLIST **head, STRLIST **tail)
     s->prev = i->prev;
     s->next = i;
     i->prev = s;
-    s->prev->next = s;
+    if (s->prev)
+        s->prev->next = s;
+    else
+        *head = s;
 }
 
 
