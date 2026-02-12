@@ -23,10 +23,11 @@ int s_motd(int n, int argc)
     char c;
     char temp[256];
     int i;
+    size_t used = 0;
 
     motd_fd = open(ICBDMOTD, O_RDONLY);
 
-    memset(temp, 0, 255);
+    memset(temp, 0, sizeof(temp));
     /* if the file is there, list it, otherwise report error */
     if (motd_fd >= 0) 
     {
@@ -43,17 +44,30 @@ int s_motd(int n, int argc)
                 }
                 else if (c == 'U') {
                     char    *value;
-                    if (icbdb_get ("server", "signon", ICBDB_STRING, &value))
-                        strncat (temp, value, sizeof(temp)-1);
+                    if (icbdb_get ("server", "signon", ICBDB_STRING, &value)) {
+                        size_t remain = sizeof(temp) - 1 - used;
+                        size_t add = strnlen(value, remain);
+                        if (add > 0) {
+                            memcpy(temp + used, value, add);
+                            used += add;
+                            temp[used] = '\0';
+                        }
+                    }
                 }
-                else
-                    strncat(temp, &c, 1);
+                else if (used < sizeof(temp) - 1) {
+                    temp[used++] = c;
+                    temp[used] = '\0';
+                }
             }
             else if (c == '\012') {
                 sends_cmdout(n, temp);
-                memset(temp, 0, 255);
+                memset(temp, 0, sizeof(temp));
+                used = 0;
             }
-            else strncat(temp, &c, 1);
+            else if (used < sizeof(temp) - 1) {
+                temp[used++] = c;
+                temp[used] = '\0';
+            }
         }
         if (close(motd_fd) != 0) {
             sprintf(mbuf, "MOTD File Close: %s",
