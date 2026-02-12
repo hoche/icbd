@@ -3938,9 +3938,9 @@ done
 
 fi
 if test $ndbm = no; then
-for ac_header in ./gdbm-ndbm.h
+for ac_header in gdbm-ndbm.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "./gdbm-ndbm.h" "ac_cv_header___gdbm_ndbm_h" "$ac_includes_default"
+  ac_fn_c_check_header_mongrel "$LINENO" "gdbm-ndbm.h" "ac_cv_header___gdbm_ndbm_h" "$ac_includes_default"
 if test "x$ac_cv_header___gdbm_ndbm_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE___GDBM_NDBM_H 1
@@ -3951,6 +3951,19 @@ fi
 done
 
 fi
+
+gdbm_hdr=no
+for ac_header in gdbm.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "gdbm.h" "ac_cv_header_gdbm_h" "$ac_includes_default"
+if test "x$ac_cv_header_gdbm_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GDBM_H 1
+_ACEOF
+ gdbm_hdr=yes
+fi
+
+done
 
 if test $ndbm = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gdbm_version in -lgdbm" >&5
@@ -3994,7 +4007,52 @@ if test "x$ac_cv_lib_gdbm_gdbm_version" = xyes; then :
 fi
 
 else
-    as_fn_error $? "Cannot find either gdbm or ndbm. Please install one or the other." "$LINENO" 5
+    if test $gdbm_hdr = yes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gdbm_open in -lgdbm" >&5
+$as_echo_n "checking for gdbm_open in -lgdbm... " >&6; }
+if ${ac_cv_lib_gdbm_gdbm_open+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lgdbm  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gdbm_open ();
+int
+main ()
+{
+return gdbm_open ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_gdbm_gdbm_open=yes
+else
+  ac_cv_lib_gdbm_gdbm_open=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gdbm_gdbm_open" >&5
+$as_echo "$ac_cv_lib_gdbm_gdbm_open" >&6; }
+if test "x$ac_cv_lib_gdbm_gdbm_open" = xyes; then :
+  LIBS="$LIBS -lgdbm"
+else
+  gdbm_hdr=no
+  as_fn_error $? "Cannot find DBM libs. Install libgdbm-dev (native gdbm) or libgdbm-compat-dev (ndbm compatibility)." "$LINENO" 5
+fi
+    else
+        as_fn_error $? "Cannot find DBM headers/libs. Install libgdbm-dev (native gdbm) or libgdbm-compat-dev (ndbm compatibility)." "$LINENO" 5
+    fi
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for _res in -lresolv" >&5

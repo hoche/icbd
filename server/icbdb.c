@@ -5,13 +5,7 @@
 #include "strutil.h"
 #include "mdb.h"
 #include <strings.h>
-#ifdef HAVE_NDBM_H
-#include <ndbm.h>
-#elif defined (HAVE_GDBM_NDBM_H)
-#include <gdbm/ndbm.h>
-#elif defined (HAVE___GDBM_NDBM_H)
-#include <gdbm-ndbm.h>
-#endif
+#include "dbm.h"
 #include <fcntl.h>
 #include <time.h>
 #include <stdlib.h>

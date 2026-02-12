@@ -28,6 +28,7 @@ OBJ = \
 	icbdb.o \
 	icbutil.o \
 	ipcf.o \
+	dbm_gdbm.o \
 	lookup.o \
 	main.o \
 	mdb.o \

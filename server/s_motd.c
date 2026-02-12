@@ -8,13 +8,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#ifdef HAVE_NDBM_H
-#include <ndbm.h>
-#elif defined (HAVE_GDBM_NDBM_H)
-#include <gdbm/ndbm.h>
-#elif defined (HAVE___GDBM_NDBM_H)
-#include <gdbm-ndbm.h>
-#endif
 #include <fcntl.h>
 #include <errno.h>
 

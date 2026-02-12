@@ -169,7 +169,13 @@ int main(int argc, char* argv[])
 
 #ifdef RLIMIT_NOFILE
     getrlimit(RLIMIT_NOFILE, &rlp);
-    rlp.rlim_cur = MAX_USERS + 1;
+    /*
+     * The server indexes connection/user state by file descriptor.
+     * Keep RLIMIT_NOFILE within bounds so we don't generate fds >= MAX_USERS.
+     */
+    rlp.rlim_cur = MAX_USERS;
+    if (rlp.rlim_max < rlp.rlim_cur)
+        rlp.rlim_max = rlp.rlim_cur;
     if (setrlimit(RLIMIT_NOFILE, &rlp) < 0)
     {
         perror("setrlimit");

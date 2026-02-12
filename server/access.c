@@ -3,19 +3,14 @@
 
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_NDBM_H
-#include <ndbm.h>
-#elif defined (HAVE_GDBM_NDBM_H)
-#include <gdbm/ndbm.h>
-#elif defined (HAVE___GDBM_NDBM_H)
-#include <gdbm-ndbm.h>
-#endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif
+
+#include "dbm.h"
 
 #include "server.h"
 #include "externs.h"

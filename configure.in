@@ -83,16 +83,22 @@ if test $ndbm = no; then
 AC_CHECK_HEADERS(gdbm/ndbm.h, ndbm=yes)
 fi
 if test $ndbm = no; then
-AC_CHECK_HEADERS(./gdbm-ndbm.h, ndbm=yes)
+AC_CHECK_HEADERS(gdbm-ndbm.h, ndbm=yes)
 fi
+
+dnl Native gdbm header (no ndbm compat) support
+gdbm_hdr=no
+AC_CHECK_HEADERS(gdbm.h, gdbm_hdr=yes)
 
 dnl Checks for libraries.
 dnl for those systems that use the gdbm/ndbm.h, look for gdbm lib
 dnl compile and look for gdbm_version. If it exists, presume it's gdbm.
 if test $ndbm = yes; then
     AC_CHECK_LIB(gdbm, gdbm_version, [LIBS="$LIBS -lgdbm -lgdbm_compat"], [], [-lgdbm_compat])
+elif test $gdbm_hdr = yes; then
+    AC_CHECK_LIB(gdbm, gdbm_open, [LIBS="$LIBS -lgdbm"], [gdbm_hdr=no])
 else
-    AC_MSG_ERROR([Cannot find either gdbm or ndbm. Please install one or the other.])
+    AC_MSG_ERROR([Cannot find DBM headers/libs. Install libgdbm-dev (native gdbm) or libgdbm-compat-dev (ndbm compatibility).])
 fi
 
 dnl do we have _res?
