@@ -31,16 +31,19 @@
 int sslsocket_accept(cbuf_t *cbuf)
 {
     mdb(MSG_ERR, "CRITICAL ERROR: sslsocket_accept() called in a non-SSL-enabled server!");
+    return -1;
 }
 
 int sslsocket_read(cbuf_t *cbuf, void* buf, size_t len)
 {
     mdb(MSG_ERR, "CRITICAL ERROR: sslsocket_read() called in a non-SSL-enabled server!");
+    return -1;
 }
 
 int sslsocket_write(cbuf_t *cbuf, void* buf, size_t len)
 {
     mdb(MSG_ERR, "CRITICAL ERROR: sslsocket_write() called in a non-SSL-enabled server!");
+    return -1;
 }
 
 
@@ -79,14 +82,14 @@ int sslsocket_accept(cbuf_t *cbuf)
     /* don't try to reinitialize if we're already in the middle of accepting */
     if (cbuf->state != WANT_SSL_ACCEPT) {
         if ( (cbuf->ssl_con = SSL_new(ctx)) == NULL) {
-            vmdb(MSG_ERR, "sslsocket_accept: fs#%d: could't create ssl_con.");
+            vmdb(MSG_ERR, "sslsocket_accept: fd%d: couldn't create ssl_con.", cbuf->fd);
             return -1;
         }
         SSL_set_fd(cbuf->ssl_con, cbuf->fd);
     }
 
     result = SSL_accept(cbuf->ssl_con);
-    if (result == 0) {
+    if (result == 1) {
         vmdb(MSG_INFO,
              "fd%d: SSL connection accepted.", cbuf->fd);
         cbuf->state = ACCEPTED;
