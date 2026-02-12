@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # ---------------------------------------------------------------
+  # Native Linux and macOS builds using GitHub-hosted runners
+  # ---------------------------------------------------------------
+  build-native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ---- Linux x64 ----
+          - os: ubuntu-24.04
+            name: Linux (Ubuntu 24.04 x64)
+            install: sudo apt-get update && sudo apt-get install -y libgdbm-dev cmake python3
+          - os: ubuntu-22.04
+            name: Linux (Ubuntu 22.04 x64)
+            install: sudo apt-get update && sudo apt-get install -y libgdbm-dev cmake python3
+
+          # ---- Linux ARM64 ----
+          # Note: ARM runners are free for public repos.
+          # If your repo is private, these may require a paid plan.
+          - os: ubuntu-24.04-arm
+            name: Linux (Ubuntu 24.04 ARM64)
+            install: sudo apt-get update && sudo apt-get install -y libgdbm-dev cmake python3
+          - os: ubuntu-22.04-arm
+            name: Linux (Ubuntu 22.04 ARM64)
+            install: sudo apt-get update && sudo apt-get install -y libgdbm-dev cmake python3
+
+          # ---- macOS Apple Silicon (ARM64) ----
+          - os: macos-15
+            name: macOS 15 (Apple Silicon)
+            install: brew install gdbm cmake python3
+          - os: macos-14
+            name: macOS 14 (Apple Silicon)
+            install: brew install gdbm cmake python3
+
+          # ---- macOS Intel (x64) ----
+          - os: macos-13
+            name: macOS 13 (Intel x64)
+            install: brew install gdbm cmake python3
+
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: ${{ matrix.install }}
+
+      - name: Configure
+        run: cmake -S . -B build -DADMIN_PWD=ci_test_pwd
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Run tests
+        working-directory: build
+        run: ctest --output-on-failure
+
+  # ---------------------------------------------------------------
+  # FreeBSD builds using vmactions/freebsd-vm (runs inside a VM
+  # on an Ubuntu host runner)
+  # ---------------------------------------------------------------
+  build-freebsd:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - freebsd-version: "14.2"
+            name: FreeBSD 14.2
+          - freebsd-version: "14.1"
+            name: FreeBSD 14.1
+          - freebsd-version: "13.4"
+            name: FreeBSD 13.4
+
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build & test in FreeBSD VM
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: ${{ matrix.freebsd-version }}
+          usesh: true
+          prepare: |
+            pkg install -y cmake gdbm python3
+          run: |
+            cmake -S . -B build -DADMIN_PWD=ci_test_pwd
+            cmake --build build
+            cd build
+            ctest --output-on-failure
