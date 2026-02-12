@@ -74,8 +74,6 @@ int init_ssl(char *pem)
         return -1;
     }
 
-    ctx = SSL_CTX_new(SSLv23_server_method());
-
     SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
 
     result = SSL_CTX_use_PrivateKey_file(ctx, pem,  SSL_FILETYPE_PEM);
