@@ -6,16 +6,16 @@ expanded (and actually useful) information here.
 
 0. THE QUICK VERSION
 
-Make sure you have gdbm or ndbm installed on your system.
+Make sure you have gdbm installed on your system (development headers).
 Unpack the source.
-% ./configure.
-Edit config.h and update anything you desire (MAX_IDLE for example)
+% cmake -S . -B build -DADMIN_PWD=******
+% cmake --build build
+Edit icb_config.h and update anything you desire (MAX_IDLE for example)
 Edit support/mkdb to show correct path to perl and correct admin values.
 Edit prod/motd
-% make depend ; make
 % cd prod
 % ../support/mkdb
-% ../server/icbd
+% ../build/server/icbd
 
 I. UNPACK THE SOURCE
 
@@ -32,8 +32,7 @@ file in the same directory as the rest of the sources.
 II. CONFIGURATION
 
 The server *has* to know the administrator password; it's compiled
-in. You need to either set this as an environment variable or
-specify it as an argument to configure.
+in. You must pass it at build configuration time.
 
 Note: The method of authentication is particularly screwy. What happens
     is you log in to the server and register a nickname with the same
@@ -43,15 +42,11 @@ Note: The method of authentication is particularly screwy. What happens
     Don't ask, I don't know why it was done that way; it's been that
     way forever. Yes, it likely will change in the future.
 
-So, run either:
+Configure with:
 
-./configure --with-admin-pwd=******
+cmake -S . -B build -DADMIN_PWD=******
 
-or 
-
-./configure ADMIN_PWD=******
-
-This will create your Makefiles and config.h file.
+This will create build files and a generated config header in the build dir.
 
 Next, you'll want to check icb_config.h and verify or update the following
 values:

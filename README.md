@@ -1,8 +1,6 @@
 # icbd - The ICB Server
 
-_**NOTE: As of 1 Dec 2019, the current version on HEAD (with pktserv
-instead of murgil) is known to be broken. Fixes are pending. The last
-known-working version is 1.2d.**_ 
+_**NOTE: HEAD builds with CMake.**_
 
 ICB (Internet Citizen's Band) is a renaming of Sean Casey's original
 ForumNet (or fn) program. Much of the code here-in is Sean's, though
@@ -22,15 +20,11 @@ README.CHANGEHIST.
 
 Since then:
   * UTF-8 support has been added for messages (but not usernames or groupnames).
-  * The configure system has been updated.
+  * The build system has been updated (CMake).
   * "brick" has been added (feature request)
   * SSL support has been added (but still has some bugs).
 
 Building and installation instructions can be found in README.INSTALL.
-
-README.autoconf has information about using autoconf to create the
-configure script. It is for icbd developers and can be
-skipped if you just want to build and run the server.
 
 README.ToDo is a ToDo list for the developers.
 
