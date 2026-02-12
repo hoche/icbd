@@ -122,14 +122,16 @@ void filtertext(const char *src, char *dest, size_t len)
  */
 void filtertext(const char *s, char *dest, size_t len)
 {
-    for (;*s != '\0'; s++) {
-        if (!(*s >= 0x20 && *s < 0x7E)) {
-            *s = '?';
+    size_t i;
+
+    for (i = 0; i < len - 1 && s[i] != '\0'; i++) {
+        if (s[i] >= 0x20 && s[i] < 0x7E) {
+            dest[i] = s[i];
+        } else {
+            dest[i] = '?';
         }
     }
-
-    strncpy(dest, s, len);
-    dest[len] = '\0';
+    dest[i] = '\0';
 }
 #endif
 
