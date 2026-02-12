@@ -190,6 +190,13 @@ void s_new_user(int n, int secure)
 {
     char *cp;
 
+    /* Check bounds: file descriptor must be < MAX_USERS to use as array index */
+    if (n < 0 || n >= MAX_USERS) {
+        vmdb(MSG_ERR, "s_new_user: invalid file descriptor %d (must be 0-%d), closing connection", n, MAX_USERS - 1);
+        pktserv_disconnect(n);
+        return;
+    }
+
     /* construct proto(col) message */
     snprintf(&packetbuffer[1], MAX_PKT_LEN-1, "%c%d\001%s\001%s",
              ICB_M_PROTO, PROTO_LEVEL, thishost, VERSION);
