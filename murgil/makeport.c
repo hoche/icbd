@@ -55,25 +55,25 @@ int makeport(char *host_name, int port_number)
 
 	/* create a socket */
 	if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		perror("makeport: gethostbyname");
+		perror("makeport: socket");
 		return(-1);
+	}
+
+	/* allow address reuse so we can restart quickly after a crash
+	 * without waiting for TIME_WAIT to expire. must be set before bind().
+	 */
+	if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) < 0) {
+		perror("makeport: setsockopt(SO_REUSEADDR)");
 	}
 
 	/* bind it to the inet address */
 	if (bind(s, (struct sockaddr *) &saddr, sizeof(saddr)) < 0) {
 		perror("makeport: bind");
-		perror("perror says:");
 		return(-1);
 	}
 
 	/* start listening for connections */
 	listen(s, 5);
-
-	/* force occasional connection check */
-	if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(one)) < 0) {
-		puts("makeport:setsockopt (makeport)");
-		/* return(-1);*/
-	}
 
 	/* make it non-blocking */
 	if (fcntl(s, F_SETFL, O_NONBLOCK) < 0) {
