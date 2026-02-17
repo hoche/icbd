@@ -29,6 +29,7 @@
 
 #ifdef HAVE_SSL
 #include <openssl/ssl.h>
+#include <openssl/err.h>
 #endif
 
 #define PACKET_HEADER_LEN	1
@@ -66,28 +67,61 @@ int _readpacket(int user, struct cbuf_t *p)
       ret = read(user, p->rbuf->data, PACKET_HEADER_LEN);
     } else {
       ret = SSL_read(cbufs[user].ssl_con, p->rbuf->data, PACKET_HEADER_LEN);
+      if (ret <= 0) {
+	int ssl_error = SSL_get_error(cbufs[user].ssl_con, ret);
+	switch (ssl_error) {
+	  case SSL_ERROR_WANT_READ:
+	  case SSL_ERROR_WANT_WRITE:
+	    return(0); /* incomplete, retry later */
+
+	  case SSL_ERROR_ZERO_RETURN:
+	    return(-2); /* clean shutdown */
+
+	  case SSL_ERROR_SYSCALL:
+	    if (ret == 0) {
+	      vmdb(MSG_ERR,
+		"fd%d (SSL): read header: got EOF", user);
+	    } else {
+	      vmdb(MSG_ERR,
+		"fd%d (SSL): read header: %s", user, strerror(errno));
+	    }
+	    return(-1);
+
+	  case SSL_ERROR_SSL: {
+	    unsigned long err = ERR_get_error();
+	    if (err) {
+	      char err_buf[256];
+	      ERR_error_string(err, err_buf);
+	      vmdb(MSG_ERR,
+		"fd%d (SSL): read header: %s", user, err_buf);
+	    } else {
+	      vmdb(MSG_ERR,
+		"fd%d (SSL): Couldn't read command packet.", user);
+	    }
+	    return(-1);
+	  }
+
+	  default:
+	    vmdb(MSG_ERR,
+	      "fd%d (SSL): Couldn't read command packet (ssl_error=%d)",
+	      user, ssl_error);
+	    return(-1);
+	}
+      }
     }
 #else
     ret = read(user, p->rbuf->data, PACKET_HEADER_LEN);
 #endif
     if (ret < 0) {
-      /* we haven't gotten all the data they said they
-       * were gonna send (incomplete packet)
+      /* plain read error - we haven't gotten all the data they said
+       * they were gonna send (incomplete packet)
        */
       if (errno == EWOULDBLOCK) {
 	return(0);
       } else if ( errno == EPIPE || errno == ECONNRESET ) {
 	return (-2);
       } else {
-#ifdef HAVE_SSL
-	if (p->ssl_con == NULL) {
-	  vmdb(MSG_ERR, "fd%d: Couldn't read command packet.", user);
-	} else {
-	  vmdb(MSG_ERR, "fd%d (SSL): Couldn't read command packet.", user);
-	}
-#else
 	vmdb(MSG_ERR, "fd%d: Couldn't read command packet.", user);
-#endif
 	return(-1);
       }
     }
@@ -138,28 +172,61 @@ int _readpacket(int user, struct cbuf_t *p)
     ret = read(user, p->rbuf->pos, remain);
   } else {
     ret = SSL_read(cbufs[user].ssl_con, p->rbuf->pos, remain);
+    if (ret <= 0) {
+      int ssl_error = SSL_get_error(cbufs[user].ssl_con, ret);
+      switch (ssl_error) {
+	case SSL_ERROR_WANT_READ:
+	case SSL_ERROR_WANT_WRITE:
+	  return(0); /* incomplete, retry later */
+
+	case SSL_ERROR_ZERO_RETURN:
+	  return(-2); /* clean shutdown */
+
+	case SSL_ERROR_SYSCALL:
+	  if (ret == 0) {
+	    vmdb(MSG_ERR,
+	      "fd%d (SSL): read body: got EOF", user);
+	  } else {
+	    vmdb(MSG_ERR,
+	      "fd%d (SSL): read body: %s", user, strerror(errno));
+	  }
+	  return(-1);
+
+	case SSL_ERROR_SSL: {
+	  unsigned long err = ERR_get_error();
+	  if (err) {
+	    char err_buf[256];
+	    ERR_error_string(err, err_buf);
+	    vmdb(MSG_ERR,
+	      "fd%d (SSL): read body: %s", user, err_buf);
+	  } else {
+	    vmdb(MSG_ERR,
+	      "fd%d (SSL): Couldn't read packet.", user);
+	  }
+	  return(-1);
+	}
+
+	default:
+	  vmdb(MSG_ERR,
+	    "fd%d (SSL): Couldn't read packet (ssl_error=%d)",
+	    user, ssl_error);
+	  return(-1);
+      }
+    }
   }
 #else
   ret = read(user, p->rbuf->pos, remain);
 #endif
   if ( ret < 0) {
-    /* we haven't gotten all the data they said they
-     * were gonna send (incomplete packet)
+    /* plain read error - we haven't gotten all the data they said
+     * they were gonna send (incomplete packet)
      */
     if (errno == EWOULDBLOCK) {
       return(0);
     } else if (errno == EPIPE || errno == ECONNRESET) {
       return(-2);
     } else {
-#ifdef HAVE_SSL
-      if (p->ssl_con == NULL) {
-	vmdb(MSG_ERR, "fd%d: Couldn't read packet.", user);
-      } else {
-	vmdb(MSG_ERR, "fd%d (SSL): Couldn't read packet.", user);
-      }
-#else
       vmdb(MSG_ERR, "fd%d: Couldn't read packet.", user);
-#endif
       return(-1);
     }
   }
