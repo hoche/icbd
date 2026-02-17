@@ -55,6 +55,9 @@ int _writepacket(struct cbuf_t* cbuf)
     cbuf->fd, cbuf->wlist_size);
 
   if (cbuf->retries > MAX_SENDPACKET_RETRIES) {
+     vmdb(MSG_ERR,
+       "writepacket: fd%d exceeded max retries (%d). giving up.",
+       cbuf->fd, MAX_SENDPACKET_RETRIES);
      return -1;
   }
 
@@ -142,13 +145,13 @@ int _writepacket(struct cbuf_t* cbuf)
     }
     
     if (result < remain) {
-      /* try again later with the remaining amount */
+      /* partial write - data IS flowing, so reset retries */
       msgbuf->pos += result;
       FD_SET(cbuf->fd, &wfdset);
       vmdb(MSG_VERBOSE, 
 	"writepacket: fd%d sent partial packet (%d bytes). will retry sending later.",
         cbuf->fd, result);
-      cbuf->retries++;
+      cbuf->retries = 0;
       return 0;
     } 
     
