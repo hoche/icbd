@@ -50,7 +50,10 @@
  */
 int _newconnect(int s, int is_ssl)
 {
-  int ns;  /* new socket - the socket of the accepted client */
+  int ns = s; /* new socket - the socket of the accepted client.
+               * initialized to s so that SSL retry calls (where
+               * accept() is skipped) have a valid value.
+               */
   int one = 1;
   int flags;
   struct linger nolinger;
@@ -212,6 +215,14 @@ int _newconnect(int s, int is_ssl)
 
   if (ns > highestfd)
     highestfd = ns;
+
+#ifdef HAVE_SSL
+  /* if the SSL handshake is still in progress, return 0 ("would block")
+   * so the caller doesn't treat this as a ready connection.
+   */
+  if (cbuf->want_ssl_accept)
+    return(0);
+#endif
 
   return(ns);
 }

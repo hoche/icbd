@@ -93,13 +93,13 @@ void handle_fd_activity(void)
 	      if ((n = _newconnect(x, 1 )) > 0) {
 		  s_new_user(n); /* let server init the user */
 	      }
-	      break;
+	      continue;
 	    }
 
 	    if (_writepacket(&cbufs[x]) < 0) {
 		vmdb(MSG_WARN, "fd%d send error. disconnecting user.", x);
 		disconnectuser(x);
-		break;
+		continue;
 	    }
 	}
 
@@ -112,7 +112,7 @@ void handle_fd_activity(void)
 	      if ((n = _newconnect(x, 1 )) > 0) {
 		  s_new_user(n); /* let server init the user */
 	      }
-	      break;
+	      continue;
 	    }
 
 	    if ( ok2read(x) == 1 ) {
