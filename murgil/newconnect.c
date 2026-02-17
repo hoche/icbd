@@ -120,6 +120,7 @@ int _newconnect(int s, int is_ssl)
     /* we're starting with a new command */
     cbuf->fd = ns;
     cbuf->newmsg = 1;
+    TAILQ_INIT(&(cbuf->wlist));
 
   }
 
