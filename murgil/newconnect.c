@@ -95,10 +95,10 @@ int _newconnect(int s, int is_ssl)
 	    strerror(errno));
     }
 
-    /* XXX this should be necessary anymore, since we have send queues
+    /* XXX this shouldn't be necessary anymore, since we have send queues
      */
     one = 24576;
-    if (setsockopt(s, SOL_SOCKET, SO_SNDBUF, (char *)&one, sizeof(one)) < 0) {
+    if (setsockopt(ns, SOL_SOCKET, SO_SNDBUF, (char *)&one, sizeof(one)) < 0) {
 	vmdb(MSG_WARN, "_newconnect::setsockopt(SO_SNDBUF) - %s", 
 	    strerror(errno));
     }
