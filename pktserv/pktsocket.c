@@ -74,6 +74,13 @@ int pktsocket_accept(cbuf_t *listen_cbuf)
     }
     listen_cbuf->disp = OK;
 
+    /* Check bounds: file descriptor must be < MAX_USERS to use as array index */
+    if (ns >= MAX_USERS) {
+        vmdb(MSG_ERR, "pktsocket_accept: file descriptor %d >= MAX_USERS (%d), closing connection", ns, MAX_USERS);
+        close(ns);
+        return -1;
+    }
+
     /* ok, got a new socket. point the cbuf to the new one's */
     cbuf = &cbufs[ns];
 
