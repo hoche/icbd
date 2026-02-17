@@ -188,12 +188,12 @@ void s_new_user(int n)
     cp = getremotename(n);
 
     if (cp == NULL) {
-	vmdb(MSG_INFO, mbuf, "[CONNECT] %d", n);
+	vmdb(MSG_INFO, "[CONNECT] %d", n);
 	return;
     }
 
     if (strlen(cp) == 0) {
-	vmdb(MSG_INFO, mbuf, "[CONNECT] %d", n);
+	vmdb(MSG_INFO, "[CONNECT] %d", n);
 	return;
     }
 
@@ -205,7 +205,7 @@ void s_new_user(int n)
 
     snprintf(u_tab[n].nodeid, MAX_NODELEN+1, "%s", cp);
 
-    vmdb(MSG_INFO, mbuf, "[CONNECT] %d: %s", n, cp);
+    vmdb(MSG_INFO, "[CONNECT] %d: %s", n, cp);
 }
 
 void send_loginok(int to)
