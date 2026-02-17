@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -114,6 +115,7 @@ int _newconnect(int s, int is_ssl)
     /* make the socket non-blocking */
     if (fcntl(ns, F_SETFL, FNDELAY) < 0) {
 	vmdb(MSG_WARN, "_newconnect::fcntl(FNDELAY) - %s", strerror(errno));
+	close(ns);
 	return(-1);
     }
 
@@ -140,7 +142,8 @@ int _newconnect(int s, int is_ssl)
     /* don't try to reinitialize if we're in the middle of accepting already */
     if (!cbuf->want_ssl_accept) {
       if ( (cbuf->ssl_con = SSL_new(ctx)) == NULL) {
-	  vmdb(MSG_ERR, "_newconnect: fs#%d: could't create ssl_con.");
+	  vmdb(MSG_ERR, "_newconnect: fd#%d: couldn't create ssl_con.", ns);
+	  close(ns);
 	  return -1;
       }
       SSL_set_fd(cbuf->ssl_con, ns);
@@ -164,39 +167,55 @@ int _newconnect(int s, int is_ssl)
 	  break;
 
 	case SSL_ERROR_ZERO_RETURN:
-	  vmdb(MSG_ERR, "fs#%d: ssl conn marked closed on SSL_accept", ns);
+	  vmdb(MSG_ERR, "fd#%d: ssl conn marked closed on SSL_accept", ns);
 	  SSL_free(cbuf->ssl_con);
+	  cbuf->ssl_con = NULL;
+	  FD_CLR(ns, &rfdset);
+	  FD_CLR(ns, &wfdset);
+	  close(ns);
 	  return -1;
 
 	case SSL_ERROR_WANT_X509_LOOKUP:
-	  vmdb(MSG_ERR, "fs#%d: ssl conn wants X509 lookup.", ns);
+	  vmdb(MSG_ERR, "fd#%d: ssl conn wants X509 lookup.", ns);
 	  SSL_free(cbuf->ssl_con);
+	  cbuf->ssl_con = NULL;
+	  FD_CLR(ns, &rfdset);
+	  FD_CLR(ns, &wfdset);
+	  close(ns);
 	  return -1;
 
 	case SSL_ERROR_SYSCALL:
 	  if (result == 0) {
-	    vmdb(MSG_ERR, "SSL_accept on fs%d: SSL_ERROR_SYSCALL: got EOF", ns);
+	    vmdb(MSG_ERR, "SSL_accept on fd%d: SSL_ERROR_SYSCALL: got EOF", ns);
 	  } else {
-	    vmdb(MSG_ERR, "SSL_accept on fs%d: SSL_ERROR_SYSCALL: %s", ns,
+	    vmdb(MSG_ERR, "SSL_accept on fd%d: SSL_ERROR_SYSCALL: %s", ns,
 	      strerror(errno));
 	  }
 	  SSL_free(cbuf->ssl_con);
+	  cbuf->ssl_con = NULL;
+	  FD_CLR(ns, &rfdset);
+	  FD_CLR(ns, &wfdset);
+	  close(ns);
 	  return -1;
 
 	case SSL_ERROR_SSL:
 	  ssl_error = ERR_get_error();
 	  if (ssl_error == 0) {
 	    if (result == 0) {
-	      vmdb(MSG_ERR, "fs#%d, SSL_accept got bad EOF", ns);
+	      vmdb(MSG_ERR, "fd#%d, SSL_accept got bad EOF", ns);
 	    } else {
-	      vmdb(MSG_ERR, "fs#%d, SSL_accept got socket I/O error", ns);
+	      vmdb(MSG_ERR, "fd#%d, SSL_accept got socket I/O error", ns);
 	    }
 	  } else {
 	    char err_buf[256];
 	    ERR_error_string(ssl_error, &err_buf[0]);
-	    vmdb(MSG_ERR, "fs#%d, SSL_accept error: %s", ns, err_buf);
+	    vmdb(MSG_ERR, "fd#%d, SSL_accept error: %s", ns, err_buf);
 	  }
 	  SSL_free(cbuf->ssl_con);
+	  cbuf->ssl_con = NULL;
+	  FD_CLR(ns, &rfdset);
+	  FD_CLR(ns, &wfdset);
+	  close(ns);
 	  return -1;
       }
     } else {
