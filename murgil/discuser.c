@@ -16,6 +16,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/types.h>
 
 #include "globals.h"
@@ -77,4 +78,11 @@ void disconnectuser(int s)
   /* let main program know user went bye bye */
   /* XXX stupid callback */
   s_lost_user(cbuf->fd);
+
+  /* reset the cbuf to a clean state so no stale values
+   * (wlist_size, retries, want_ssl_accept, etc.) persist
+   * if this fd slot is reused.
+   */
+  memset(cbuf, 0, sizeof(struct cbuf_t));
+  TAILQ_INIT(&(cbuf->wlist));
 }
