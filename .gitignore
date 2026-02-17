@@ -69,4 +69,4 @@ build-*/
 build-test/
 
 # python stuff
-*/*/__pycache__
+__pycache__/
