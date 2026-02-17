@@ -3,8 +3,8 @@
  *
  * socket handlers
  *
- * Author: Michel Hoche-Mong, hoche@grok.com
- * Copyright (c) 2001-2019 Michel Hoche-Mong.
+ * Author: Michel Hoche-Mong
+ * Copyright (c) 2001-2026 Michel Hoche-Mong
  * All rights reserved.
  *
  * Originally based on code created by Carrick Sean Casey, as

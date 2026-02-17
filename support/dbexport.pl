@@ -2,7 +2,6 @@
 
 ###
 ## @(#) dbexport		falcon@icb.net
-## Updated by hoche@grok.com       5/24/19
 ##
 ## this exports the database in a format that can be used by
 ## dbimport. it's not hammered on since it's only been used once.

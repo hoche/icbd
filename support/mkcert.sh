@@ -1,8 +1,6 @@
 #!/bin/sh
 
 ###
-## @(#) mkcert		hoche@grok.com
-##
 ## make a cert with openssl
 ###
 

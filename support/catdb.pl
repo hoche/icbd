@@ -2,7 +2,6 @@
 
 ###
 ## @(#) catdb.pl    falcon@icb.net  2/1/98
-## Updated by hoche@grok.com       5/24/19
 ##
 ## just cat the entire damn database to stdout
 ###

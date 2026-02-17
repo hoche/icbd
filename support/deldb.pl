@@ -2,7 +2,6 @@
 
 ###
 ## @(#) deldb.pl        falcon@icb.net        2/1/98
-## Updated by hoche@grok.com       5/24/19
 ##
 ## delete nick entries from an icbd database
 ###

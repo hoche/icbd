@@ -2,7 +2,6 @@
 
 ###
 ## @(#) dbimport		falcon@icb.net
-## Updated by hoche@grok.com       5/24/19
 ##
 ## this builds a database by importing data created by dbexport
 ## it's not hammered on since it's only been used once

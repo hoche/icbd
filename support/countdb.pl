@@ -2,7 +2,6 @@
 
 ###
 ## @(#) countdb		falcon@icb.net
-## Updated by hoche@grok.com       5/24/19
 ##
 ## count how many nicks there are. though effective, this is slow & inefficient
 ###

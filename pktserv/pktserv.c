@@ -3,8 +3,8 @@
  *
  * main event loop for an SSL-enabled poll-based server.
  *
- * Author: Michel Hoche-Mong, hoche@grok.com
- * Copyright (c) 2001-2019 Michel Hoche-Mong.
+ * Author: Michel Hoche-Mong
+ * Copyright (c) 2001-2026 Michel Hoche-Mong
  * All rights reserved.
  *
  * Loosely based on code originally created by Carrick Sean Casey, as well

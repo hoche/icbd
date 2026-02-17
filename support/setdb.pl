@@ -2,7 +2,6 @@
 
 ###
 ## @(#) setdb		falcon@icb.net
-## Updated by hoche@grok.com       5/24/19
 ##
 ## assign a specific database value. useful for resetting passwords for users
 ## who forget them.

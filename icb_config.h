@@ -1,6 +1,6 @@
 /* File:        icb_config.h
  * Created:     19/05/21
- * Author:      Michel Hoche-Mong (hoche@grok.com)
+ * Author:      Michel Hoche-Mong
  *
  * Based (loosely) on the original written for icb by Mark 
  * Giaquinto, copyright (C) 1991 
