@@ -86,8 +86,13 @@ int _newconnect(int s, int is_ssl)
 	  strerror(errno));
     }
 
-    /* don't allow broken connections to linger */
-    nolinger.l_onoff = 1;
+    /* disable linger - close() returns immediately and the kernel
+     * handles graceful shutdown in the background. previously this
+     * was set to l_onoff=1, l_linger=0 which caused close() to send
+     * a RST instead of a FIN, discarding any data still in flight
+     * (including final error/exit messages to the client).
+     */
+    nolinger.l_onoff = 0;
     nolinger.l_linger = 0;
     if (setsockopt(ns, SOL_SOCKET, SO_LINGER,
       (char *)&nolinger, sizeof(nolinger)) < 0) {
