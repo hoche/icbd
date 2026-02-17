@@ -157,7 +157,7 @@ void handle_idle(void)
     s_didpoll(0);
 
     /* for all users, check ignore/held state */
-    for (i = 0; i < MAX_USERS; i++) {
+    for (i = 0; i <= highestfd; i++) {
 	if (FD_ISSET(i, &ignorefdset)) {
 	    /* if it's held and it's ok to read from it again, unignore it */
 	    if ( ok2read(i) == 1 )
