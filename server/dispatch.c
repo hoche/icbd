@@ -31,6 +31,7 @@ void dispatch(int n, char *pkt)
 			senderror(n, "ICB is full.");
 			sendexit(n);
 			disconnectuser(n);
+			break;
 			}
 		if(loginmsg(n, ++pkt) < 0) {
 			/* login failed.  dump them */
