@@ -191,11 +191,20 @@ int sendpacket(int s, char *pkt, size_t len)
     vmdb(MSG_VERBOSE, "sendpacket: len=%d, pktlen=%d, pkt=\"%s\"", 
       len, (unsigned char)*pkt, pkt+1);
 
-    /* if we already have an unwritten message, bomb out */
+    /* if we already have too many unwritten messages, try to drain first */
     if (cbuf->wlist_size >= MAX_SENDPACKET_QUEUE) {
-    	vmdb(MSG_ERR, 
-	  "sendpacket: fd%d already has %d pending writes.", cbuf->wlist_size);
-	return -1;
+	if (_writepacket(cbuf) < 0) {
+	    vmdb(MSG_WARN,
+	      "sendpacket: fd%d, error draining queue. disconnecting user.", s);
+	    disconnectuser(s);
+	    return -1;
+	}
+	/* if still full after draining, drop the message */
+	if (cbuf->wlist_size >= MAX_SENDPACKET_QUEUE) {
+	    vmdb(MSG_ERR,
+	      "sendpacket: fd%d already has %d pending writes.", s, cbuf->wlist_size);
+	    return -1;
+	}
     }
 
     /* allocate a write buffer */
