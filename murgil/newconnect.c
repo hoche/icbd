@@ -60,6 +60,11 @@ int _newconnect(int s, int is_ssl)
   struct linger nolinger;
   struct cbuf_t *cbuf;
 
+  if (s < 0 || s >= MAX_USERS) {
+    vmdb(MSG_ERR, "_newconnect: invalid socket index %d", s);
+    return(-1);
+  }
+
   /* point to our socket's cbuf. note that if this is a new connect,
    * this will point to the listen socket's cbuf. however, the 
    * want_ssl_accept flag should never be set on that, so we should
@@ -78,6 +83,12 @@ int _newconnect(int s, int is_ssl)
 	vmdb(MSG_WARN, "_newconnect::accept() - %s", strerror(errno));
 	return(-1);
       }
+    }
+
+    if (ns >= MAX_USERS || ns >= FD_SETSIZE) {
+      vmdb(MSG_WARN, "_newconnect: fd%d exceeds configured limits; closing", ns);
+      close(ns);
+      return(-1);
     }
 
     /* ok, got a new socket. point the cbuf to the new one's */
