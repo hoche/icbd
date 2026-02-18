@@ -101,11 +101,24 @@ void away_handle (int src, int dest)
 	if ((u_tab[dest].lastaway != src) || 
 	    (time(NULL) - u_tab[dest].lastawaytime > AWAY_NOSEND_TIME))
 	{
+	    int num_s = 1;
+	    int fmt_ok;
+
 	    u_tab[dest].lastaway = src;
 	    u_tab[dest].lastawaytime = time(NULL);
-	    /* sendperson(dest, src, u_tab[dest].awaymsg); */
-	    snprintf (mbuf, USER_BUF_SIZE - 2, u_tab[dest].awaymsg,
-		u_tab[dest].nickname);
+
+	    /* Validate awaymsg before using as format string.
+	     * It should contain exactly one %s (for the nickname).
+	     * If corrupt/malicious, fall back to literal output.
+	     */
+	    fmt_ok = (filterfmt(u_tab[dest].awaymsg, &num_s) == NULL);
+
+	    if (fmt_ok)
+		snprintf(mbuf, USER_BUF_SIZE - 2, u_tab[dest].awaymsg,
+		    u_tab[dest].nickname);
+	    else
+		snprintf(mbuf, USER_BUF_SIZE - 2, "%s", u_tab[dest].awaymsg);
+
 	    sendstatus(src, "Away", mbuf);
 	    if (u_tab[dest].echoback == 2) 
 	    {
@@ -123,7 +136,16 @@ void away_handle (int src, int dest)
 		    t->tm_hour > 11 ? "pm" : "am",
 		    u_tab[dest].awaymsg);
 
-		snprintf (mbuf, USER_BUF_SIZE - 2, tbuf, u_tab[dest].nickname);
+		/* tbuf now has exactly one %s (the one from awaymsg) if
+		 * fmt_ok, otherwise zero. Validate again before expanding.
+		 */
+		num_s = 1;
+		if (filterfmt(tbuf, &num_s) == NULL)
+		    snprintf(mbuf, USER_BUF_SIZE - 2, tbuf,
+			u_tab[dest].nickname);
+		else
+		    snprintf(mbuf, USER_BUF_SIZE - 2, "%s", tbuf);
+
 		sends_cmdout(dest, mbuf);
 	    }
 	}
