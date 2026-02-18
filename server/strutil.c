@@ -243,7 +243,7 @@ int split(char *s)
                  * is all cleaned up, we just stop at the MAX_FIELDS
                  * which is only slightly better.
                  */
-                if ( i > MAX_FIELDS )
+                if ( i >= MAX_FIELDS )
                     return (MAX_FIELDS);
 
 		/* find delim or EOS */
