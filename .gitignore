@@ -52,12 +52,6 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# autoconf files
-config.status
-Makefile
-config.cache
-config.h
-config.log
 
 # project-specific files
 *.dir
