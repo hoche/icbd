@@ -104,7 +104,7 @@ void pgm_long(int n, int which)
 		                 u_tab[user_list[i]].t_group)
 #endif
 			   i++;
-		        for (j = (users + 1); j > i; j--)
+		        for (j = users; j > i; j--)
 			   user_list[j] = user_list[j - 1];
 		        user_list[i] = user;
 			}
@@ -302,7 +302,7 @@ void doAll(int n, int flags)
 		       while ((i < groups) && (strcasecmp(g_tab[group].name,
 		                 g_tab[group_list[i]].name) > 0))
 			   i++;
-		       for (j = (groups + 1); j > i; j--)
+		       for (j = groups; j > i; j--)
 			   group_list[j] = group_list[j - 1];
 		       group_list[i] = group;
 		       }
