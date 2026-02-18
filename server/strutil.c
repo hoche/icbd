@@ -201,7 +201,7 @@ char *getword(char *s)
 {
 	static char word[64];
 	char *w = word;
-	while (*s != ' ' && *s != '\t' && *s != '\0' && ((w - word) < 64))
+	while (*s != ' ' && *s != '\t' && *s != '\0' && ((w - word) < (sizeof(word) - 1)))
 		*w++ = *s++;
 	*w = '\0';
 	return(word);
