@@ -78,14 +78,15 @@ int _readpacket(int user, struct cbuf_t *p)
 	    return(-2); /* clean shutdown */
 
 	  case SSL_ERROR_SYSCALL:
-	    if (ret == 0) {
-	      vmdb(MSG_ERR,
-		"fd%d (SSL): read header: got EOF", user);
-	    } else {
-	      vmdb(MSG_ERR,
-		"fd%d (SSL): read header: %s", user, strerror(errno));
-	    }
-	    return(-1);
+	  if (ret == 0 || errno == EPIPE || errno == ECONNRESET) {
+	    return(-2);
+	  }
+	  if (errno == EWOULDBLOCK || errno == EAGAIN) {
+	    return(0);
+	  }
+	  vmdb(MSG_ERR,
+	      "fd%d (SSL): read header: %s", user, strerror(errno));
+	  return(-1);
 
 	  case SSL_ERROR_SSL: {
 	    unsigned long err = ERR_get_error();
@@ -183,13 +184,14 @@ int _readpacket(int user, struct cbuf_t *p)
 	  return(-2); /* clean shutdown */
 
 	case SSL_ERROR_SYSCALL:
-	  if (ret == 0) {
-	    vmdb(MSG_ERR,
-	      "fd%d (SSL): read body: got EOF", user);
-	  } else {
-	    vmdb(MSG_ERR,
-	      "fd%d (SSL): read body: %s", user, strerror(errno));
+	  if (ret == 0 || errno == EPIPE || errno == ECONNRESET) {
+	    return(-2);
 	  }
+	  if (errno == EWOULDBLOCK || errno == EAGAIN) {
+	    return(0);
+	  }
+	  vmdb(MSG_ERR,
+	    "fd%d (SSL): read body: %s", user, strerror(errno));
 	  return(-1);
 
 	case SSL_ERROR_SSL: {
