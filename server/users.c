@@ -63,7 +63,7 @@ void clear_user_item(int n)
 	    if ( pong_req[i] == n )
 	    {
 		pong_req[i] = -1;
-		timerclear (&ping_time[n]);
+		timerclear (&ping_time[i]);
 	    }
 	}
 }
