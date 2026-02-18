@@ -13,6 +13,19 @@
 
 #include "murgil/murgil.h"
 
+static int real_user_slots_in_use(void)
+{
+	int i;
+	int in_use = 0;
+
+	for (i = 0; i < MAX_REAL_USERS; i++) {
+		if (u_tab[i].login > LOGIN_FALSE)
+			in_use++;
+	}
+
+	return in_use;
+}
+
 /* dispatch()
  *
  * dispatch to the appropriate function based on the type of message
@@ -27,7 +40,7 @@ void dispatch(int n, char *pkt)
 	switch(*pkt) {
 
 	case ICB_M_LOGIN:
-		if(n >= MAX_REAL_USERS) {
+		if (real_user_slots_in_use() >= MAX_REAL_USERS) {
 			senderror(n, "ICB is full.");
 			sendexit(n);
 			disconnectuser(n);
