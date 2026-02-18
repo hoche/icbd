@@ -84,7 +84,7 @@ void nlclear(NAMLIST *nl)
 	STRLIST *tmp, *p;
 
 	if (nl) {
-		p = nl->p;
+		p = nl->head;
 		while (p) {
 			tmp = p->next;
 			free(p);
@@ -108,6 +108,7 @@ int nldelete(NAMLIST *nl, char *name)
 	namep = strgetnode(name, nl->head, 1, 0);
 	if (namep != NULL) {
 		strunlink(namep, &nl->head, &nl->tail);
+		free(namep);
 		nl->p= nl->head;
 		if (nl->num > 0) {
 			nl->num--;
