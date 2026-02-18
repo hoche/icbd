@@ -112,6 +112,7 @@ icbdb_get (const char *category, const char *attribute, icbdb_type type,
 {
     datum	key;
     datum	data;
+    size_t	copy_len;
     int		result = 0;
 
     ICBDB_OPEN();
@@ -128,8 +129,15 @@ icbdb_get (const char *category, const char *attribute, icbdb_type type,
     {
 	vmdb (MSG_DEBUG, "icbdb_get: %s.%s: '%.*s'", category, attribute,
 		data.dsize, data.dptr);
-	bcopy (data.dptr, databuf, data.dsize);
-	databuf[data.dsize] = '\0';
+	copy_len = (size_t)data.dsize;
+	if (copy_len >= sizeof(databuf))
+	{
+	    vmdb(MSG_WARN, "icbdb_get: truncating oversized value (%d bytes)",
+		data.dsize);
+	    copy_len = sizeof(databuf) - 1;
+	}
+	memcpy(databuf, data.dptr, copy_len);
+	databuf[copy_len] = '\0';
 
 	switch (type)
 	{
