@@ -518,18 +518,6 @@ int loginmsg(int n, char *pkt)
 		u_tab[n].t_on = TheTime;
 		u_tab[n].t_recv = TheTime;
 		u_tab[n].t_sent = TheTime;
-		u_tab[n].pri_n_hushed = (NAMLIST *) malloc(sizeof(NAMLIST));
-		nlinit(u_tab[n].pri_n_hushed, MAX_HUSHED);
-		u_tab[n].pub_n_hushed = (NAMLIST *) malloc(sizeof(NAMLIST));
-		nlinit(u_tab[n].pub_n_hushed, MAX_HUSHED);
-		u_tab[n].pri_s_hushed = (NAMLIST *) malloc(sizeof(NAMLIST));
-		nlinit(u_tab[n].pri_s_hushed, MAX_HUSHED);
-		u_tab[n].pub_s_hushed = (NAMLIST *) malloc(sizeof(NAMLIST));
-		nlinit(u_tab[n].pub_s_hushed, MAX_HUSHED);
-		u_tab[n].n_notifies = (NAMLIST *) malloc(sizeof(NAMLIST));
-		nlinit(u_tab[n].n_notifies, MAX_NOTIFIES);
-		u_tab[n].s_notifies = (NAMLIST *) malloc(sizeof(NAMLIST));
-		nlinit(u_tab[n].s_notifies, MAX_NOTIFIES);
 
 		sprintf(mbuf, "Welcome to ICB %s", u_tab[n].nickname);
 		sends_cmdout(n, mbuf);
