@@ -28,6 +28,31 @@
 #include "s_commands.h"  /* for talk_report() */
 #include "icbdb.h"
 
+static void copy_bounded(char *dst, size_t dst_size, const char *src)
+{
+	if (dst_size == 0)
+		return;
+
+	if (src == NULL)
+		src = "";
+
+	snprintf(dst, dst_size, "%s", src);
+}
+
+static void append_bounded(char *dst, size_t dst_size, const char *src)
+{
+	size_t dst_len;
+
+	if (dst_size == 0 || src == NULL)
+		return;
+
+	dst_len = strlen(dst);
+	if (dst_len >= (dst_size - 1))
+		return;
+
+	strncat(dst, src, dst_size - dst_len - 1);
+}
+
 int setsecure(int forWhom, int secure, DBM *openDb)
 {
 	int            retval = 0;
@@ -566,7 +591,11 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
 
 	if (icbdb_get (theNick, "nick", ICBDB_STRING, &value))
 	{
-	    strncpy(nickstr, value, sizeof (nickstr));
+	    copy_bounded(nickstr, sizeof(nickstr), value);
+	}
+	else
+	{
+	    nickstr[0] = '\0';
 	}
 
 	if (icbdb_get (theNick, "home", ICBDB_STRING, &value))
@@ -577,62 +606,62 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
 		memset(line, 0, sizeof (line));
 		sprintf(line, "Nickname:     %s", nickstr);
 		while (strlen(line) < 36)
-			strcat(line, " ");
-		strcat(line, "Address:   ");
-		strncat(line, value, sizeof (line));
+			append_bounded(line, sizeof(line), " ");
+		append_bounded(line, sizeof(line), "Address:   ");
+		append_bounded(line, sizeof(line), value);
 		sends_cmdout(forWhom, line);
 
 		sprintf(line, "Phone Number: ");
 		if (!icbdb_get (theNick, "phone", ICBDB_STRING, &value))
-		    strcat(line, "(None)");
+		    append_bounded(line, sizeof(line), "(None)");
 		else
-		    strncat(line, value, sizeof (line));
+		    append_bounded(line, sizeof(line), value);
 
 		while (strlen(line) < 36)
-		    strcat(line, " ");
+		    append_bounded(line, sizeof(line), " ");
 
-		strcat(line, "Real Name: ");
+		append_bounded(line, sizeof(line), "Real Name: ");
 		if (!icbdb_get (theNick, "realname", ICBDB_STRING, &value))
-		    strcat(line, "(None)");
+		    append_bounded(line, sizeof(line), "(None)");
 		else
-		    strncat(line, value, sizeof (line));
+		    append_bounded(line, sizeof(line), value);
 
 		sends_cmdout(forWhom, line);
 
 		strcpy(line, "Last signon:  ");
 		if (!icbdb_get (theNick, "signon", ICBDB_STRING, &value))
-		    strcat(line, "(unknown)");
+		    append_bounded(line, sizeof(line), "(unknown)");
 		else
-		    strncat(line, value, sizeof (line));
+		    append_bounded(line, sizeof(line), value);
 
 		while (strlen(line) < 36)
-		    strcat(line, " ");
+		    append_bounded(line, sizeof(line), " ");
 
-		strcat(line, "Last signoff:  ");
+		append_bounded(line, sizeof(line), "Last signoff:  ");
 		if (!icbdb_get (theNick, "signoff", ICBDB_STRING, &value))
-		    strcat(line, "(unknown)");
+		    append_bounded(line, sizeof(line), "(unknown)");
 		else
-		    strncat(line, value, sizeof (line));
+		    append_bounded(line, sizeof(line), value);
 
 		sends_cmdout(forWhom, line);
 
 		if (icbdb_get (theNick, "email", ICBDB_STRING, &value))
 		{
 		    strcpy(line, "E-mail addr:  ");
-		    strncat(line, value, sizeof (line));
+		    append_bounded(line, sizeof(line), value);
 		    sends_cmdout(forWhom, line);
 		}
 
 		if (icbdb_get (theNick, "www", ICBDB_STRING, &value))
 		{
 		    strcpy(line, "WWW:  ");
-		    strncat(line, value, sizeof (line));
+		    append_bounded(line, sizeof(line), value);
 		    sends_cmdout(forWhom, line);
 		}
 
 		if (icbdb_get (theNick, "addr", ICBDB_STRING, &value))
 		{
-		    strncpy(line, value, sizeof (line));
+		    copy_bounded(line, sizeof(line), value);
 		    sends_cmdout(forWhom, "Street Address:");
 		    s = line;
 		    strcpy(temp, "  ");
@@ -644,7 +673,12 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
 			    strcpy(temp, "  ");
 			}
 			else
-			    strncat(temp, s, 1);
+			{
+			    char onechar[2];
+			    onechar[0] = *s;
+			    onechar[1] = '\0';
+			    append_bounded(temp, sizeof(temp), onechar);
+			}
 
 			s++;
 		    }
@@ -653,7 +687,7 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
 
 		if (icbdb_get (theNick, "text", ICBDB_STRING, &value))
 		{
-		    strncpy(line, value, sizeof (line));
+		    copy_bounded(line, sizeof(line), value);
 		    s = line;
 		    /* traverse s and try to break on a word */
 		    p = s;
@@ -664,7 +698,7 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
 			{
 			    *p++ = '\0';
 			    strcpy(temp, "Text: ");
-			    strcat(temp, s);
+			    append_bounded(temp, sizeof(temp), s);
 			    sends_cmdout(forWhom, temp);
 			    count = 0;
 			    lastw = p;
@@ -687,7 +721,7 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
 				*(p - 1) = '-';
 				*p = '\0';
 				strcpy(temp, "Text: ");
-				strcat(temp, s);
+				append_bounded(temp, sizeof(temp), s);
 				sends_cmdout(forWhom, temp);
 				*(p - 1) = tmp1;
 				*p = tmp2;
@@ -700,7 +734,7 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
 				tmp1 = *lastw;
 				*lastw = '\0';
 				strcpy(temp, "Text: ");
-				strcat(temp, s);
+				append_bounded(temp, sizeof(temp), s);
 				sends_cmdout(forWhom, temp);
 				*lastw = tmp1;
 				p = lastw + 1;
@@ -717,11 +751,12 @@ int nicklookup(int forWhom, const char *theNick, DBM *openDb)
 			}
 		    }
 
-		    if (count > 0)
-			    strcpy(temp, "Text: ");
-
-		    strcat(temp, s);
-		    sends_cmdout(forWhom, temp);
+		    if (*s != '\0')
+		    {
+			strcpy(temp, "Text: ");
+			append_bounded(temp, sizeof(temp), s);
+			sends_cmdout(forWhom, temp);
+		    }
 		}
 	    }
 	    else
