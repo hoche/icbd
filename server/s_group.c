@@ -1367,9 +1367,13 @@ int s_status(int n, int argc)
 		    {
 		    case SET_RESTRICT:
 			g_tab[gi].control = RESTRICTED;
+			nlclear(g_tab[gi].n_bars);
 			nlinit(g_tab[gi].n_bars, MAX_INVITES);
+			nlclear(g_tab[gi].n_nr_bars);
 			nlinit(g_tab[gi].n_nr_bars, MAX_INVITES);
+			nlclear(g_tab[gi].s_bars);
 			nlinit(g_tab[gi].s_bars, MAX_INVITES);
+			nlclear(g_tab[gi].s_nr_bars);
 			nlinit(g_tab[gi].s_nr_bars, MAX_INVITES);
 			cp = "Group is now restricted.";
 
@@ -1398,9 +1402,13 @@ int s_status(int n, int argc)
 
 		    case SET_MODERATE:
 			g_tab[gi].control = MODERATED;
+			nlclear(g_tab[gi].n_invites);
 			nlinit(g_tab[gi].n_invites, MAX_INVITES);
+			nlclear(g_tab[gi].nr_invites);
 			nlinit(g_tab[gi].nr_invites, MAX_INVITES);
+			nlclear(g_tab[gi].s_invites);
 			nlinit(g_tab[gi].s_invites, MAX_INVITES);
+			nlclear(g_tab[gi].sr_invites);
 			nlinit(g_tab[gi].sr_invites, MAX_INVITES);
 			cp = "Group is now moderated.";
 			break;
@@ -1408,9 +1416,13 @@ int s_status(int n, int argc)
 
 		    case SET_CONTROL:
 			g_tab[gi].control = CONTROLLED;
+			nlclear(g_tab[gi].n_invites);
 			nlinit(g_tab[gi].n_invites, MAX_INVITES);
+			nlclear(g_tab[gi].nr_invites);
 			nlinit(g_tab[gi].nr_invites, MAX_INVITES);
+			nlclear(g_tab[gi].s_invites);
 			nlinit(g_tab[gi].s_invites, MAX_INVITES);
+			nlclear(g_tab[gi].sr_invites);
 			nlinit(g_tab[gi].sr_invites, MAX_INVITES);
 			cp = "Group is now controlled.";
 			break;
@@ -1644,13 +1656,21 @@ int s_status(int n, int argc)
 
 		    case SET_PUBLIC:
 			g_tab[gi].control = PUBLIC;
+			nlclear(g_tab[gi].n_invites);
 			nlinit(g_tab[gi].n_invites, MAX_INVITES);
+			nlclear(g_tab[gi].nr_invites);
 			nlinit(g_tab[gi].nr_invites, MAX_INVITES);
+			nlclear(g_tab[gi].s_invites);
 			nlinit(g_tab[gi].s_invites, MAX_INVITES);
+			nlclear(g_tab[gi].sr_invites);
 			nlinit(g_tab[gi].sr_invites, MAX_INVITES);
+			nlclear(g_tab[gi].n_bars);
 			nlinit(g_tab[gi].n_bars, MAX_INVITES);
+			nlclear(g_tab[gi].n_nr_bars);
 			nlinit(g_tab[gi].n_nr_bars, MAX_INVITES);
+			nlclear(g_tab[gi].s_bars);
 			nlinit(g_tab[gi].s_bars, MAX_INVITES);
+			nlclear(g_tab[gi].s_nr_bars);
 			nlinit(g_tab[gi].s_nr_bars, MAX_INVITES);
 			/* cp = "Group is now public."; */
 			sprintf (cp2, "%s made group public.", 
