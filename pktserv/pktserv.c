@@ -203,8 +203,11 @@ add_pollfd(int fd)
         g_pollset[g_pollsetsize++].fd = fd;
     }
 
-    /* reset the event mask */
-    g_pollset[i].events = POLLIN | POLLOUT;
+    /* Only watch for readability by default.  POLLOUT is added
+     * dynamically by update_pollfd_events() when there is actually
+     * data to write; leaving it on all the time causes poll() to
+     * return immediately on idle connections → 100 % CPU. */
+    g_pollset[i].events = POLLIN;
     return 0;
 }
 
@@ -428,6 +431,48 @@ int pktserv_init(char *config, pktserv_cb_t *cb)
 }
 
 
+/*
+ * Update pollfd events based on each connection's current state.
+ * We only request POLLOUT when the connection actually needs to write
+ * (pending data or SSL handshake/write retry).  Leaving POLLOUT set
+ * on idle connections causes poll() to return immediately — spinning
+ * the CPU at 100 %.
+ */
+static void
+update_pollfd_events(void)
+{
+    int i;
+    for (i = 0; i < g_pollsetsize; i++) {
+        int fd = g_pollset[i].fd;
+        if (fd < 0 || fd >= MAX_USERS)
+            continue;
+
+        cbuf_t *cbuf = &cbufs[fd];
+        short events = POLLIN;
+
+        switch (cbuf->state) {
+            case ACCEPTED:
+                /* Freshly accepted: the state machine must run
+                 * immediately so the server can send the protocol
+                 * banner before the client sends anything. */
+            case WANT_WRITE:
+            case WANT_SSL_WRITE:
+            case WANT_SSL_ACCEPT:
+                /* These states need write-readiness notification. */
+            case WANT_DISCONNECT:
+            case WANT_RAW_DISCONNECT:
+                /* Disconnects should be processed promptly even if
+                 * the remote side has gone quiet. */
+                events |= POLLOUT;
+                break;
+            default:
+                break;
+        }
+
+        g_pollset[i].events = events;
+    }
+}
+
 /* 
  * The main server loop. Polls the set of file descriptors looking for 
  * activity in the pollfdset. If there is, it gets handed off to 
@@ -455,6 +500,7 @@ pktserv_run(void)
     for (;;) {
         loopcount++;
 
+        update_pollfd_events();
         ret = poll(g_pollset, g_pollsetsize, poll_timeout); // millisec
         if (ret < 0) {
             if (errno == EINTR)
