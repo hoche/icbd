@@ -206,6 +206,10 @@ void openmsg(int n, char *pkt)
 		   vmdb(MSG_INFO, "[OPEN] %d", n);
 
 		   gi = find_group(u_tab[n].group);
+		   if (gi < 0) {
+			senderror(n, "You are not in a valid group.");
+			return;
+		   }
 		   if (g_tab[gi].volume == QUIET)
 			senderror(n,
 			"Open messages not permitted in quiet groups.");
@@ -275,6 +279,7 @@ int loginmsg(int n, char *pkt)
     int access_file;
     char c;
     long perms = PERM_NULL;
+    const char *password = "";
 
     if (u_tab[n].login > LOGIN_FALSE)
     {
@@ -289,6 +294,8 @@ int loginmsg(int n, char *pkt)
     num_fields = split(pkt);
 
     if (num_fields < 4) return -1;
+    if (num_fields >= 5 && fields[4] != NULL)
+	password = fields[4];
 
     len = strlen(fields[2]);
 
@@ -466,7 +473,7 @@ int loginmsg(int n, char *pkt)
 
 		/* fill in what we can */
 		fill_user_entry(n, fields[0], cp, fields[1],
-			fields[4], "", "", LOGIN_FALSE, 0, 0, perms);
+			password, "", "", LOGIN_FALSE, 0, 0, perms);
 
 		sprintf(mbuf, "[LOGIN] %d: %s@%s", n, fields[0], cp);
 		mdb(MSG_INFO, mbuf);
@@ -693,6 +700,7 @@ void cmdmsg(int n, char *pkt)
 {
 	int argc;
 	time_t TheTime;
+	const char *arg1;
 
 	if (u_tab[n].login >= LOGIN_COMPLETE) 
 	{
@@ -701,12 +709,13 @@ void cmdmsg(int n, char *pkt)
                 u_tab[n].t_recv= TheTime;
 
 		argc = split(pkt);
+		arg1 = (argc > 1 && fields[1] != NULL) ? fields[1] : "";
 
 		if (strcmp(fields[0], "m") == 0)
 		  sprintf(mbuf, "[COMMAND] %d: %s %s", n, fields[0],
-			getword(fields[1]));
+			getword((char *)arg1));
 		else
-		  sprintf(mbuf, "[COMMAND] %d: %s %s", n, fields[0], fields[1]);
+		  sprintf(mbuf, "[COMMAND] %d: %s %s", n, fields[0], arg1);
 		mdb(MSG_DEBUG, mbuf);
 	
 		switch(lookup(fields[0], command_table)) {
